@@ -1,0 +1,666 @@
+{
+  "dailyRosters": {
+    "saturday": {
+      "morning": [
+        "lw-01",
+        "lw-02",
+        "lw-03",
+        "lw-04",
+        "lw-05",
+        "lw-06",
+        "lw-07",
+        "lw-08"
+      ],
+      "evening": [
+        "lw-09",
+        "lw-10",
+        "lw-01",
+        "lw-02",
+        "lw-03",
+        "lw-04",
+        "lw-05",
+        "lw-06"
+      ]
+    },
+    "sunday": {
+      "morning": [
+        "lw-03",
+        "lw-04",
+        "lw-05",
+        "lw-06",
+        "lw-07",
+        "lw-08",
+        "lw-09",
+        "lw-10"
+      ],
+      "evening": [
+        "lw-01",
+        "lw-02",
+        "lw-03",
+        "lw-04",
+        "lw-05",
+        "lw-06",
+        "lw-07",
+        "lw-08"
+      ]
+    },
+    "monday": {
+      "morning": [
+        "lw-05",
+        "lw-06",
+        "lw-07",
+        "lw-08",
+        "lw-09",
+        "lw-10",
+        "lw-01",
+        "lw-02"
+      ],
+      "evening": [
+        "lw-03",
+        "lw-04",
+        "lw-05",
+        "lw-06",
+        "lw-07",
+        "lw-08",
+        "lw-09",
+        "lw-10"
+      ]
+    },
+    "tuesday": {
+      "morning": [
+        "lw-07",
+        "lw-08",
+        "lw-09",
+        "lw-10",
+        "lw-01",
+        "lw-02",
+        "lw-03",
+        "lw-04"
+      ],
+      "evening": [
+        "lw-05",
+        "lw-06",
+        "lw-07",
+        "lw-08",
+        "lw-09",
+        "lw-10",
+        "lw-01",
+        "lw-02"
+      ]
+    },
+    "wednesday": {
+      "morning": [
+        "lw-09",
+        "lw-10",
+        "lw-01",
+        "lw-02",
+        "lw-03",
+        "lw-04",
+        "lw-05",
+        "lw-06"
+      ],
+      "evening": [
+        "lw-07",
+        "lw-08",
+        "lw-09",
+        "lw-10",
+        "lw-01",
+        "lw-02",
+        "lw-03",
+        "lw-04"
+      ]
+    },
+    "thursday": {
+      "morning": [
+        "lw-01",
+        "lw-02",
+        "lw-03",
+        "lw-04",
+        "lw-05",
+        "lw-06",
+        "lw-07",
+        "lw-08"
+      ],
+      "evening": [
+        "lw-09",
+        "lw-10",
+        "lw-01",
+        "lw-02",
+        "lw-03",
+        "lw-04",
+        "lw-05",
+        "lw-06"
+      ]
+    },
+    "friday": {
+      "morning": [
+        "lw-03",
+        "lw-04",
+        "lw-05",
+        "lw-06",
+        "lw-07",
+        "lw-08",
+        "lw-09",
+        "lw-10"
+      ],
+      "evening": [
+        "lw-01",
+        "lw-02",
+        "lw-03",
+        "lw-04",
+        "lw-05",
+        "lw-06",
+        "lw-07",
+        "lw-08"
+      ]
+    }
+  },
+  "weeklySchedule": {
+    "saturday": {
+      "washer": {
+        "morning": [
+          "lw-01",
+          "lw-02"
+        ],
+        "evening": [
+          "lw-09",
+          "lw-10"
+        ]
+      },
+      "valet": {
+        "morning": [
+          "lw-03",
+          "lw-04"
+        ],
+        "evening": [
+          "lw-01",
+          "lw-02"
+        ]
+      },
+      "ironing": {
+        "morning": [
+          "lw-05",
+          "lw-06"
+        ],
+        "evening": [
+          "lw-03",
+          "lw-04"
+        ]
+      },
+      "press": {
+        "morning": [
+          "lw-07",
+          "lw-08"
+        ],
+        "evening": [
+          "lw-05",
+          "lw-06"
+        ]
+      },
+      "linen": {
+        "morning": [
+          "lw-02",
+          "lw-03"
+        ],
+        "evening": [
+          "lw-10",
+          "lw-01"
+        ]
+      },
+      "off": {
+        "morning": [
+          "lw-04",
+          "lw-05"
+        ],
+        "evening": [
+          "lw-02",
+          "lw-03"
+        ]
+      }
+    },
+    "sunday": {
+      "washer": {
+        "morning": [
+          "lw-03",
+          "lw-04"
+        ],
+        "evening": [
+          "lw-01",
+          "lw-02"
+        ]
+      },
+      "valet": {
+        "morning": [
+          "lw-05",
+          "lw-06"
+        ],
+        "evening": [
+          "lw-03",
+          "lw-04"
+        ]
+      },
+      "ironing": {
+        "morning": [
+          "lw-07",
+          "lw-08"
+        ],
+        "evening": [
+          "lw-05",
+          "lw-06"
+        ]
+      },
+      "press": {
+        "morning": [
+          "lw-09",
+          "lw-10"
+        ],
+        "evening": [
+          "lw-07",
+          "lw-08"
+        ]
+      },
+      "linen": {
+        "morning": [
+          "lw-04",
+          "lw-05"
+        ],
+        "evening": [
+          "lw-02",
+          "lw-03"
+        ]
+      },
+      "off": {
+        "morning": [
+          "lw-06",
+          "lw-07"
+        ],
+        "evening": [
+          "lw-04",
+          "lw-05"
+        ]
+      }
+    },
+    "monday": {
+      "washer": {
+        "morning": [
+          "lw-05",
+          "lw-06"
+        ],
+        "evening": [
+          "lw-03",
+          "lw-04"
+        ]
+      },
+      "valet": {
+        "morning": [
+          "lw-07",
+          "lw-08"
+        ],
+        "evening": [
+          "lw-05",
+          "lw-06"
+        ]
+      },
+      "ironing": {
+        "morning": [
+          "lw-09",
+          "lw-10"
+        ],
+        "evening": [
+          "lw-07",
+          "lw-08"
+        ]
+      },
+      "press": {
+        "morning": [
+          "lw-01",
+          "lw-02"
+        ],
+        "evening": [
+          "lw-09",
+          "lw-10"
+        ]
+      },
+      "linen": {
+        "morning": [
+          "lw-06",
+          "lw-07"
+        ],
+        "evening": [
+          "lw-04",
+          "lw-05"
+        ]
+      },
+      "off": {
+        "morning": [
+          "lw-08",
+          "lw-09"
+        ],
+        "evening": [
+          "lw-06",
+          "lw-07"
+        ]
+      }
+    },
+    "tuesday": {
+      "washer": {
+        "morning": [
+          "lw-07",
+          "lw-08"
+        ],
+        "evening": [
+          "lw-05",
+          "lw-06"
+        ]
+      },
+      "valet": {
+        "morning": [
+          "lw-09",
+          "lw-10"
+        ],
+        "evening": [
+          "lw-07",
+          "lw-08"
+        ]
+      },
+      "ironing": {
+        "morning": [
+          "lw-01",
+          "lw-02"
+        ],
+        "evening": [
+          "lw-09",
+          "lw-10"
+        ]
+      },
+      "press": {
+        "morning": [
+          "lw-03",
+          "lw-04"
+        ],
+        "evening": [
+          "lw-01",
+          "lw-02"
+        ]
+      },
+      "linen": {
+        "morning": [
+          "lw-08",
+          "lw-09"
+        ],
+        "evening": [
+          "lw-06",
+          "lw-07"
+        ]
+      },
+      "off": {
+        "morning": [
+          "lw-10",
+          "lw-01"
+        ],
+        "evening": [
+          "lw-08",
+          "lw-09"
+        ]
+      }
+    },
+    "wednesday": {
+      "washer": {
+        "morning": [
+          "lw-09",
+          "lw-10"
+        ],
+        "evening": [
+          "lw-07",
+          "lw-08"
+        ]
+      },
+      "valet": {
+        "morning": [
+          "lw-01",
+          "lw-02"
+        ],
+        "evening": [
+          "lw-09",
+          "lw-10"
+        ]
+      },
+      "ironing": {
+        "morning": [
+          "lw-03",
+          "lw-04"
+        ],
+        "evening": [
+          "lw-01",
+          "lw-02"
+        ]
+      },
+      "press": {
+        "morning": [
+          "lw-05",
+          "lw-06"
+        ],
+        "evening": [
+          "lw-03",
+          "lw-04"
+        ]
+      },
+      "linen": {
+        "morning": [
+          "lw-10",
+          "lw-01"
+        ],
+        "evening": [
+          "lw-08",
+          "lw-09"
+        ]
+      },
+      "off": {
+        "morning": [
+          "lw-02",
+          "lw-03"
+        ],
+        "evening": [
+          "lw-10",
+          "lw-01"
+        ]
+      }
+    },
+    "thursday": {
+      "washer": {
+        "morning": [
+          "lw-01",
+          "lw-02"
+        ],
+        "evening": [
+          "lw-09",
+          "lw-10"
+        ]
+      },
+      "valet": {
+        "morning": [
+          "lw-03",
+          "lw-04"
+        ],
+        "evening": [
+          "lw-01",
+          "lw-02"
+        ]
+      },
+      "ironing": {
+        "morning": [
+          "lw-05",
+          "lw-06"
+        ],
+        "evening": [
+          "lw-03",
+          "lw-04"
+        ]
+      },
+      "press": {
+        "morning": [
+          "lw-07",
+          "lw-08"
+        ],
+        "evening": [
+          "lw-05",
+          "lw-06"
+        ]
+      },
+      "linen": {
+        "morning": [
+          "lw-02",
+          "lw-03"
+        ],
+        "evening": [
+          "lw-10",
+          "lw-01"
+        ]
+      },
+      "off": {
+        "morning": [
+          "lw-04",
+          "lw-05"
+        ],
+        "evening": [
+          "lw-02",
+          "lw-03"
+        ]
+      }
+    },
+    "friday": {
+      "washer": {
+        "morning": [
+          "lw-03",
+          "lw-04"
+        ],
+        "evening": [
+          "lw-01",
+          "lw-02"
+        ]
+      },
+      "valet": {
+        "morning": [
+          "lw-05",
+          "lw-06"
+        ],
+        "evening": [
+          "lw-03",
+          "lw-04"
+        ]
+      },
+      "ironing": {
+        "morning": [
+          "lw-07",
+          "lw-08"
+        ],
+        "evening": [
+          "lw-05",
+          "lw-06"
+        ]
+      },
+      "press": {
+        "morning": [
+          "lw-09",
+          "lw-10"
+        ],
+        "evening": [
+          "lw-07",
+          "lw-08"
+        ]
+      },
+      "linen": {
+        "morning": [
+          "lw-04",
+          "lw-05"
+        ],
+        "evening": [
+          "lw-02",
+          "lw-03"
+        ]
+      },
+      "off": {
+        "morning": [
+          "lw-06",
+          "lw-07"
+        ],
+        "evening": [
+          "lw-04",
+          "lw-05"
+        ]
+      }
+    }
+  },
+  "workingHours": {
+    "saturday": {
+      "morning": {
+        "en": "07:00 AM – 03:00 PM",
+        "ar": "07:00 ص – 03:00 م"
+      },
+      "evening": {
+        "en": "03:00 PM – 11:00 PM",
+        "ar": "03:00 م – 11:00 م"
+      }
+    },
+    "sunday": {
+      "morning": {
+        "en": "07:00 AM – 03:00 PM",
+        "ar": "07:00 ص – 03:00 م"
+      },
+      "evening": {
+        "en": "03:00 PM – 11:00 PM",
+        "ar": "03:00 م – 11:00 م"
+      }
+    },
+    "monday": {
+      "morning": {
+        "en": "07:00 AM – 03:00 PM",
+        "ar": "07:00 ص – 03:00 م"
+      },
+      "evening": {
+        "en": "03:00 PM – 11:00 PM",
+        "ar": "03:00 م – 11:00 م"
+      }
+    },
+    "tuesday": {
+      "morning": {
+        "en": "07:00 AM – 03:00 PM",
+        "ar": "07:00 ص – 03:00 م"
+      },
+      "evening": {
+        "en": "03:00 PM – 11:00 PM",
+        "ar": "03:00 م – 11:00 م"
+      }
+    },
+    "wednesday": {
+      "morning": {
+        "en": "07:00 AM – 03:00 PM",
+        "ar": "07:00 ص – 03:00 م"
+      },
+      "evening": {
+        "en": "03:00 PM – 11:00 PM",
+        "ar": "03:00 م – 11:00 م"
+      }
+    },
+    "thursday": {
+      "morning": {
+        "en": "07:00 AM – 03:00 PM",
+        "ar": "07:00 ص – 03:00 م"
+      },
+      "evening": {
+        "en": "03:00 PM – 11:00 PM",
+        "ar": "03:00 م – 11:00 م"
+      }
+    },
+    "friday": {
+      "morning": {
+        "en": "07:00 AM – 03:00 PM",
+        "ar": "07:00 ص – 03:00 م"
+      },
+      "evening": {
+        "en": "03:00 PM – 11:00 PM",
+        "ar": "03:00 م – 11:00 م"
+      }
+    }
+  }
+}

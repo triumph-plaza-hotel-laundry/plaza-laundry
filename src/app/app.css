@@ -1,0 +1,14 @@
+.app-stage {
+  min-height: 100%;
+}
+
+.app-stage--revealing {
+  opacity: 1;
+  transition: opacity var(--app-reveal-ms) cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-stage--revealing {
+    transition-duration: 1ms;
+  }
+}

@@ -1,0 +1,28 @@
+.header-logo {
+  display: block;
+  flex-shrink: 1;
+  width: auto;
+  height: auto;
+  max-height: calc(var(--header-height) - 10px);
+  max-width: clamp(64px, 26vw, 110px);
+  min-width: 0;
+  object-fit: contain;
+  object-position: center;
+}
+
+@media (min-width: 640px) {
+  .header-logo {
+    max-width: clamp(90px, 14vw, 140px);
+    max-height: calc(var(--header-height) - 8px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .header-logo {
+    max-width: clamp(110px, 12vw, 160px);
+  }
+}
+
+[dir='rtl'] .header-logo {
+  object-position: center;
+}

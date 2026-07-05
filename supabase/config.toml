@@ -1,0 +1,8 @@
+project_id = "dtpotzigctinidoxgooo"
+
+[api]
+enabled = true
+
+[db]
+port = 54322
+major_version = 15

@@ -1,0 +1,286 @@
+@import 'tailwindcss';
+@import './luxury-ui.css';
+@import './luxury-light-theme.css';
+
+@theme {
+  --font-sans:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  --color-luxury-black: #050505;
+  --color-luxury-graphite: #151515;
+  --color-luxury-charcoal: #23201a;
+  --color-luxury-gold: #c9a45c;
+  --color-luxury-gold-soft: #e8d5a6;
+  --color-luxury-ivory: #f8f3e8;
+  --shadow-luxury: var(--shadow-luxury-app);
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --app-bg: #050505;
+    --app-surface: #11100d;
+    --app-surface-soft: #191711;
+    --app-border: rgb(201 164 92 / 18%);
+    --app-text: #f8f3e8;
+    --app-muted: rgb(248 243 232 / 62%);
+    --app-gold: #c9a45c;
+    --app-gold-soft: #e8d5a6;
+    --app-gold-border: #ae8625;
+    --app-gold-hover: #c9a45c;
+    --app-icon-gold: #c9a45c;
+    --shadow-luxury-app: 0 18px 50px rgb(0 0 0 / 28%);
+    --overlay-scrim: rgb(0 0 0 / 72%);
+    --header-bg: #0a0a0a;
+    --header-control-bg: #0a0a0a;
+    --header-marble-opacity: 0.35;
+    --footer-bg: #060606;
+    --footer-text: rgb(248 243 232 / 72%);
+    --footer-text-muted: rgb(248 243 232 / 48%);
+    --footer-marble-image: none;
+    --footer-marble-opacity: 0;
+    --footer-marble-filter: none;
+    --footer-overlay: linear-gradient(180deg, rgb(0 0 0 / 72%) 0%, rgb(0 0 0 / 88%) 100%);
+    --home-overlay: rgb(0 0 0 / 34%);
+    --home-bg-fallback: #050505;
+    --home-shell-bg: var(--app-bg);
+    --hero-text: #f8f4ea;
+    --hero-depth-gradient: radial-gradient(
+      ellipse 80% 66% at 50% 54%,
+      transparent 44%,
+      rgb(0 0 0 / 5%) 72%,
+      rgb(0 0 0 / 11%) 100%
+    );
+    --hero-vignette-gradient: radial-gradient(
+      ellipse 96% 90% at 50% 50%,
+      transparent 48%,
+      rgb(0 0 0 / 8%) 76%,
+      rgb(0 0 0 / 18%) 100%
+    );
+    --hero-volumetric-bg: linear-gradient(180deg, rgb(201 164 92 / 3%) 0%, transparent 42%);
+    --hero-ambient-bg: none;
+    --hero-reflection-bg: none;
+    --hero-reflection-opacity: 0;
+    --hero-showcase-contact-shadow: none;
+    --hero-slogan-shadow: none;
+    --card-glass-bg: rgb(255 255 255 / 4%);
+    --dashboard-hero-bg: linear-gradient(
+      135deg,
+      rgb(201 164 92 / 14%),
+      rgb(17 16 13 / 74%) 42%,
+      rgb(0 0 0 / 84%)
+    );
+    --sidebar-bg: #0a0a0a;
+    --sidebar-panel-border: rgb(201 164 92 / 22%);
+    --sidebar-card-bg: #0f0f0f;
+    --sidebar-card-border: var(--app-gold-border);
+    --sidebar-card-active-border: var(--app-gold);
+    --sidebar-card-active-glow: 0 0 10px rgb(201 164 92 / 18%);
+    --sidebar-card-accent: var(--app-gold);
+    --sidebar-card-hover-bg: #141414;
+    --sidebar-card-text: #ffffff;
+    --sidebar-card-icon: var(--app-gold);
+    --sidebar-brand-frame-bg: #000000;
+    --splash-bg: #000;
+    --splash-text: #f8f3e8;
+    --splash-marble-base: #000;
+    --login-bg: #050505;
+    --login-text: #f8f3e8;
+    --login-muted: rgb(248 243 232 / 62%);
+    --login-atmosphere: radial-gradient(
+      ellipse 80% 56% at 50% 18%,
+      rgb(201 164 92 / 7%),
+      transparent 68%
+    );
+    --login-card-bg: #0f0f0f;
+    --login-card-shadow: 0 14px 40px rgb(0 0 0 / 28%);
+    --login-input-bg: #0a0a0a;
+    --login-button-bg: #0a0a0a;
+    --login-button-bg-hover: #121212;
+    --login-button-text: #e8d5a6;
+    --motion-fast: 120ms;
+    --motion-base: 180ms;
+    --motion-slow: 260ms;
+  }
+
+  :root[data-theme='luxury-light'] {
+    color-scheme: light;
+    --app-bg: #d9d0c3;
+    --app-surface: #d6ccbe;
+    --app-surface-soft: #e2d9cd;
+    --app-border: rgb(174 134 37 / 26%);
+    --app-text: #2f2a25;
+    --app-muted: rgb(47 42 37 / 62%);
+    --app-gold: #c9a45c;
+    --app-gold-soft: #e8d5a6;
+    --app-gold-border: #ae8625;
+    --app-gold-hover: #c9a45c;
+    --app-icon-gold: #ae8625;
+    --shadow-luxury-app: 0 18px 50px rgb(47 42 37 / 12%);
+    --overlay-scrim: rgb(47 42 37 / 38%);
+    --surface-light: #d9d0c3;
+    --header-bg: #c8bba8;
+    --header-control-bg: #d6ccbe;
+    --header-marble-opacity: 0;
+    --header-shadow: 0 2px 10px rgb(47 42 37 / 8%), 0 1px 3px rgb(47 42 37 / 5%);
+    --header-divider: #ae8625;
+    --footer-bg: #c8bba8;
+    --footer-text: #2f2a25;
+    --footer-text-muted: rgb(47 42 37 / 58%);
+    --footer-marble-image: none;
+    --footer-marble-opacity: 0;
+    --footer-marble-filter: none;
+    --footer-overlay: none;
+    --home-overlay: rgb(217 208 195 / 18%);
+    --home-bg-fallback: #d9d0c3;
+    --home-shell-bg: transparent;
+    --hero-volumetric-bg: linear-gradient(180deg, rgb(201 164 92 / 4%) 0%, transparent 42%);
+    --hero-ambient-bg: none;
+    --hero-reflection-bg: none;
+    --hero-reflection-opacity: 0;
+    --hero-showcase-contact-shadow: none;
+    --hero-slogan-shadow: none;
+    --hero-text: #2f2a25;
+    --hero-depth-gradient: radial-gradient(
+      ellipse 80% 66% at 50% 54%,
+      transparent 44%,
+      rgb(226 217 205 / 14%) 72%,
+      rgb(217 208 195 / 20%) 100%
+    );
+    --hero-vignette-gradient: radial-gradient(
+      ellipse 96% 90% at 50% 50%,
+      transparent 48%,
+      rgb(226 217 205 / 12%) 76%,
+      rgb(217 208 195 / 18%) 100%
+    );
+    --card-glass-bg: #ffffff;
+    --dashboard-hero-bg: linear-gradient(
+      135deg,
+      rgb(201 164 92 / 16%),
+      rgb(214 204 190 / 94%) 42%,
+      rgb(207 195 178 / 96%)
+    );
+    --sidebar-bg: #cfc3b2;
+    --sidebar-panel-border: rgb(201 164 92 / 24%);
+    --sidebar-card-bg: #d6ccbe;
+    --sidebar-card-border: var(--app-gold-border);
+    --sidebar-card-active-border: var(--app-gold);
+    --sidebar-card-active-glow: 0 0 10px rgb(201 164 92 / 14%);
+    --sidebar-card-accent: var(--app-gold);
+    --sidebar-card-hover-bg: #e2d9cd;
+    --sidebar-card-text: #2f2a25;
+    --sidebar-card-icon: var(--app-gold);
+    --sidebar-brand-frame-bg: #d6ccbe;
+    --splash-bg: #d9d0c3;
+    --splash-text: #2f2a25;
+    --splash-marble-base: #d9d0c3;
+    --login-bg: #d9d0c3;
+    --login-text: #2f2a25;
+    --login-muted: rgb(47 42 37 / 58%);
+    --login-atmosphere: radial-gradient(
+      ellipse 80% 56% at 50% 18%,
+      rgb(201 164 92 / 6%),
+      transparent 68%
+    );
+    --login-card-bg: #d6ccbe;
+    --login-card-shadow: 0 14px 40px rgb(47 42 37 / 10%);
+    --login-input-bg: #e2d9cd;
+    --login-button-bg: #c9a45c;
+    --login-button-bg-hover: #b8924f;
+    --login-button-text: #2f2a25;
+    --table-header-bg: linear-gradient(180deg, #e8d5a6 0%, #d4b168 100%);
+    --table-header-text: #2f2a25;
+    --table-body-bg: #ffffff;
+    --table-row-alt-bg: #faf6ee;
+    --table-text: #2f2a25;
+    --table-row-border: rgb(174 134 37 / 22%);
+    --table-row-hover: rgb(201 164 92 / 12%);
+    --input-bg: #ffffff;
+    --input-border: #ae8625;
+    --input-text: #2f2a25;
+    --input-focus-ring: rgb(201 164 92 / 35%);
+    --btn-primary-bg: #c9a45c;
+    --btn-primary-text: #2f2a25;
+    --btn-primary-hover: #b8924f;
+    --btn-secondary-bg: #ffffff;
+    --btn-secondary-border: #ae8625;
+    --btn-secondary-text: #2f2a25;
+    --modal-bg: #ffffff;
+    --modal-border: #ae8625;
+    --card-bg: #ffffff;
+    --card-shadow: 0 8px 24px rgb(47 42 37 / 10%);
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    background: var(--app-bg);
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  html.theme-switching,
+  html.theme-switching *,
+  html.theme-switching *::before,
+  html.theme-switching *::after {
+    transition: none !important;
+  }
+
+  body {
+    @apply min-h-dvh overflow-x-hidden font-sans antialiased;
+    background: var(--app-bg);
+    color: var(--app-text);
+    text-rendering: optimizeLegibility;
+  }
+
+  #root {
+    @apply min-h-dvh overflow-x-hidden;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer utilities {
+  .gpu-smooth {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+  }
+
+  .luxury-focus {
+    @apply outline-none ring-2 ring-luxury-gold/70 ring-offset-2;
+    --tw-ring-offset-color: var(--app-bg);
+  }
+
+  .dashboard-hero-surface {
+    background: var(--dashboard-hero-bg);
+  }
+
+  .luxury-card-surface {
+    background-color: var(--card-glass-bg);
+  }
+
+  .luxury-sidebar-surface {
+    background: var(--sidebar-bg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+}

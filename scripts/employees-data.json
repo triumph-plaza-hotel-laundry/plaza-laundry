@@ -1,0 +1,722 @@
+[
+  {
+    "id": "gm-01",
+    "employeeId": "",
+    "tier": "generalManager",
+    "sortOrder": 0,
+    "name": {
+      "en": "Ahmed Debaka",
+      "ar": "أحمد دبكه"
+    },
+    "jobTitle": {
+      "en": "Director Manager",
+      "ar": "المدير المسؤول"
+    },
+    "department": {
+      "en": "",
+      "ar": ""
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "dm-01",
+    "employeeId": "",
+    "tier": "departmentManager",
+    "sortOrder": 1,
+    "name": {
+      "en": "Ramadan Mahmoud",
+      "ar": "رمضان محمود"
+    },
+    "jobTitle": {
+      "en": "Laundry Manager",
+      "ar": "مدير المغسلة"
+    },
+    "department": {
+      "en": "",
+      "ar": ""
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "dm-02",
+    "employeeId": "",
+    "tier": "departmentManager",
+    "sortOrder": 1,
+    "name": {
+      "en": "Mohamed Hamid",
+      "ar": "محمد حامد"
+    },
+    "jobTitle": {
+      "en": "Senior Valet Supervisor",
+      "ar": "مشرف أول فاليه"
+    },
+    "department": {
+      "en": "Valet Department",
+      "ar": "قسم الفاليه"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "wts-01",
+    "employeeId": "",
+    "tier": "washingTeamSupervisor",
+    "sortOrder": 2,
+    "name": {
+      "en": "Kamel Ahmed",
+      "ar": "كامل أحمد"
+    },
+    "jobTitle": {
+      "en": "Shift Leader Valet",
+      "ar": "مشرف وردية الفاليه"
+    },
+    "department": {
+      "en": "Valet Department",
+      "ar": "قسم الفاليه"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "lw-06",
+    "employeeId": "",
+    "tier": "laundryWorker",
+    "sortOrder": 3,
+    "name": {
+      "en": "Khaled El Sayed",
+      "ar": "خالد السيد"
+    },
+    "jobTitle": {
+      "en": "Valet Room Attendant",
+      "ar": "عامل غرفة الفاليه"
+    },
+    "department": {
+      "en": "Valet Department",
+      "ar": "قسم الفاليه"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "ws-01",
+    "employeeId": "",
+    "tier": "washingSupervisor",
+    "sortOrder": 4,
+    "name": {
+      "en": "Ahmed Shabban",
+      "ar": "أحمد شعبان"
+    },
+    "jobTitle": {
+      "en": "Senior Laundry Supervisor",
+      "ar": "مشرف أول مغسلة"
+    },
+    "department": {
+      "en": "Laundry Department",
+      "ar": "قسم المغسلة"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "ws-02",
+    "employeeId": "",
+    "tier": "washingSupervisor",
+    "sortOrder": 5,
+    "name": {
+      "en": "Tariq Ali",
+      "ar": "طارق علي"
+    },
+    "jobTitle": {
+      "en": "Laundry Supervisor",
+      "ar": "مشرف مغسلة"
+    },
+    "department": {
+      "en": "Laundry Department",
+      "ar": "قسم المغسلة"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "wts-02",
+    "employeeId": "",
+    "tier": "washingTeamSupervisor",
+    "sortOrder": 6,
+    "name": {
+      "en": "Mohamed Sayed",
+      "ar": "محمد سيد"
+    },
+    "jobTitle": {
+      "en": "Shift Leader Laundry",
+      "ar": "مشرف وردية المغسلة"
+    },
+    "department": {
+      "en": "Laundry Department",
+      "ar": "قسم المغسلة"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "dm-03",
+    "employeeId": "",
+    "tier": "departmentManager",
+    "sortOrder": 7,
+    "name": {
+      "en": "Mustafa Mohamed",
+      "ar": "مصطفى محمد"
+    },
+    "jobTitle": {
+      "en": "Senior Linen Supervisor",
+      "ar": "مشرف أول لينين"
+    },
+    "department": {
+      "en": "Linen Room",
+      "ar": "غرفة اللينين"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "lw-01",
+    "employeeId": "",
+    "tier": "laundryWorker",
+    "sortOrder": 8,
+    "name": {
+      "en": "Abdallah Ahmed",
+      "ar": "عبدالله أحمد"
+    },
+    "jobTitle": {
+      "en": "Linen Room Attendant",
+      "ar": "عامل غرفة اللينين"
+    },
+    "department": {
+      "en": "Linen Room",
+      "ar": "غرفة اللينين"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "wts-03",
+    "employeeId": "",
+    "tier": "washingTeamSupervisor",
+    "sortOrder": 9,
+    "name": {
+      "en": "Ashraf ElSayed",
+      "ar": "أشرف السيد"
+    },
+    "jobTitle": {
+      "en": "Shift Leader Iron",
+      "ar": "مشرف وردية المكواة"
+    },
+    "department": {
+      "en": "Iron Room",
+      "ar": "غرفة المكواة"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "lw-02",
+    "employeeId": "",
+    "tier": "laundryWorker",
+    "sortOrder": 10,
+    "name": {
+      "en": "Adel Salah",
+      "ar": "عادل صلاح"
+    },
+    "jobTitle": {
+      "en": "Iron Room Attendant",
+      "ar": "عامل غرفة المكواة"
+    },
+    "department": {
+      "en": "Iron Room",
+      "ar": "غرفة المكواة"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "lw-03",
+    "employeeId": "",
+    "tier": "laundryWorker",
+    "sortOrder": 11,
+    "name": {
+      "en": "Mohamed Abdul Nabi",
+      "ar": "محمد عبد النبي"
+    },
+    "jobTitle": {
+      "en": "Iron Room Attendant",
+      "ar": "عامل غرفة المكواة"
+    },
+    "department": {
+      "en": "Iron Room",
+      "ar": "غرفة المكواة"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "lw-04",
+    "employeeId": "",
+    "tier": "laundryWorker",
+    "sortOrder": 12,
+    "name": {
+      "en": "Mohamed Salama",
+      "ar": "محمد سلامة"
+    },
+    "jobTitle": {
+      "en": "Iron Room Attendant",
+      "ar": "عامل غرفة المكواة"
+    },
+    "department": {
+      "en": "Iron Room",
+      "ar": "غرفة المكواة"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "lw-05",
+    "employeeId": "",
+    "tier": "laundryWorker",
+    "sortOrder": 13,
+    "name": {
+      "en": "Eslam Abdulaziz",
+      "ar": "إسلام عبدالعزيز"
+    },
+    "jobTitle": {
+      "en": "Iron Room Attendant",
+      "ar": "عامل غرفة المكواة"
+    },
+    "department": {
+      "en": "Iron Room",
+      "ar": "غرفة المكواة"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "lw-07",
+    "employeeId": "",
+    "tier": "laundryWorker",
+    "sortOrder": 14,
+    "name": {
+      "en": "Mohamed Mosalam",
+      "ar": "محمد مسلم"
+    },
+    "jobTitle": {
+      "en": "Chest Ironers Attendant",
+      "ar": "عامل جندرة"
+    },
+    "department": {
+      "en": "Chest Ironers",
+      "ar": "الجندرة"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "lw-08",
+    "employeeId": "",
+    "tier": "laundryWorker",
+    "sortOrder": 15,
+    "name": {
+      "en": "Ahmed Mohamed",
+      "ar": "أحمد محمد"
+    },
+    "jobTitle": {
+      "en": "Chest Ironers Attendant",
+      "ar": "عامل جندرة"
+    },
+    "department": {
+      "en": "Chest Ironers",
+      "ar": "الجندرة"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "lw-09",
+    "employeeId": "",
+    "tier": "laundryWorker",
+    "sortOrder": 16,
+    "name": {
+      "en": "Ahmed Ali",
+      "ar": "أحمد علي"
+    },
+    "jobTitle": {
+      "en": "Chest Ironers Attendant",
+      "ar": "عامل جندرة"
+    },
+    "department": {
+      "en": "Chest Ironers",
+      "ar": "الجندرة"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "lw-10",
+    "employeeId": "",
+    "tier": "laundryWorker",
+    "sortOrder": 17,
+    "name": {
+      "en": "Mohamed Mostafa",
+      "ar": "محمد مصطفى"
+    },
+    "jobTitle": {
+      "en": "Chest Ironers Attendant",
+      "ar": "عامل جندرة"
+    },
+    "department": {
+      "en": "Chest Ironers",
+      "ar": "الجندرة"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "tl-01",
+    "employeeId": "",
+    "tier": "tailor",
+    "sortOrder": 18,
+    "name": {
+      "en": "Mohamed Saeed",
+      "ar": "محمد سعيد"
+    },
+    "jobTitle": {
+      "en": "Tailor",
+      "ar": "ترزي"
+    },
+    "department": {
+      "en": "Tailor",
+      "ar": "الترزي"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  }
+]

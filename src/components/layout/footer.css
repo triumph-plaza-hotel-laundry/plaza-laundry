@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600&display=swap');
+
+.luxury-footer {
+  --footer-gold: var(--app-gold);
+  --footer-gold-soft: var(--app-gold-soft);
+  --footer-gold-deep: #ae8625;
+  --footer-gold-line: var(--app-gold-border);
+
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 18.5rem;
+  background: var(--footer-bg);
+  color: var(--footer-text);
+}
+
+.luxury-footer__marble {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: var(--footer-bg);
+  background-image: var(--footer-marble-image);
+  background-size: cover;
+  background-position: center;
+  opacity: var(--footer-marble-opacity);
+  filter: var(--footer-marble-filter);
+}
+
+.luxury-footer__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: var(--footer-overlay);
+}
+
+.luxury-footer__ambient {
+  display: none;
+}
+
+.luxury-footer__divider {
+  position: relative;
+  z-index: 2;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(201 164 92 / 20%) 18%,
+    var(--app-gold) 50%,
+    rgb(201 164 92 / 20%) 82%,
+    transparent 100%
+  );
+}
+
+:root[data-theme='luxury-light'] .luxury-footer__marble,
+:root[data-theme='luxury-light'] .luxury-footer__overlay,
+:root[data-theme='luxury-light'] .luxury-footer__ambient {
+  display: none;
+}
+
+.luxury-footer__inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  min-height: 18.5rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.125rem;
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 2.75rem 1.5rem 2.5rem;
+  text-align: center;
+}
+
+.luxury-footer__logo {
+  display: block;
+  height: clamp(5.5rem, 14vw, 7.5rem);
+  width: auto;
+  max-width: min(92vw, 22rem);
+  object-fit: contain;
+  object-position: center;
+}
+
+.luxury-footer__tagline {
+  margin: 0;
+  font-family: 'Noto Kufi Arabic', Georgia, 'Times New Roman', serif;
+  font-size: clamp(0.95rem, 2.2vw, 1.125rem);
+  font-weight: 500;
+  line-height: 1.55;
+  letter-spacing: 0.04em;
+  color: var(--footer-gold-soft);
+}
+
+.luxury-footer__copyright {
+  margin: 0;
+  max-width: 28rem;
+  font-size: clamp(0.7rem, 1.6vw, 0.8125rem);
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0.03em;
+  color: var(--footer-text-muted);
+}
+
+.luxury-footer__social {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 0.25rem;
+}
+
+.luxury-footer__social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  color: var(--footer-gold);
+  text-decoration: none;
+  transition:
+    color 220ms ease,
+    filter 220ms ease,
+    transform 220ms ease;
+}
+
+.luxury-footer__social-link:hover {
+  color: var(--footer-gold-soft);
+  filter: drop-shadow(0 0 10px rgb(201 164 92 / 45%));
+  transform: translateY(-1px);
+}
+
+.luxury-footer__social-link:focus-visible {
+  outline: none;
+  filter: drop-shadow(0 0 10px rgb(201 164 92 / 45%));
+  box-shadow: 0 0 0 2px rgb(201 164 92 / 55%);
+}
+
+.luxury-footer__social-icon {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (max-width: 480px) {
+  .luxury-footer__inner {
+    gap: 0.95rem;
+  }
+
+  .luxury-footer__tagline {
+    letter-spacing: 0.02em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .luxury-footer__ambient {
+    animation: none;
+    opacity: 0.5;
+  }
+
+  .luxury-footer__social-link {
+    transition: color 220ms ease;
+  }
+
+  .luxury-footer__social-link:hover {
+    transform: none;
+  }
+}

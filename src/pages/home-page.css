@@ -1,0 +1,75 @@
+.home-page {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  isolation: isolate;
+  background: var(--home-bg-fallback);
+}
+
+.home-page__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.home-page__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform: translateZ(0);
+}
+
+.home-page__bg--dark {
+  background-image: url('../assets/images/luxury.png');
+  opacity: 1;
+}
+
+.home-page__bg--light {
+  background-image: url('../assets/images/luxury-light.png');
+  opacity: 0;
+}
+
+:root[data-theme='luxury-light'] .home-page__bg--dark {
+  opacity: 0;
+}
+
+:root[data-theme='luxury-light'] .home-page__bg--light {
+  opacity: 1;
+}
+
+.home-page__overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--home-overlay);
+}
+
+.home-page > .home-hero {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+}
+
+/* Light Mode Home — hero only; header/footer use solid off-white via theme tokens */
+
+.home-shell-main {
+  background: transparent;
+}
+
+:root[data-theme='luxury-light'] .home-hero {
+  --bird-gold-highlight: #9a7428;
+  --bird-gold-mid: #8a6420;
+  --bird-gold-shadow: #6b4e14;
+  --gold-rich: #8a6420;
+  --bird-gold-grade: saturate(1.08) brightness(0.9) contrast(1.14);
+  --hero-slogan-shadow: drop-shadow(0 1px 1px rgb(47 42 37 / 28%));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-page__bg {
+    transition-duration: 1ms;
+  }
+}

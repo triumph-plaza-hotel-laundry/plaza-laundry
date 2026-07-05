@@ -1,0 +1,221 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600&display=swap');
+
+.minimal-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #000000;
+  animation: minimal-splash-fade-in var(--minimal-splash-fade-in-ms, 300ms) ease-out both;
+}
+
+.minimal-splash--exit {
+  animation: minimal-splash-fade-out var(--minimal-splash-fade-out-ms, 300ms) ease-in forwards;
+}
+
+.minimal-splash__logo {
+  display: block;
+  width: clamp(7.5rem, 32vw, 9.375rem);
+  max-width: calc(100vw - 2rem);
+  height: auto;
+  object-fit: contain;
+}
+
+@media (min-width: 768px) {
+  .minimal-splash__logo {
+    width: clamp(9.375rem, 22vw, 11.25rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .minimal-splash__logo {
+    width: clamp(11.25rem, 14vw, 13.75rem);
+  }
+}
+
+@keyframes minimal-splash-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes minimal-splash-fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 1.5rem 1rem;
+  background: var(--splash-bg, #050505);
+  color: var(--splash-text, #f6efe2);
+  opacity: 1;
+  transition: opacity var(--splash-exit-ms) ease-out;
+  backface-visibility: hidden;
+}
+
+.splash-screen.is-exiting {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splash-screen--login {
+  position: relative;
+  z-index: auto;
+  min-height: 100dvh;
+}
+
+.splash-brand__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: min(100%, 28rem);
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: splash-brand-fade 360ms ease-out both;
+}
+
+.splash-brand__logo-wrap {
+  position: relative;
+  overflow: visible;
+  border-radius: 0;
+  transform: none;
+}
+
+.splash-brand__logo {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: min(76vw, 16.5rem);
+  height: auto;
+  object-fit: contain;
+  filter: none;
+}
+
+.splash-login {
+  display: flex;
+  width: min(100%, 22rem);
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  text-align: start;
+}
+
+.splash-login__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--login-text);
+}
+
+.splash-login__subtitle {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--login-muted);
+}
+
+.splash-login__label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--login-muted);
+}
+
+.splash-login__input {
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--login-input-border);
+  border-radius: 0.625rem;
+  background: var(--login-input-bg);
+  color: var(--login-text);
+  font-size: 0.875rem;
+}
+
+.splash-login__submit {
+  margin-top: 0.25rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--login-button-border);
+  border-radius: 999px;
+  background: var(--login-button-bg);
+  color: var(--login-button-text);
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.splash-login__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.splash-login__error {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #e07070;
+}
+
+@keyframes splash-brand-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (min-width: 640px) {
+  .splash-screen {
+    padding: 2.5rem 1.5rem;
+  }
+
+  .splash-brand__content {
+    gap: 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .splash-brand__content {
+    width: min(100%, 32rem);
+    gap: 0;
+  }
+
+  .splash-brand__logo {
+    width: min(68vw, 18rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .minimal-splash,
+  .minimal-splash--exit,
+  .splash-screen,
+  .splash-brand__content {
+    animation: none;
+  }
+
+  .minimal-splash--exit,
+  .splash-screen.is-exiting {
+    opacity: 0;
+    transition-duration: 1ms;
+  }
+}

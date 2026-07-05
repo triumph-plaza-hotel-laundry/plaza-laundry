@@ -1,0 +1,974 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap');
+
+.fabrics-catalog {
+  --catalog-bg: #0a0a0a;
+  --catalog-surface: #0f0f0f;
+  --catalog-text: #f5f5f5;
+  --catalog-muted: rgb(255 255 255 / 55%);
+  --catalog-gold: #d6b76e;
+  --catalog-gold-soft: #e8d5a6;
+  --catalog-input: #050505;
+  --catalog-font-en: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --catalog-font-ar: 'Noto Kufi Arabic', 'Segoe UI', Tahoma, sans-serif;
+  display: flex;
+  width: 100%;
+  max-width: 80rem;
+  flex: 1;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+:root[data-theme='luxury-light'] .fabrics-catalog {
+  --catalog-bg: #d9d0c3;
+  --catalog-surface: #ffffff;
+  --catalog-text: #2f2a25;
+  --catalog-muted: rgb(47 42 37 / 58%);
+  --catalog-gold: #c8a24e;
+  --catalog-gold-soft: #9a7b35;
+  --catalog-input: #ffffff;
+}
+
+.sr-only {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  margin: -1px;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.fabrics-catalog__header {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  animation: catalog-fade 240ms ease both;
+}
+
+.fabrics-catalog__title-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  text-align: center;
+}
+
+.fabrics-catalog__emoji {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.fabrics-catalog__title-en {
+  margin: 0;
+  font-family: var(--catalog-font-en);
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  color: var(--catalog-gold);
+}
+
+.fabrics-catalog__title-ar {
+  margin: 0;
+  font-family: var(--catalog-font-ar);
+  font-size: clamp(1.5rem, 3.5vw, 1.875rem);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--catalog-gold);
+}
+
+.fabrics-catalog__search {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  border: 1px solid var(--app-gold-border);
+  border-radius: calc(var(--card-radius) + 4px);
+  background: var(--catalog-input);
+  padding: 1rem 1.25rem;
+  box-shadow: 0 8px 32px rgb(0 0 0 / 18%);
+}
+
+:root[data-theme='luxury-light'] .fabrics-catalog__search {
+  box-shadow: 0 8px 28px rgb(47 42 37 / 8%);
+}
+
+.fabrics-catalog__search-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  color: var(--app-icon-gold);
+}
+
+.fabrics-catalog__search-input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--catalog-text);
+  font-size: 1rem;
+  line-height: 1.5;
+  outline: none;
+}
+
+html[dir='ltr'] .fabrics-catalog__search-input {
+  font-family: var(--catalog-font-en);
+}
+
+html[dir='rtl'] .fabrics-catalog__search-input {
+  font-family: var(--catalog-font-ar);
+}
+
+.fabrics-catalog__search-input::placeholder {
+  color: var(--catalog-muted);
+}
+
+.fabrics-catalog__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.fabrics-catalog__filter {
+  min-height: 2.25rem;
+  border: 1px solid var(--app-gold-border);
+  border-radius: 999px;
+  background: var(--catalog-surface);
+  padding: 0.5rem 1rem;
+  color: var(--catalog-text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+html[dir='ltr'] .fabrics-catalog__filter {
+  font-family: var(--catalog-font-en);
+}
+
+html[dir='rtl'] .fabrics-catalog__filter {
+  font-family: var(--catalog-font-ar);
+}
+
+.fabrics-catalog__filter:hover {
+  border-color: var(--app-gold);
+  transform: translateY(-1px);
+}
+
+.fabrics-catalog__filter--active {
+  border-color: var(--app-gold);
+  background: var(--app-gold);
+  color: #0a0a0a;
+}
+
+.fabrics-catalog__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  animation: catalog-fade 280ms ease 60ms both;
+}
+
+.fabric-catalog-card {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: 0.875rem;
+  border: 1px solid var(--app-gold-border);
+  border-radius: var(--card-radius);
+  background: var(--catalog-surface);
+  padding: 1rem;
+  text-align: inherit;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.fabric-catalog-card:focus-visible {
+  outline: 2px solid var(--catalog-gold);
+  outline-offset: 2px;
+}
+
+.fabric-catalog-card:hover {
+  border-color: var(--app-gold);
+  box-shadow: 0 10px 28px rgb(201 164 92 / 12%);
+  transform: translateY(-4px);
+}
+
+.fabric-catalog-card--compact {
+  padding: 0.75rem;
+  gap: 0.625rem;
+}
+
+.fabric-catalog-card--compact:hover {
+  transform: translateY(-2px);
+}
+
+.fabric-catalog-card__image-wrap {
+  position: relative;
+  display: flex;
+  aspect-ratio: 1;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--app-gold-border);
+  border-radius: calc(var(--card-radius) - 4px);
+  background: var(--catalog-bg);
+  padding: 1.25rem;
+  overflow: hidden;
+}
+
+.fabric-catalog-card--compact .fabric-catalog-card__image-wrap {
+  padding: 0.75rem;
+}
+
+.fabric-catalog-card__image {
+  display: block;
+  width: 100%;
+  max-width: 7.5rem;
+  height: auto;
+  object-fit: contain;
+}
+
+.fabric-image {
+  position: relative;
+  display: flex;
+  width: 100%;
+  max-width: 7.5rem;
+  aspect-ratio: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+.fabric-catalog-card--compact .fabric-image {
+  max-width: 4.5rem;
+}
+
+.fabric-image__skeleton {
+  position: absolute;
+  inset: 0;
+  border-radius: 0.5rem;
+  background: linear-gradient(
+    110deg,
+    rgb(255 255 255 / 4%) 8%,
+    rgb(214 183 110 / 18%) 18%,
+    rgb(255 255 255 / 4%) 33%
+  );
+  background-size: 200% 100%;
+  animation: fabric-shimmer 1.2s ease-in-out infinite;
+}
+
+:root[data-theme='luxury-light'] .fabric-image__skeleton {
+  background: linear-gradient(
+    110deg,
+    rgb(0 0 0 / 4%) 8%,
+    rgb(200 162 78 / 16%) 18%,
+    rgb(0 0 0 / 4%) 33%
+  );
+  background-size: 200% 100%;
+}
+
+.fabric-image__img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.fabric-image--loaded .fabric-image__img {
+  opacity: 1;
+}
+
+.fabric-image--loaded .fabric-image__skeleton {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+.fabric-catalog-card__care-badge {
+  position: absolute;
+  z-index: 2;
+  top: 0.5rem;
+  left: 0.5rem;
+  display: inline-flex;
+  width: 1.625rem;
+  height: 1.625rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--app-gold-border);
+  border-radius: 999px;
+  background: rgb(10 10 10 / 82%);
+  color: var(--catalog-gold-soft);
+}
+
+:root[data-theme='luxury-light'] .fabric-catalog-card__care-badge {
+  background: rgb(226 217 205 / 92%);
+}
+
+.fabric-catalog-card__care-badge svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.fabric-catalog-card__temp-badge {
+  position: absolute;
+  z-index: 2;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  border: 1px solid var(--catalog-gold);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #c9a45c 0%, #e8d5a6 55%, #b8924a 100%);
+  padding: 0.125rem 0.5rem;
+  color: #0a0a0a;
+  font-family: var(--catalog-font-en);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+}
+
+.fabric-catalog-card__favorite {
+  position: absolute;
+  z-index: 3;
+  top: 0.375rem;
+  right: 0.375rem;
+  display: inline-flex;
+  width: 1.75rem;
+  height: 1.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--app-gold-border);
+  border-radius: 999px;
+  background: rgb(10 10 10 / 78%);
+  color: var(--catalog-muted);
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease,
+    background-color 160ms ease;
+}
+
+:root[data-theme='luxury-light'] .fabric-catalog-card__favorite {
+  background: rgb(226 217 205 / 88%);
+}
+
+.fabric-catalog-card__favorite:hover {
+  border-color: var(--catalog-gold);
+  color: var(--catalog-gold);
+  transform: scale(1.06);
+}
+
+.fabric-catalog-card__favorite--active {
+  border-color: var(--catalog-gold);
+  background: rgb(201 164 92 / 18%);
+  color: var(--catalog-gold);
+}
+
+.fabric-catalog-card__favorite svg {
+  width: 0.9375rem;
+  height: 0.9375rem;
+}
+
+.fabrics-catalog__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  animation: catalog-fade 300ms ease both;
+}
+
+.fabrics-catalog__section-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.fabrics-catalog__section-title-en {
+  margin: 0;
+  font-family: var(--catalog-font-en);
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--catalog-gold);
+}
+
+.fabrics-catalog__section-title-ar {
+  margin: 0;
+  font-family: var(--catalog-font-ar);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--catalog-gold-soft);
+}
+
+.fabrics-catalog__section-desc-en,
+.fabrics-catalog__section-desc-ar {
+  margin: 0.125rem 0 0;
+  max-width: 42rem;
+  color: var(--catalog-muted);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.fabrics-catalog__section-desc-en {
+  font-family: var(--catalog-font-en);
+}
+
+.fabrics-catalog__section-desc-ar {
+  font-family: var(--catalog-font-ar);
+}
+
+.fabrics-catalog__strip {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(9.5rem, 11.5rem);
+  gap: 0.875rem;
+  overflow-x: auto;
+  padding-bottom: 0.375rem;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: var(--catalog-gold) transparent;
+}
+
+.fabrics-catalog__strip .fabric-catalog-card {
+  scroll-snap-align: start;
+  min-width: 0;
+}
+
+.fabric-modal__fabric-image {
+  width: 100%;
+  max-width: 9rem;
+}
+
+.fabric-modal__favorite {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.625rem;
+  border: 1px solid var(--app-gold-border);
+  border-radius: 999px;
+  background: transparent;
+  padding: 0.375rem 0.75rem;
+  color: var(--catalog-muted);
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.fabric-modal__favorite--active {
+  border-color: var(--catalog-gold);
+  background: rgb(201 164 92 / 12%);
+  color: var(--catalog-gold);
+}
+
+.fabric-modal__favorite svg {
+  width: 0.9375rem;
+  height: 0.9375rem;
+}
+
+.fabric-modal__favorite-en,
+.fabric-modal__favorite-ar {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.fabric-modal__favorite-en {
+  font-family: var(--catalog-font-en);
+}
+
+.fabric-modal__favorite-ar {
+  font-family: var(--catalog-font-ar);
+}
+
+@keyframes fabric-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.fabric-catalog-card--compact .fabric-catalog-card__image {
+  max-width: 4.5rem;
+}
+
+.fabric-catalog-card__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.fabric-catalog-card__name-ar {
+  margin: 0;
+  width: 100%;
+  font-family: var(--catalog-font-ar);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--catalog-gold);
+  text-align: right;
+  direction: rtl;
+}
+
+.fabric-catalog-card__name-en {
+  margin: 0;
+  width: 100%;
+  font-family: var(--catalog-font-en);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--catalog-text);
+  text-align: left;
+  direction: ltr;
+}
+
+.fabric-catalog-card__badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+  margin-top: 0.375rem;
+  border: 1px solid var(--app-gold-border);
+  border-radius: 999px;
+  background: var(--catalog-bg);
+  padding: 0.25rem 0.75rem;
+}
+
+.fabric-catalog-card__badge-ar {
+  font-family: var(--catalog-font-ar);
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--catalog-gold-soft);
+  direction: rtl;
+}
+
+.fabric-catalog-card__badge-en {
+  font-family: var(--catalog-font-en);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: var(--catalog-gold-soft);
+}
+
+.fabrics-catalog__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  border: 1px solid var(--app-gold-border);
+  border-radius: var(--card-radius);
+  background: var(--catalog-surface);
+  padding: 3rem 1.5rem;
+  text-align: center;
+  animation: catalog-fade 280ms ease both;
+}
+
+.fabrics-catalog__empty-en {
+  margin: 0;
+  font-family: var(--catalog-font-en);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--catalog-gold);
+}
+
+.fabrics-catalog__empty-ar {
+  margin: 0;
+  font-family: var(--catalog-font-ar);
+  font-size: 0.9375rem;
+  color: var(--catalog-muted);
+}
+
+/* Modal */
+.fabric-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  background: rgb(0 0 0 / 72%);
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.fabric-modal {
+  position: relative;
+  width: min(100%, 42rem);
+  border: 1px solid var(--app-gold-border);
+  border-radius: calc(var(--card-radius) + 4px);
+  background: var(--catalog-surface);
+  padding: 1.5rem;
+  margin: auto;
+  box-shadow: 0 24px 64px rgb(0 0 0 / 45%), 0 0 0 1px rgb(201 164 92 / 8%);
+}
+
+.fabric-modal__close {
+  position: absolute;
+  top: 1rem;
+  inset-inline-end: 1rem;
+  display: inline-flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--app-gold-border);
+  border-radius: 50%;
+  background: var(--catalog-bg);
+  color: var(--catalog-gold);
+  cursor: pointer;
+  transition: border-color 150ms ease;
+}
+
+.fabric-modal__close:hover {
+  border-color: var(--app-gold);
+}
+
+.fabric-modal__close svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.fabric-modal__hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.5rem;
+}
+
+.fabric-modal__image-frame {
+  display: flex;
+  width: 9rem;
+  height: 9rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--app-gold-border);
+  border-radius: calc(var(--card-radius) + 2px);
+  background: var(--catalog-bg);
+  padding: 1.5rem;
+}
+
+.fabric-modal__image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.fabric-modal__titles {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.fabric-modal__name-ar {
+  margin: 0;
+  width: 100%;
+  font-family: var(--catalog-font-ar);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--catalog-gold);
+  text-align: center;
+  direction: rtl;
+}
+
+.fabric-modal__name-en {
+  margin: 0;
+  width: 100%;
+  font-family: var(--catalog-font-en);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--catalog-text);
+  text-align: center;
+}
+
+.fabric-modal__divider {
+  height: 1px;
+  border: 0;
+  margin: 1.25rem 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(201 164 92 / 20%) 20%,
+    rgb(201 164 92 / 45%) 50%,
+    rgb(201 164 92 / 20%) 80%,
+    transparent 100%
+  );
+}
+
+.fabric-modal__details {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.625rem;
+}
+
+.fabric-modal__detail {
+  display: flex;
+  gap: 0.75rem;
+  border: 1px solid var(--app-gold-border);
+  border-radius: calc(var(--card-radius) - 4px);
+  background: var(--catalog-bg);
+  padding: 0.75rem;
+}
+
+.fabric-modal__detail-icon-wrap {
+  display: flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--app-gold-border);
+  border-radius: 50%;
+  background: var(--catalog-surface);
+}
+
+.fabric-modal__detail-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--app-icon-gold);
+}
+
+.fabric-modal__detail-content {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.fabric-modal__detail-label-en {
+  margin: 0;
+  font-family: var(--catalog-font-en);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  color: var(--catalog-muted);
+  text-align: left;
+}
+
+.fabric-modal__detail-label-ar {
+  margin: 0;
+  font-family: var(--catalog-font-ar);
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--catalog-muted);
+  text-align: right;
+  direction: rtl;
+}
+
+.fabric-modal__detail-value-en {
+  margin: 0;
+  font-family: var(--catalog-font-en);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--catalog-text);
+  text-align: left;
+  overflow-wrap: break-word;
+}
+
+.fabric-modal__detail-value-ar {
+  margin: 0;
+  font-family: var(--catalog-font-ar);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--catalog-text);
+  text-align: right;
+  direction: rtl;
+  overflow-wrap: break-word;
+}
+
+.fabric-modal__uses {
+  margin-top: 1rem;
+  border: 1px solid var(--app-gold-border);
+  border-radius: calc(var(--card-radius) - 4px);
+  background: var(--catalog-bg);
+  padding: 0.875rem;
+}
+
+.fabric-modal__uses-header {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-bottom: 0.75rem;
+}
+
+.fabric-modal__uses-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+  color: var(--app-icon-gold);
+}
+
+.fabric-modal__uses-label-en {
+  margin: 0;
+  font-family: var(--catalog-font-en);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--catalog-muted);
+}
+
+.fabric-modal__uses-label-ar {
+  margin: 0;
+  font-family: var(--catalog-font-ar);
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--catalog-muted);
+  direction: rtl;
+  text-align: right;
+}
+
+.fabric-modal__uses-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.fabric-modal__use-chip {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.0625rem;
+  border: 1px solid var(--app-gold-border);
+  border-radius: 999px;
+  background: var(--catalog-surface);
+  padding: 0.375rem 0.75rem;
+}
+
+.fabric-modal__use-chip-ar {
+  font-family: var(--catalog-font-ar);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--catalog-gold-soft);
+  direction: rtl;
+  text-align: right;
+}
+
+.fabric-modal__use-chip-en {
+  font-family: var(--catalog-font-en);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--catalog-muted);
+}
+
+.fabric-modal__related {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgb(201 164 92 / 16%);
+}
+
+.fabric-modal__related-title-en {
+  margin: 0;
+  font-family: var(--catalog-font-en);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--catalog-gold);
+  text-align: left;
+}
+
+.fabric-modal__related-title-ar {
+  margin: 0.125rem 0 0.875rem;
+  font-family: var(--catalog-font-ar);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--catalog-gold);
+  text-align: right;
+  direction: rtl;
+}
+
+.fabric-modal__related-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+}
+
+@keyframes catalog-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (min-width: 640px) {
+  .fabrics-catalog__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.125rem;
+  }
+
+  .fabric-modal__details {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fabric-modal__detail:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1024px) {
+  .fabrics-catalog__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .fabric-modal__related-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fabrics-catalog__header,
+  .fabrics-catalog__grid,
+  .fabrics-catalog__empty {
+    animation: none;
+  }
+
+  .fabric-catalog-card,
+  .fabrics-catalog__filter {
+    transition: none;
+  }
+
+  .fabric-catalog-card:hover {
+    transform: none;
+  }
+
+  .fabric-image__skeleton {
+    animation: none;
+  }
+}

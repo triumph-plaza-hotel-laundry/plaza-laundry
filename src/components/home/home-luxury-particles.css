@@ -1,0 +1,50 @@
+.home-luxury-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  transform: translate3d(calc(var(--parallax-x, 0) * 1px), calc(var(--parallax-y, 0) * 1px), 0);
+}
+
+.home-luxury-particle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background: rgb(201 164 92 / 72%);
+  box-shadow: 0 0 2px rgb(201 164 92 / 18%);
+  opacity: 0;
+  transform: translate3d(calc(var(--x0) - var(--half)), calc(var(--y0) - var(--half)), 0);
+  animation: home-luxury-particle-drift var(--duration) linear var(--delay) forwards;
+}
+
+@keyframes home-luxury-particle-drift {
+  0% {
+    transform: translate3d(calc(var(--x0) - var(--half)), calc(var(--y0) - var(--half)), 0);
+    opacity: 0;
+  }
+
+  8% {
+    opacity: var(--peak);
+  }
+
+  92% {
+    opacity: var(--peak);
+  }
+
+  100% {
+    transform: translate3d(calc(var(--x1) - var(--half)), calc(var(--y1) - var(--half)), 0);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-luxury-particles {
+    display: none;
+  }
+}

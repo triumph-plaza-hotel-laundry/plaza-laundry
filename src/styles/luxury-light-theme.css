@@ -1,0 +1,364 @@
+/* Light mode component overrides — dark mode styles remain in source files */
+
+:root[data-theme='luxury-light'] .page-back-bar__btn {
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+  box-shadow: var(--card-shadow);
+}
+
+:root[data-theme='luxury-light'] .page-back-bar__btn:hover {
+  background: #faf6ee;
+  color: var(--app-gold);
+}
+
+:root[data-theme='luxury-light'] .splash-screen {
+  background: var(--splash-bg);
+  color: var(--splash-text);
+}
+
+:root[data-theme='luxury-light'] .cinematic-splash {
+  background: #030303;
+}
+
+:root[data-theme='luxury-light'] .install-prompt {
+  background: rgb(255 255 255 / 96%);
+  box-shadow: var(--card-shadow);
+}
+
+:root[data-theme='luxury-light'] .install-prompt__copy strong {
+  color: var(--app-gold);
+}
+
+:root[data-theme='luxury-light'] .install-prompt__button {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+}
+
+:root[data-theme='luxury-light'] .install-prompt__button:hover {
+  background: var(--btn-primary-hover);
+}
+
+:root[data-theme='luxury-light'] .programs-page {
+  --programs-print-bg: #ffffff;
+  --programs-print-text: #2f2a25;
+}
+
+:root[data-theme='luxury-light'] .chemicals-page {
+  --chemicals-print-bg: #ffffff;
+  --chemicals-print-text: #2f2a25;
+}
+
+/* Admin editor surfaces */
+:root[data-theme='luxury-light'] .admin-back-btn {
+  background: var(--btn-secondary-bg);
+  color: var(--app-gold);
+  box-shadow: var(--card-shadow);
+}
+
+:root[data-theme='luxury-light'] .admin-back-btn:hover {
+  background: #faf6ee;
+}
+
+:root[data-theme='luxury-light'] .admin-edit-toolbar {
+  background: linear-gradient(145deg, rgb(201 164 92 / 14%), rgb(255 255 255 / 96%));
+}
+
+:root[data-theme='luxury-light'] .admin-edit-toolbar__btn--cancel {
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+}
+
+:root[data-theme='luxury-light'] .admin-edit-toolbar__btn--save {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  border-color: var(--btn-primary-bg);
+}
+
+:root[data-theme='luxury-light'] .admin-editor-panel {
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+:root[data-theme='luxury-light'] .admin-editor-table-wrap {
+  border-color: var(--app-gold-border);
+  background: var(--table-body-bg);
+}
+
+:root[data-theme='luxury-light'] .admin-editor-table thead th,
+:root[data-theme='luxury-light'] .admin-editor-table th {
+  background: var(--table-header-bg);
+  color: var(--table-header-text);
+}
+
+:root[data-theme='luxury-light'] .admin-editor-table td {
+  background: var(--table-body-bg);
+  color: var(--table-text);
+}
+
+:root[data-theme='luxury-light'] .admin-editor-table tbody tr:nth-child(even) td {
+  background: var(--table-row-alt-bg);
+}
+
+:root[data-theme='luxury-light'] .admin-editor-table tbody tr:hover td {
+  background: var(--table-row-hover);
+}
+
+:root[data-theme='luxury-light'] .admin-editor-field input,
+:root[data-theme='luxury-light'] .admin-editor-field select,
+:root[data-theme='luxury-light'] .admin-editor-field textarea {
+  background: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--input-text);
+}
+
+:root[data-theme='luxury-light'] .admin-editor-field input:focus,
+:root[data-theme='luxury-light'] .admin-editor-field select:focus,
+:root[data-theme='luxury-light'] .admin-editor-field textarea:focus {
+  outline: none;
+  border-color: var(--app-gold);
+  box-shadow: 0 0 0 2px var(--input-focus-ring);
+}
+
+:root[data-theme='luxury-light'] .admin-editor-btn {
+  background: var(--btn-secondary-bg);
+  color: var(--app-gold);
+  box-shadow: var(--card-shadow);
+}
+
+:root[data-theme='luxury-light'] .admin-editor-btn--primary {
+  background: var(--btn-primary-bg);
+  border-color: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  box-shadow: none;
+}
+
+:root[data-theme='luxury-light'] .admin-editor-btn--primary:hover {
+  background: var(--btn-primary-hover);
+}
+
+:root[data-theme='luxury-light'] .admin-shifts-editor__day-tab {
+  background: var(--btn-secondary-bg);
+  color: var(--input-text);
+}
+
+:root[data-theme='luxury-light'] .admin-shifts-editor__day-tab--active {
+  background: rgb(201 164 92 / 16%);
+  color: var(--app-gold);
+}
+
+:root[data-theme='luxury-light'] .admin-employee-card {
+  background: var(--card-bg);
+  color: var(--app-gold);
+  box-shadow: var(--card-shadow);
+}
+
+:root[data-theme='luxury-light'] .admin-employee-modal,
+:root[data-theme='luxury-light'] .admin-employee-modal__header,
+:root[data-theme='luxury-light'] .admin-employee-modal__actions {
+  background: var(--modal-bg);
+  box-shadow: var(--card-shadow);
+}
+
+:root[data-theme='luxury-light'] .admin-employee-modal__title {
+  color: var(--app-text);
+}
+
+:root[data-theme='luxury-light'] .admin-employee-modal__close {
+  color: var(--app-gold);
+}
+
+:root[data-theme='luxury-light'] .admin-editor-table--responsive tbody tr {
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+:root[data-theme='luxury-light'] .admin-settings-message--error {
+  color: #991b1b;
+  background: rgb(254 226 226 / 88%);
+}
+
+:root[data-theme='luxury-light'] .admin-settings-message--success {
+  color: #166534;
+  background: rgb(220 252 231 / 88%);
+}
+
+/* Inventory management */
+:root[data-theme='luxury-light'] .inv-management-page {
+  --inv-black: #ffffff;
+  --inv-black-soft: #faf6ee;
+  --inv-gold: #c9a45c;
+  --inv-gold-soft: #9a7b35;
+  --inv-gold-border: #ae8625;
+  --inv-text: #2f2a25;
+  --inv-muted: rgb(47 42 37 / 62%);
+  --inv-panel-bg: linear-gradient(180deg, #ffffff, #faf6ee);
+  --inv-warehouse-bg: linear-gradient(180deg, #ffffff, #faf6ee);
+  --inv-search-bg: #faf6ee;
+  --inv-input-bg: #ffffff;
+  --inv-erp-header-bg: var(--table-header-bg);
+  --inv-pagination-bg: #faf6ee;
+  --inv-combobox-list-bg: #ffffff;
+  --inv-btn-bg: #ffffff;
+  --inv-marble-bg: linear-gradient(
+    180deg,
+    rgb(232 213 166 / 28%),
+    rgb(255 255 255 / 72%)
+  );
+}
+
+:root[data-theme='luxury-light'] .inv-management-page .inv-management-page__marble {
+  background: var(--inv-marble-bg);
+  border-color: rgb(174 134 37 / 22%);
+}
+
+:root[data-theme='luxury-light'] .inv-management-page .inv-panel,
+:root[data-theme='luxury-light'] .inv-management-page .inv-warehouse {
+  background: var(--inv-panel-bg);
+  box-shadow: var(--card-shadow);
+}
+
+:root[data-theme='luxury-light'] .inv-management-page .inv-warehouse__search {
+  background: var(--inv-search-bg);
+}
+
+:root[data-theme='luxury-light'] .inv-management-page .luxury-table.inv-erp-table thead th {
+  background: var(--inv-erp-header-bg);
+  color: var(--table-header-text);
+  box-shadow: inset 0 -1px 0 rgb(174 134 37 / 22%);
+}
+
+:root[data-theme='luxury-light'] .inv-management-page .inv-field input,
+:root[data-theme='luxury-light'] .inv-management-page .inv-field select,
+:root[data-theme='luxury-light'] .inv-management-page .inv-field textarea,
+:root[data-theme='luxury-light'] .inv-management-page .inv-combobox__input {
+  background: var(--inv-input-bg);
+  color: var(--inv-text);
+  border-color: var(--inv-gold-border);
+}
+
+:root[data-theme='luxury-light'] .inv-management-page .inv-combobox__list {
+  background: var(--inv-combobox-list-bg);
+  box-shadow: var(--card-shadow);
+}
+
+:root[data-theme='luxury-light'] .inv-management-page .inv-combobox__option--active,
+:root[data-theme='luxury-light'] .inv-management-page .inv-combobox__option:hover {
+  color: var(--inv-text);
+}
+
+:root[data-theme='luxury-light'] .inv-management-page .inv-pagination--erp {
+  background: var(--inv-pagination-bg);
+}
+
+:root[data-theme='luxury-light'] .inv-management-page .inv-pagination button {
+  background: var(--inv-btn-bg);
+  color: var(--inv-gold);
+  box-shadow: var(--card-shadow);
+}
+
+:root[data-theme='luxury-light'] .inv-management-page .inv-btn--gold {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  border-color: var(--btn-primary-bg);
+}
+
+:root[data-theme='luxury-light'] .inv-management-page .inv-erp-table__remaining {
+  color: var(--inv-gold);
+}
+
+:root[data-theme='luxury-light'] .inv-management-page .inv-erp-table tbody td.inv-erp-table__code,
+:root[data-theme='luxury-light'] .inv-management-page .inv-erp-table tbody td.inv-erp-table__name {
+  background: var(--table-body-bg, #ffffff);
+}
+
+:root[data-theme='luxury-light'] .inv-management-page .inv-erp-table tbody tr:nth-child(even) td.inv-erp-table__code,
+:root[data-theme='luxury-light'] .inv-management-page .inv-erp-table tbody tr:nth-child(even) td.inv-erp-table__name {
+  background: var(--table-row-alt-bg, #faf6ee);
+}
+
+:root[data-theme='luxury-light'] .inv-management-page .inv-erp-table tbody tr:hover td.inv-erp-table__code,
+:root[data-theme='luxury-light'] .inv-management-page .inv-erp-table tbody tr:hover td.inv-erp-table__name {
+  background: var(--table-row-hover, rgb(201 164 92 / 10%));
+}
+
+:root[data-theme='luxury-light'] .inv-management-page .inv-error {
+  color: #991b1b;
+  background: rgb(254 226 226 / 88%);
+}
+
+:root[data-theme='luxury-light'] .inv-management-page .inv-skeleton--erp {
+  background: #ffffff;
+}
+
+:root[data-theme='luxury-light'] .inv-management-page .inv-skeleton__search,
+:root[data-theme='luxury-light'] .inv-management-page .inv-skeleton__table-head,
+:root[data-theme='luxury-light'] .inv-management-page .inv-skeleton__table-row,
+:root[data-theme='luxury-light'] .inv-management-page .inv-skeleton__row {
+  background: linear-gradient(90deg, #faf6ee 25%, #f0e8d8 50%, #faf6ee 75%);
+}
+
+/* Official forms / reports */
+:root[data-theme='luxury-light'] .tpl-form-page {
+  --tpl-black: #ffffff;
+  --tpl-black-soft: #faf6ee;
+  --tpl-gold: #c9a45c;
+  --tpl-gold-bright: #9a7b35;
+  --tpl-gold-border: #ae8625;
+  --tpl-gold-line: rgb(174 134 37 / 72%);
+  --tpl-gold-muted: rgb(201 164 92 / 18%);
+  --tpl-text: #2f2a25;
+  --tpl-text-muted: rgb(47 42 37 / 62%);
+}
+
+:root[data-theme='luxury-light'] .tpl-form-page__print {
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+  box-shadow: var(--card-shadow);
+}
+
+:root[data-theme='luxury-light'] .tpl-form-page__print:hover {
+  background: #faf6ee;
+}
+
+:root[data-theme='luxury-light'] .tpl-form-page__tab {
+  background: #ffffff;
+  color: var(--tpl-text);
+}
+
+:root[data-theme='luxury-light'] .tpl-form-page__tab--active {
+  background: rgb(201 164 92 / 16%);
+  color: var(--tpl-gold-bright);
+}
+
+:root[data-theme='luxury-light'] .tpl-official-sheet {
+  background: #ffffff;
+  color: var(--tpl-text);
+  box-shadow: var(--card-shadow);
+}
+
+:root[data-theme='luxury-light'] .tpl-official-table thead th {
+  background: var(--table-header-bg);
+  color: var(--table-header-text);
+}
+
+:root[data-theme='luxury-light'] .tpl-official-table tbody td,
+:root[data-theme='luxury-light'] .tpl-official-table tbody th {
+  background: var(--table-body-bg);
+  color: var(--table-text);
+}
+
+:root[data-theme='luxury-light'] .tpl-official-table tbody tr:nth-child(even) td {
+  background: var(--table-row-alt-bg);
+}
+
+:root[data-theme='luxury-light'] .tpl-official-table__input,
+:root[data-theme='luxury-light'] .tpl-official-table__select {
+  color: var(--tpl-text);
+  background: #ffffff;
+}
+
+@media (max-width: 1023px) {
+  :root[data-theme='luxury-light'] .admin-editor-table--responsive tbody tr {
+    background: var(--card-bg);
+  }
+}

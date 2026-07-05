@@ -1,0 +1,78 @@
+.admin-leaves-page {
+  --shift-bg: #0a0a0a;
+  --shift-surface: rgb(15 15 15 / 78%);
+  --shift-glass: rgb(12 12 12 / 58%);
+  --shift-text: #f5f5f5;
+  --shift-muted: rgb(255 255 255 / 55%);
+  --shift-gold: #d6b76e;
+  --shift-gold-soft: #e8d5a6;
+  --shift-gold-dim: rgb(214 183 110 / 22%);
+  --shift-border: rgb(214 183 110 / 28%);
+  --shift-font-en: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --shift-font-ar: 'Noto Kufi Arabic', 'Segoe UI', Tahoma, sans-serif;
+  display: flex;
+  width: 100%;
+  max-width: 80rem;
+  flex: 1;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem 1rem 2rem;
+}
+
+:root[data-theme='luxury-light'] .admin-leaves-page {
+  --shift-bg: #d9d0c3;
+  --shift-surface: rgb(214 204 190 / 88%);
+  --shift-glass: rgb(226 217 205 / 68%);
+  --shift-text: #2f2a25;
+  --shift-muted: rgb(47 42 37 / 58%);
+  --shift-gold: #c8a24e;
+  --shift-gold-soft: #9a7b35;
+  --shift-gold-dim: rgb(200 162 78 / 18%);
+  --shift-border: rgb(200 162 78 / 32%);
+}
+
+.admin-leaves-page__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  text-align: center;
+}
+
+.admin-leaves-page__emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--shift-gold);
+}
+
+.admin-leaves-page__title {
+  margin: 0;
+  font-family: var(--shift-font-en);
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  font-weight: 700;
+  color: var(--shift-gold);
+}
+
+html[dir='rtl'] .admin-leaves-page__title {
+  font-family: var(--shift-font-ar);
+}
+
+.admin-leaves-page__subtitle {
+  margin: 0;
+  max-width: 36rem;
+  font-size: 0.875rem;
+  color: var(--shift-muted);
+}
+
+.admin-leaves .leave-panel {
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.leave-modal__meta {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--shift-muted);
+}
