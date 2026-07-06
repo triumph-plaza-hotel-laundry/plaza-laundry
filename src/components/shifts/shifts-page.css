@@ -1791,11 +1791,20 @@ html[dir='rtl'] .shift-employee-row__name {
   .shift-today-card__table-wrap,
   .shift-weekly-card__table-wrap {
     overflow-x: auto;
+    scroll-behavior: smooth;
   }
 
   .shift-today-card__table.luxury-table--cards,
   .shift-weekly-card__table.luxury-table--cards {
+    min-width: 0;
+  }
+
+  .shift-today-card__table:not(.luxury-table--cards) {
     min-width: 42rem;
+  }
+
+  .shift-weekly-card__table:not(.luxury-table--cards) {
+    min-width: 52rem;
   }
 }
 
@@ -1807,57 +1816,37 @@ html[dir='rtl'] .shift-employee-row__name {
 
   .shift-today-card__table-wrap.luxury-table-wrap,
   .shift-weekly-card__table-wrap.luxury-table-wrap {
-    overflow-x: auto;
-    border: 1px solid var(--shift-border);
-    border-radius: 0.875rem;
-    background: rgb(0 0 0 / 12%);
-  }
-
-  .shift-today-card__table.luxury-table--cards,
-  .shift-weekly-card__table.luxury-table--cards {
-    display: table;
-    min-width: 38rem;
-  }
-
-  .shift-today-card__table.luxury-table--cards thead,
-  .shift-weekly-card__table.luxury-table--cards thead {
-    position: static;
-    width: auto;
-    height: auto;
     overflow: visible;
-    clip: auto;
-    white-space: normal;
-  }
-
-  .shift-today-card__table.luxury-table--cards tbody,
-  .shift-weekly-card__table.luxury-table--cards tbody {
-    display: table-row-group;
-  }
-
-  .shift-today-card__table.luxury-table--cards tbody tr,
-  .shift-weekly-card__table.luxury-table--cards tbody tr {
-    display: table-row;
     border: 0;
-    padding: 0;
     background: transparent;
-    box-shadow: none;
   }
 
-  .shift-today-card__table.luxury-table--cards tbody td,
-  .shift-today-card__table.luxury-table--cards tbody th,
-  .shift-weekly-card__table.luxury-table--cards tbody td,
-  .shift-weekly-card__table.luxury-table--cards tbody th {
-    display: table-cell;
-    padding: 0.75rem;
-    border-bottom: 1px solid var(--shift-border);
-    text-align: center;
+  .shift-today-card__table.luxury-table--cards tbody td {
+    text-align: start;
   }
 
-  .shift-today-card__table.luxury-table--cards tbody td::before,
-  .shift-today-card__table.luxury-table--cards tbody th::before,
-  .shift-weekly-card__table.luxury-table--cards tbody td::before,
-  .shift-weekly-card__table.luxury-table--cards tbody th::before {
-    content: none;
+  .shift-today-card__table.luxury-table--cards tbody td:last-child {
+    border-bottom: 0;
+  }
+
+  .shift-today-card__table.luxury-table--cards .shift-today-card__shift-block {
+    align-items: flex-start;
+  }
+
+  .shift-today-card__table.luxury-table--cards .shift-today-card__name {
+    font-size: 0.8125rem;
+  }
+
+  .shift-weekly-card__table.luxury-table--cards .shift-weekly-card__employee {
+    color: var(--shift-gold-soft);
+    font-weight: 700;
+  }
+
+  .shift-weekly-card__table.luxury-table--cards .shift-weekly-card__status {
+    min-width: 0;
+    width: 100%;
+    font-size: 0.6875rem;
+    padding: 0.3rem 0.5rem;
   }
 }
 

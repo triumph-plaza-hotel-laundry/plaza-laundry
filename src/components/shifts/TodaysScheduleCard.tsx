@@ -74,8 +74,8 @@ export const TodaysScheduleCard = memo(function TodaysScheduleCard({
         </p>
       </header>
 
-      <div className="shift-today-card__table-wrap">
-        <table className="shift-today-card__table">
+      <div className="shift-today-card__table-wrap luxury-table-wrap">
+        <table className="shift-today-card__table luxury-table luxury-table--cards">
           <thead>
             <tr>
               {columns.map((column) => (

@@ -308,7 +308,10 @@
 
 .tpl-official-sheet__table-scroll {
   overflow-x: auto;
+  max-width: 100%;
   -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
 }
 
 .tpl-official-table {
@@ -568,11 +571,21 @@
   }
 
   .tpl-official-table {
-    min-width: 34rem;
+    min-width: 0;
+    font-size: 0.5625rem;
+  }
+
+  .tpl-official-table th,
+  .tpl-official-table td {
+    padding: 0.2rem 0.25rem;
+  }
+
+  .tpl-official-table__head-ar {
+    font-size: 0.5rem;
   }
 
   .tpl-official-sheet--landscape .tpl-official-table {
-    min-width: 52rem;
+    min-width: 44rem;
   }
 
   .tpl-official-sheet__footer {

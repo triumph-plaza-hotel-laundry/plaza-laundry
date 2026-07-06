@@ -586,9 +586,34 @@ html[dir='rtl'] .price-section__table thead th {
     min-width: 0;
   }
 
+  .price-section__item-line {
+    font-size: 0.75rem;
+  }
+
+  .price-section__input {
+    min-height: 2rem;
+    font-size: 0.8125rem;
+  }
+
   .price-list-page__tab {
     min-width: 7.5rem;
     flex: 1;
+  }
+}
+
+@media (max-width: 639px) {
+  .price-section__table tbody tr {
+    padding: 0.75rem;
+  }
+
+  .price-section__item-line {
+    font-size: 0.6875rem;
+  }
+
+  .price-section__input {
+    min-height: 1.875rem;
+    padding: 0.3125rem 0.5rem;
+    font-size: 0.75rem;
   }
 }
 

@@ -136,7 +136,6 @@ export function InventoryItemsTable({ items }: InventoryItemsTableProps) {
               <col className="inv-erp-col inv-erp-col--num" />
               <col className="inv-erp-col inv-erp-col--num" />
               <col className="inv-erp-col inv-erp-col--num" />
-              <col className="inv-erp-col inv-erp-col--actions" />
             </colgroup>
             <thead>
               <tr>
@@ -166,7 +165,7 @@ export function InventoryItemsTable({ items }: InventoryItemsTableProps) {
                   onClick={() => toggleSort('totalQuantity')}
                   scope="col"
                 >
-                  {t('inventory.v2.totalStock')}
+                  {t('inventory.table.incoming')}
                   {sortIndicator('totalQuantity')}
                 </th>
                 <th
@@ -191,15 +190,12 @@ export function InventoryItemsTable({ items }: InventoryItemsTableProps) {
                   {t('inventory.table.remaining')}
                   {sortIndicator('remainingQuantity')}
                 </th>
-                <th className="inv-erp-table__actions" scope="col">
-                  {t('inventory.table.actions')}
-                </th>
               </tr>
             </thead>
             <tbody>
               {pageItems.length === 0 ? (
                 <tr>
-                  <td className="inv-erp-table__empty" colSpan={6}>
+                  <td className="inv-erp-table__empty" colSpan={5}>
                     {t('inventory.search.noResults')}
                   </td>
                 </tr>
@@ -213,9 +209,6 @@ export function InventoryItemsTable({ items }: InventoryItemsTableProps) {
                     <td className="inv-erp-table__num">{item.totalQuantity}</td>
                     <td className="inv-erp-table__num">{item.issuedQuantity}</td>
                     <td className="inv-erp-table__num inv-erp-table__remaining">{item.remainingQuantity}</td>
-                    <td className="inv-erp-table__actions">
-                      <span className="inv-erp-table__status">{t('inventory.v2.viewOnly')}</span>
-                    </td>
                   </tr>
                 ))
               )}

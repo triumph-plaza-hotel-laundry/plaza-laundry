@@ -64,7 +64,7 @@ export const WeeklyShiftReadOnlyTable = memo(function WeeklyShiftReadOnlyTable({
       </header>
 
       <div className="shift-weekly-card__table-wrap luxury-table-wrap">
-        <table className="shift-weekly-card__table luxury-table">
+        <table className="shift-weekly-card__table luxury-table luxury-table--cards">
           <thead>
             <tr>
               <th scope="col">{employeeLabel}</th>

@@ -26,10 +26,9 @@
   --inv-gold-border: #ae8625;
   --inv-text: #f4e8c1;
   --inv-muted: rgb(244 232 193 / 62%);
-  --inv-code-col-width: 12.5rem;
-  --inv-name-col-min: 11rem;
-  --inv-num-col-width: 5rem;
-  --inv-actions-col-width: 7rem;
+  --inv-code-col-width: 4.75rem;
+  --inv-name-col-min: 0;
+  --inv-num-col-width: 2.875rem;
   position: relative;
   display: flex;
   width: 100%;
@@ -38,7 +37,7 @@
   flex-direction: column;
   gap: 1.25rem;
   padding-bottom: 2rem;
-  overflow-x: visible;
+  overflow-x: clip;
   isolation: isolate;
 }
 
@@ -196,7 +195,7 @@
 }
 
 .inv-management-page .inv-table-wrap--erp {
-  overflow-x: visible;
+  overflow-x: auto;
   overflow-y: auto;
   max-width: 100%;
   max-height: min(36rem, 64vh);
@@ -204,6 +203,7 @@
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
   scrollbar-gutter: stable;
+  scroll-behavior: smooth;
 }
 
 .inv-management-page .luxury-table.inv-erp-table {
@@ -217,6 +217,7 @@
 .inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) {
   width: 100%;
   min-width: 0;
+  font-size: 0.75rem;
 }
 
 .inv-management-page .luxury-table.inv-erp-table--history {
@@ -242,10 +243,6 @@
   width: var(--inv-num-col-width);
 }
 
-.inv-management-page .inv-erp-col--actions {
-  width: var(--inv-actions-col-width);
-}
-
 .inv-management-page .inv-erp-col--type {
   width: 6.5rem;
 }
@@ -261,9 +258,15 @@
 .inv-management-page .luxury-table.inv-erp-table thead th,
 .inv-management-page .luxury-table.inv-erp-table tbody td {
   box-sizing: border-box;
-  padding: 0.5rem 0.625rem;
+  padding: 0.375rem 0.375rem;
   vertical-align: middle;
   overflow: hidden;
+}
+
+.inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) thead th {
+  font-size: 0.625rem;
+  line-height: 1.2;
+  padding: 0.4375rem 0.375rem;
 }
 
 .inv-management-page .luxury-table.inv-erp-table thead th {
@@ -298,25 +301,32 @@
   width: var(--inv-code-col-width);
   min-width: var(--inv-code-col-width);
   max-width: var(--inv-code-col-width);
+  padding-inline-end: 0.25rem;
+  border-inline-end: 1px solid rgb(201 164 92 / 12%);
   font-family: ui-monospace, 'Cascadia Code', monospace;
-  font-size: 0.8125rem;
+  font-size: 0.6875rem;
   font-weight: 600;
-  line-height: 1.4;
+  line-height: 1.35;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: clip;
-  text-align: left;
+  text-overflow: ellipsis;
+  text-align: start;
   direction: ltr;
 }
 
 .inv-management-page .inv-erp-table__name {
   width: auto;
   min-width: 0;
+  padding-inline-start: 0.375rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-align: right;
+  text-align: start;
   direction: rtl;
+}
+
+.inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) thead th.inv-erp-table__code {
+  border-inline-end: 1px solid rgb(201 164 92 / 18%);
 }
 
 .inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) thead th.inv-erp-table__name,
@@ -327,7 +337,9 @@
 .inv-management-page .inv-erp-table__num {
   width: var(--inv-num-col-width);
   min-width: var(--inv-num-col-width);
+  max-width: var(--inv-num-col-width);
   text-align: center;
+  font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -336,29 +348,13 @@
   text-align: center;
 }
 
-.inv-management-page .inv-erp-table__remaining {
-  color: var(--inv-gold-soft);
-  font-weight: 700;
+.inv-management-page .luxury-table.inv-erp-table--history .inv-erp-table__code {
+  padding-inline-end: 0.25rem;
+  border-inline-end: 1px solid rgb(201 164 92 / 12%);
 }
 
-.inv-management-page .inv-erp-table__actions {
-  width: var(--inv-actions-col-width);
-  min-width: var(--inv-actions-col-width);
-  text-align: center;
-  white-space: nowrap;
-}
-
-.inv-management-page .inv-erp-table__status {
-  display: inline-flex;
-  max-width: 100%;
-  padding: 0.18rem 0.42rem;
-  border: 1px solid rgb(201 164 92 / 22%);
-  border-radius: 999px;
-  color: var(--inv-muted);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
+.inv-management-page .luxury-table.inv-erp-table--history .inv-erp-table__name {
+  padding-inline-start: 0.375rem;
 }
 
 .inv-management-page .luxury-table.inv-erp-table--history tbody td:not(.inv-erp-table__code):not(.inv-erp-table__name):not(.inv-erp-table__num) {
@@ -618,11 +614,6 @@ html[dir='rtl'] .inv-management-page .inv-combobox__control--open .inv-combobox_
   font-weight: 700;
 }
 
-.inv-management-page .inv-table__action-label {
-  color: var(--inv-muted);
-  font-size: 0.75rem;
-}
-
 .inv-management-page .inv-pagination {
   display: flex;
   align-items: center;
@@ -778,9 +769,85 @@ html[dir='rtl'] .inv-management-page .inv-combobox__control--open .inv-combobox_
   color: var(--inv-gold-soft);
 }
 
-@media (max-width: 1023px) {
+@media (min-width: 640px) {
+  .inv-management-page {
+    --inv-code-col-width: 6.5rem;
+    --inv-num-col-width: 3.5rem;
+  }
+
+  .inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) {
+    font-size: 0.8125rem;
+  }
+
+  .inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) thead th {
+    font-size: 0.6875rem;
+    padding: 0.5rem 0.4375rem;
+  }
+
   .inv-management-page .luxury-table.inv-erp-table thead th,
   .inv-management-page .luxury-table.inv-erp-table tbody td {
+    padding: 0.4375rem 0.5rem;
+  }
+
+  .inv-management-page .inv-erp-table__code {
+    font-size: 0.75rem;
+  }
+
+  .inv-management-page .inv-erp-table__num {
+    font-size: 0.8125rem;
+  }
+
+  .inv-management-page .inv-warehouse__table-toolbar {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+@media (min-width: 768px) {
+  .inv-management-page {
+    --inv-code-col-width: 7.5rem;
+    --inv-num-col-width: 4rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .inv-management-page {
+    --inv-code-col-width: 10rem;
+    --inv-name-col-min: 8rem;
+    --inv-num-col-width: 5rem;
+  }
+
+  .inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) {
+    font-size: 0.875rem;
+  }
+
+  .inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) thead th {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.625rem;
+  }
+
+  .inv-management-page .luxury-table.inv-erp-table thead th,
+  .inv-management-page .luxury-table.inv-erp-table tbody td {
+    padding: 0.5rem 0.625rem;
+  }
+
+  .inv-management-page .inv-erp-table__code {
+    font-size: 0.8125rem;
+    padding-inline-end: 0.375rem;
+  }
+
+  .inv-management-page .inv-erp-table__name {
+    padding-inline-start: 0.5rem;
+  }
+
+  .inv-management-page .inv-erp-table__num {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 1023px) {
+  .inv-management-page .luxury-table.inv-erp-table--history thead th,
+  .inv-management-page .luxury-table.inv-erp-table--history tbody td {
     padding: 0.4375rem 0.5rem;
   }
 }
@@ -803,13 +870,25 @@ html[dir='rtl'] .inv-management-page .inv-combobox__control--open .inv-combobox_
   }
 
   .inv-management-page .luxury-table.inv-erp-table--history {
-    min-width: 48rem;
+    min-width: 40rem;
+    font-size: 0.75rem;
+  }
+
+  .inv-management-page .inv-erp-col--type {
+    width: 5rem;
+  }
+
+  .inv-management-page .inv-erp-col--text {
+    width: 6.5rem;
+  }
+
+  .inv-management-page .inv-erp-col--date {
+    width: 5.5rem;
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 639px) {
   .inv-management-page .inv-table-wrap--erp {
-    overflow-x: auto;
     max-height: min(28rem, 58vh);
   }
 
@@ -817,136 +896,15 @@ html[dir='rtl'] .inv-management-page .inv-combobox__control--open .inv-combobox_
     flex-direction: column;
     align-items: flex-start;
   }
-}
 
-@media (max-width: 639px) {
-  .inv-management-page {
-    --inv-name-col-min: 9.5rem;
-    --inv-item-pin-width: calc(var(--inv-code-col-width) + var(--inv-name-col-min));
-  }
-
-  .inv-management-page .inv-warehouse__table-block {
-    overflow: visible;
-  }
-
-  .inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) {
-    min-width: calc(
-      var(--inv-item-pin-width) + (var(--inv-num-col-width) * 3) + var(--inv-actions-col-width) +
-        1rem
-    );
-    font-size: 0.8125rem;
-  }
-
-  .inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) thead th {
+  .inv-management-page .luxury-table.inv-erp-table--history {
+    min-width: 36rem;
     font-size: 0.6875rem;
-    padding: 0.375rem 0.5rem;
   }
 
-  .inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) tbody td {
-    font-size: 0.8125rem;
-    padding: 0.4375rem 0.5rem;
-  }
-
-  .inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) .inv-erp-table__code,
-  .inv-management-page
-    .luxury-table.inv-erp-table:not(.inv-erp-table--history)
-    thead
-    th.inv-erp-table__code {
-    position: sticky;
-    top: 0;
-    inset-inline-start: 0;
-    z-index: 5;
-    font-size: 0.75rem;
-    background: #0d0d0d;
-    border-inline-end: 1px solid rgb(201 164 92 / 14%);
-    box-shadow: none;
-  }
-
-  .inv-management-page
-    .luxury-table.inv-erp-table:not(.inv-erp-table--history)
-    tbody
-    td.inv-erp-table__code {
-    z-index: 1;
-    background: #0a0a0a;
-  }
-
-  .inv-management-page
-    .luxury-table.inv-erp-table:not(.inv-erp-table--history)
-    tbody
-    tr:nth-child(even)
-    td.inv-erp-table__code {
-    background: rgb(12 12 12 / 98%);
-  }
-
-  .inv-management-page
-    .luxury-table.inv-erp-table:not(.inv-erp-table--history)
-    tbody
-    tr:hover
-    td.inv-erp-table__code {
-    background: rgb(18 16 12 / 98%);
-  }
-
-  .inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) .inv-erp-table__name,
-  .inv-management-page
-    .luxury-table.inv-erp-table:not(.inv-erp-table--history)
-    thead
-    th.inv-erp-table__name {
-    position: sticky;
-    top: 0;
-    inset-inline-start: var(--inv-code-col-width);
-    z-index: 4;
-    width: var(--inv-name-col-min);
-    min-width: var(--inv-name-col-min);
-    max-width: var(--inv-name-col-min);
-    background: #0d0d0d;
-    box-shadow: 4px 0 14px rgb(0 0 0 / 24%);
-  }
-
-  .inv-management-page
-    .luxury-table.inv-erp-table:not(.inv-erp-table--history)
-    tbody
-    td.inv-erp-table__name {
-    z-index: 1;
-    background: #0a0a0a;
-    white-space: normal;
-    word-break: break-word;
-    line-height: 1.35;
-  }
-
-  .inv-management-page
-    .luxury-table.inv-erp-table:not(.inv-erp-table--history)
-    tbody
-    tr:nth-child(even)
-    td.inv-erp-table__name {
-    background: rgb(12 12 12 / 98%);
-  }
-
-  .inv-management-page
-    .luxury-table.inv-erp-table:not(.inv-erp-table--history)
-    tbody
-    tr:hover
-    td.inv-erp-table__name {
-    background: rgb(18 16 12 / 98%);
-  }
-
-  .inv-management-page
-    .luxury-table.inv-erp-table:not(.inv-erp-table--history)
-    thead
-    th.inv-erp-table__code,
-  .inv-management-page
-    .luxury-table.inv-erp-table:not(.inv-erp-table--history)
-    thead
-    th.inv-erp-table__name {
-    z-index: 5;
-    white-space: normal;
-    line-height: 1.2;
-  }
-
-  .inv-management-page
-    .luxury-table.inv-erp-table:not(.inv-erp-table--history)
-    thead
-    th.inv-erp-table__name {
-    z-index: 4;
+  .inv-management-page .luxury-table.inv-erp-table--history thead th,
+  .inv-management-page .luxury-table.inv-erp-table--history tbody td {
+    padding: 0.3125rem 0.375rem;
   }
 
   .inv-management-page .luxury-table.inv-erp-table--history .inv-erp-table__code,
@@ -954,6 +912,27 @@ html[dir='rtl'] .inv-management-page .inv-combobox__control--open .inv-combobox_
     position: sticky;
     inset-inline-start: 0;
     z-index: 3;
+    background: #0d0d0d;
+  }
+
+  .inv-management-page .luxury-table.inv-erp-table--history tbody td.inv-erp-table__code {
+    background: #0a0a0a;
+  }
+
+  .inv-management-page
+    .luxury-table.inv-erp-table--history
+    tbody
+    tr:nth-child(even)
+    td.inv-erp-table__code {
+    background: rgb(12 12 12 / 98%);
+  }
+
+  .inv-management-page
+    .luxury-table.inv-erp-table--history
+    tbody
+    tr:hover
+    td.inv-erp-table__code {
+    background: rgb(18 16 12 / 98%);
   }
 
   .inv-management-page .luxury-table.inv-erp-table--history .inv-erp-table__name,
@@ -961,6 +940,28 @@ html[dir='rtl'] .inv-management-page .inv-combobox__control--open .inv-combobox_
     position: sticky;
     inset-inline-start: var(--inv-code-col-width);
     z-index: 2;
+    background: #0d0d0d;
+    box-shadow: 4px 0 12px rgb(0 0 0 / 22%);
+  }
+
+  .inv-management-page .luxury-table.inv-erp-table--history tbody td.inv-erp-table__name {
+    background: #0a0a0a;
+  }
+
+  .inv-management-page
+    .luxury-table.inv-erp-table--history
+    tbody
+    tr:nth-child(even)
+    td.inv-erp-table__name {
+    background: rgb(12 12 12 / 98%);
+  }
+
+  .inv-management-page
+    .luxury-table.inv-erp-table--history
+    tbody
+    tr:hover
+    td.inv-erp-table__name {
+    background: rgb(18 16 12 / 98%);
   }
 }
 
