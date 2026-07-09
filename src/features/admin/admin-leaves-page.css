@@ -76,3 +76,10 @@ html[dir='rtl'] .admin-leaves-page__title {
   font-size: 0.8125rem;
   color: var(--shift-muted);
 }
+
+@media (max-width: 480px) {
+  .admin-leaves-page {
+    padding: 1rem 0.75rem 1.5rem;
+    gap: 1rem;
+  }
+}

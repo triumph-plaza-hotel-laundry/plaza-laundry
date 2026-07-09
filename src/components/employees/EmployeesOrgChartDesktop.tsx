@@ -68,6 +68,23 @@ export function EmployeesOrgChartDesktop({
     );
   }
 
+  if (chart.assistantManagers.length > 0) {
+    sections.push(<OrgConnector key="connector-assistant-managers" />);
+    sections.push(
+      <section className="org-chart__level org-chart__level--assistant-managers" key="assistant-managers">
+        <OrgLevelLabel
+          labelAr={t('employees.org.assistantManagersAr')}
+          labelEn={t('employees.org.assistantManagersEn')}
+        />
+        <div className="org-chart__row org-chart__row--quad">
+          {chart.assistantManagers.map((employee) => (
+            <OrgChartEmployeeCard employee={employee} index={nextIndex()} key={employee.id} size="standard" />
+          ))}
+        </div>
+      </section>,
+    );
+  }
+
   if (chart.seniorSupervisors.length > 0) {
     sections.push(<OrgConnector key="connector-senior" />);
     sections.push(
@@ -85,13 +102,18 @@ export function EmployeesOrgChartDesktop({
     );
   }
 
-  if (chart.tailor) {
-    sections.push(<OrgConnector key="connector-tailor" />);
+  if (chart.leadSupervisors.length > 0) {
+    sections.push(<OrgConnector key="connector-lead-supervisors" />);
     sections.push(
-      <section className="org-chart__level org-chart__level--tailor" key="tailor">
-        <OrgLevelLabel labelAr={t('employees.org.tailorAr')} labelEn={t('employees.org.tailorEn')} />
-        <div className="org-chart__row org-chart__row--single">
-          <OrgChartEmployeeCard employee={chart.tailor} index={nextIndex()} size="standard" />
+      <section className="org-chart__level org-chart__level--lead-supervisors" key="lead-supervisors">
+        <OrgLevelLabel
+          labelAr={t('employees.org.leadSupervisorsAr')}
+          labelEn={t('employees.org.leadSupervisorsEn')}
+        />
+        <div className="org-chart__row org-chart__row--quad">
+          {chart.leadSupervisors.map((employee) => (
+            <OrgChartEmployeeCard employee={employee} index={nextIndex()} key={employee.id} size="standard" />
+          ))}
         </div>
       </section>,
     );
@@ -109,6 +131,18 @@ export function EmployeesOrgChartDesktop({
           {chart.shiftLeaders.map((employee) => (
             <OrgChartEmployeeCard employee={employee} index={nextIndex()} key={employee.id} size="standard" />
           ))}
+        </div>
+      </section>,
+    );
+  }
+
+  if (chart.tailor) {
+    sections.push(<OrgConnector key="connector-tailor" />);
+    sections.push(
+      <section className="org-chart__level org-chart__level--tailor" key="tailor">
+        <OrgLevelLabel labelAr={t('employees.org.tailorAr')} labelEn={t('employees.org.tailorEn')} />
+        <div className="org-chart__row org-chart__row--single">
+          <OrgChartEmployeeCard employee={chart.tailor} index={nextIndex()} size="standard" />
         </div>
       </section>,
     );

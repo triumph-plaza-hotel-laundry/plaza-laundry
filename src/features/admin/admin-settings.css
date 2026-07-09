@@ -41,3 +41,23 @@
   color: #bbf7d0;
   background: rgb(20 83 45 / 28%);
 }
+
+@media (max-width: 767px) {
+  .admin-settings-page {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .admin-settings-section {
+    margin-bottom: 1.25rem;
+  }
+
+  .admin-settings-section h2 {
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+
+  .admin-settings-section .admin-editor-grid--2 {
+    grid-template-columns: 1fr;
+  }
+}

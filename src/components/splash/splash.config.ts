@@ -1,11 +1,11 @@
 export const splashTiming = {
-  totalMs: 2000,
-  fadeInMs: 300,
-  fadeOutMs: 300,
-  exitMs: 300,
+  loadBarMs: 5000,
+  fadeOutMs: 700,
+  logoIntroMs: 1200,
+  shimmerMs: 1400,
 } as const;
 
-export const splashDestination = '/admin/login';
+export const splashTotalMs = splashTiming.loadBarMs + splashTiming.fadeOutMs;
 
 export const splashPhases = {
   introEnd: 400,

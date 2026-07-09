@@ -160,6 +160,15 @@ export function EmployeesOrgChartMobile({
         </AccordionSection>
       ) : null}
 
+      {chart.assistantManagers.length > 0 ? (
+        <AccordionSection
+          titleAr={t('employees.org.assistantManagersAr')}
+          titleEn={t('employees.org.assistantManagersEn')}
+        >
+          <EmployeeCards employees={chart.assistantManagers} onIndexAdvance={nextIndex} />
+        </AccordionSection>
+      ) : null}
+
       {chart.seniorSupervisors.length > 0 ? (
         <AccordionSection
           titleAr={t('employees.org.seniorSupervisorsAr')}
@@ -169,9 +178,12 @@ export function EmployeesOrgChartMobile({
         </AccordionSection>
       ) : null}
 
-      {chart.tailor ? (
-        <AccordionSection titleAr={t('employees.org.tailorAr')} titleEn={t('employees.org.tailorEn')}>
-          <EmployeeCards employees={[chart.tailor]} onIndexAdvance={nextIndex} />
+      {chart.leadSupervisors.length > 0 ? (
+        <AccordionSection
+          titleAr={t('employees.org.leadSupervisorsAr')}
+          titleEn={t('employees.org.leadSupervisorsEn')}
+        >
+          <EmployeeCards employees={chart.leadSupervisors} onIndexAdvance={nextIndex} />
         </AccordionSection>
       ) : null}
 
@@ -181,6 +193,12 @@ export function EmployeesOrgChartMobile({
           titleEn={t('employees.org.shiftLeadersEn')}
         >
           <EmployeeCards employees={chart.shiftLeaders} onIndexAdvance={nextIndex} />
+        </AccordionSection>
+      ) : null}
+
+      {chart.tailor ? (
+        <AccordionSection titleAr={t('employees.org.tailorAr')} titleEn={t('employees.org.tailorEn')}>
+          <EmployeeCards employees={[chart.tailor]} onIndexAdvance={nextIndex} />
         </AccordionSection>
       ) : null}
 

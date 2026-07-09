@@ -162,3 +162,18 @@
     min-height: calc(100dvh - 6rem);
   }
 }
+
+@media (max-width: 480px) {
+  .admin-login-page {
+    min-height: calc(100dvh - 6rem);
+    padding: 1.25rem 0.875rem 2rem;
+  }
+
+  .admin-login-page__form {
+    padding: 1.125rem;
+  }
+
+  .admin-login-page__submit {
+    min-height: 2.75rem;
+  }
+}

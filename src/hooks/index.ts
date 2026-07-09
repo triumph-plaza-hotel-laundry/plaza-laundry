@@ -20,6 +20,8 @@ export { useTrainingStorage } from '@/hooks/useTrainingStorage';
 export { useAiSettings } from '@/hooks/useAiSettings';
 export { useInventoryManagement } from '@/hooks/useInventoryManagement';
 export type { InventoryToastState } from '@/hooks/useInventoryManagement';
+export { useInventoryAuth } from '@/hooks/useInventoryAuth';
 export { useSyncStore } from '@/hooks/useSyncStore';
+export { useHomeShiftPlan } from '@/hooks/useHomeShiftPlan';
 export { useFormAutoSave } from '@/hooks/useFormAutoSave';
 export type { FormSaveStatus } from '@/hooks/useFormAutoSave';

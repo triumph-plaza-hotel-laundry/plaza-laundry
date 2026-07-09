@@ -1,7 +1,7 @@
 .luxury-header {
   position: sticky;
   top: 0;
-  z-index: 30;
+  z-index: 50;
   height: var(--header-height);
   flex-shrink: 0;
   overflow: hidden;
@@ -90,7 +90,14 @@
 button.luxury-header__control {
   cursor: pointer;
   padding: 0;
+  pointer-events: auto;
+  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+}
+
+.luxury-header__menu {
+  position: relative;
+  z-index: 2;
 }
 
 button.luxury-header__control:hover {
@@ -124,6 +131,10 @@ time.luxury-header__control {
 @media (min-width: 1024px) {
   .luxury-header__inner {
     gap: clamp(10px, 1.2vw, 16px);
+  }
+
+  .luxury-header__menu {
+    display: none;
   }
 
   .luxury-header__inner > .header-logo {

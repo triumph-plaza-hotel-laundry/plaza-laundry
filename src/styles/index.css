@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import './luxury-ui.css';
 @import './luxury-light-theme.css';
+@import './responsive.css';
 
 @theme {
   --font-sans:
@@ -241,6 +242,9 @@
 
   #root {
     @apply min-h-dvh overflow-x-hidden;
+    position: relative;
+    z-index: 1;
+    isolation: isolate;
   }
 
   button,

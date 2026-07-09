@@ -925,6 +925,16 @@ html[dir='rtl'] .leave-panel__title-en {
   grid-template-columns: 1fr 1fr;
 }
 
+@media (max-width: 480px) {
+  .leave-modal__row {
+    grid-template-columns: 1fr;
+  }
+
+  .leave-modal__submit {
+    min-height: 2.75rem;
+  }
+}
+
 .leave-modal__field {
   display: flex;
   flex-direction: column;

@@ -62,8 +62,60 @@ export type IssueItemsInput = {
 
 export const NOT_ENOUGH_STOCK_MESSAGE = 'There is not enough stock available.';
 
+export type InventoryQuantityField = 'totalQuantity' | 'issuedQuantity' | 'remainingQuantity';
+
+export type UpdateInventoryQuantityInput = {
+  itemId: string;
+  field: InventoryQuantityField;
+  value: number;
+};
+
 export function calculateRemaining(totalQuantity: number, issuedQuantity: number) {
   return Math.max(totalQuantity - issuedQuantity, 0);
+}
+
+export function applyInventoryQuantityUpdate(
+  item: InventoryItem,
+  field: InventoryQuantityField,
+  value: number,
+): InventoryItem {
+  const quantity = Math.max(0, Math.floor(Number.isFinite(value) ? value : 0));
+
+  if (field === 'totalQuantity') {
+    const totalQuantity = quantity;
+    const issuedQuantity = Math.min(item.issuedQuantity, totalQuantity);
+    const remainingQuantity = calculateRemaining(totalQuantity, issuedQuantity);
+
+    return {
+      ...item,
+      totalQuantity,
+      issuedQuantity,
+      remainingQuantity,
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  if (field === 'issuedQuantity') {
+    const issuedQuantity = Math.min(quantity, item.totalQuantity);
+    const remainingQuantity = calculateRemaining(item.totalQuantity, issuedQuantity);
+
+    return {
+      ...item,
+      issuedQuantity,
+      remainingQuantity,
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  const remainingQuantity = quantity;
+  const totalQuantity = remainingQuantity + item.issuedQuantity;
+
+  return {
+    ...item,
+    totalQuantity,
+    remainingQuantity,
+    updatedAt: new Date().toISOString(),
+  };
 }
 
 export function mapInventoryItem(row: {

@@ -18,10 +18,12 @@ await import('@/data/repositories/training-repository');
 await import('@/data/repositories/ai-settings-repository');
 
 const { initAllRepositories } = await import('@/data/repositories/repository-utils');
+const { syncMissingSeedEmployees } = await import('@/data/repositories/employees-repository');
 const { ensureUsersStoreReady } = await import('@/features/auth/users');
 const { seedOfficialInventoryItems } = await import('@/features/inventory/service');
 
 await initAllRepositories();
+await syncMissingSeedEmployees();
 await ensureUsersStoreReady();
 await seedOfficialInventoryItems();
 

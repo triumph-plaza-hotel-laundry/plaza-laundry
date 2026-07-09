@@ -409,9 +409,11 @@
 }
 
 .tpl-official-table__input:read-only,
+.tpl-official-table__input--static,
 .tpl-official-table__select:disabled {
   border-bottom-color: transparent;
   cursor: default;
+  pointer-events: none;
 }
 
 .tpl-official-table__employee {
@@ -586,6 +588,14 @@
 
   .tpl-official-sheet--landscape .tpl-official-table {
     min-width: 44rem;
+  }
+
+  .tpl-official-sheet--landscape {
+    overflow-x: hidden;
+  }
+
+  .tpl-official-sheet--landscape .tpl-official-sheet__table-scroll {
+    max-width: 100%;
   }
 
   .tpl-official-sheet__footer {

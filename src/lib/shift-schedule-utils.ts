@@ -5,6 +5,7 @@ import {
   weekDays,
   type ShiftPeriod,
   type ShiftRole,
+  type ShiftsState,
   type WeekDayId,
   type WeeklyCellAssignment,
 } from '@/data/laundry-shifts';
@@ -69,6 +70,22 @@ export function formatEmployeeDaySummary(
     morning: morning || '—',
     evening: evening || '—',
   };
+}
+
+export function shiftsHasSavedAssignments(state: ShiftsState) {
+  return weekDays.some((day) =>
+    shiftRoles.some((role) => {
+      const cell = state.weeklySchedule[day]?.[role];
+      if (!cell) {
+        return false;
+      }
+
+      return (
+        cell.morning.some((employeeId) => employeeId.trim().length > 0) ||
+        cell.evening.some((employeeId) => employeeId.trim().length > 0)
+      );
+    }),
+  );
 }
 
 export function resolveEmployeeDisplayName(

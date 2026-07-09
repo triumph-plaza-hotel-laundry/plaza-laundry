@@ -1,0 +1,142 @@
+#home-cinematic-bg-host {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.home-cinematic-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  max-width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  pointer-events: none;
+  contain: paint;
+  animation: home-cinematic-bg-fade-in 1.25s ease-out both;
+}
+
+.home-cinematic-bg__stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.home-cinematic-bg__motion {
+  position: absolute;
+  inset: -7%;
+  pointer-events: none;
+  transform: scale(1) translateZ(0);
+  transform-origin: center center;
+  animation: home-cinematic-bg-ken-burns 22s ease-in-out infinite alternate;
+}
+
+.home-cinematic-bg__motion--dark {
+  opacity: 1;
+}
+
+.home-cinematic-bg__motion--light {
+  opacity: 0;
+}
+
+.home-cinematic-bg__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 31% 34%;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.home-cinematic-bg__glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.42;
+  background:
+    radial-gradient(ellipse 72% 58% at 24% 38%, rgb(246 215 107 / 14%), transparent 68%),
+    radial-gradient(ellipse 54% 44% at 78% 62%, rgb(201 164 92 / 10%), transparent 72%);
+  animation: home-cinematic-bg-glow 18s ease-in-out infinite alternate;
+}
+
+.home-cinematic-bg__overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: rgb(0 0 0 / 50%);
+}
+
+:root[data-theme='luxury-light'] .home-cinematic-bg__motion--dark {
+  opacity: 0;
+  animation: none;
+}
+
+:root[data-theme='luxury-light'] .home-cinematic-bg__motion--light {
+  opacity: 1;
+}
+
+:root[data-theme='luxury-light'] .home-cinematic-bg__overlay {
+  background: var(--home-overlay);
+}
+
+:root[data-theme='luxury-light'] .home-cinematic-bg__glow {
+  opacity: 0.28;
+}
+
+@media (min-width: 768px) {
+  .home-cinematic-bg__image--dark {
+    object-position: 28% 32%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-cinematic-bg {
+    animation-duration: 1ms;
+  }
+
+  .home-cinematic-bg__motion {
+    animation: none;
+  }
+
+  .home-cinematic-bg__glow {
+    animation: none;
+    opacity: 0.35;
+  }
+}
+
+@keyframes home-cinematic-bg-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes home-cinematic-bg-ken-burns {
+  from {
+    transform: scale(1) translateZ(0);
+  }
+
+  to {
+    transform: scale(1.07) translateZ(0);
+  }
+}
+
+@keyframes home-cinematic-bg-glow {
+  from {
+    opacity: 0.34;
+    transform: scale(1) translateZ(0);
+  }
+
+  to {
+    opacity: 0.48;
+    transform: scale(1.04) translateZ(0);
+  }
+}

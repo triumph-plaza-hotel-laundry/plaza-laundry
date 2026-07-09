@@ -11,10 +11,13 @@ export type EmployeeTier =
   | 'washingTeamSupervisor'
   | 'laundryWorker';
 
+export type EmployeeStatus = 'active' | 'inactive';
+
 export type LaundryEmployee = {
   id: string;
   employeeId: string;
   tier: EmployeeTier;
+  status: EmployeeStatus;
   name: LocalizedText;
   jobTitle: LocalizedText;
   department: LocalizedText;
@@ -40,8 +43,9 @@ function e(
 ): LaundryEmployee {
   return {
     id,
-    employeeId: '',
+    employeeId: id,
     tier,
+    status: 'active' as const,
     sortOrder,
     name: { en: nameEn, ar: nameAr },
     jobTitle: { en: jobTitleEn, ar: jobTitleAr },
@@ -126,12 +130,12 @@ export const laundryEmployees: readonly LaundryEmployee[] = [
     'ws-02',
     'washingSupervisor',
     6,
-    'Tariq Ali',
+    'Tarik Ali',
     'طارق علي',
-    'Laundry Supervisor',
-    'مشرف مغسلة',
-    'Laundry Department',
-    'قسم المغسلة',
+    'Lead Supervisor',
+    'مشرف رئيسي',
+    'Laundry',
+    'المغسلة',
   ),
   e(
     'wts-02',

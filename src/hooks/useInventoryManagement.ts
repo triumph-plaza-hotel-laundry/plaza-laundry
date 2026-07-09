@@ -6,7 +6,10 @@ import {
   issueInventoryItems,
   receiveInventoryItems,
   subscribeInventoryChanges,
+  updateInventoryItemQuantity,
+  applyInventoryQuantityUpdate,
   type InventoryItem,
+  type InventoryQuantityField,
   type InventoryTransaction,
   type IssueItemsInput,
   type ReceiveItemsInput,
@@ -129,6 +132,42 @@ export function useInventoryManagement() {
     [refresh, showToast],
   );
 
+  const updateItemQuantity = useCallback(
+    async (itemId: string, field: InventoryQuantityField, value: number) => {
+      let previousItem: InventoryItem | undefined;
+
+      setItems((current) => {
+        const currentItem = current.find((item) => item.id === itemId);
+        if (!currentItem) {
+          return current;
+        }
+
+        previousItem = currentItem;
+        const optimisticItem = applyInventoryQuantityUpdate(currentItem, field, value);
+        return current.map((item) => (item.id === itemId ? optimisticItem : item));
+      });
+
+      if (!previousItem) {
+        return;
+      }
+
+      setError(null);
+
+      try {
+        const savedItem = await updateInventoryItemQuantity({ itemId, field, value });
+        setItems((current) => current.map((item) => (item.id === itemId ? savedItem : item)));
+      } catch (caught) {
+        const rollbackItem = previousItem;
+        setItems((current) => current.map((item) => (item.id === itemId ? rollbackItem : item)));
+        const message = caught instanceof Error ? caught.message : 'Failed to update quantity.';
+        setError(message);
+        showToast(message, 'error');
+        throw caught;
+      }
+    },
+    [showToast],
+  );
+
   return {
     items,
     transactions,
@@ -138,6 +177,7 @@ export function useInventoryManagement() {
     toast,
     receiveItems,
     issueItems,
+    updateItemQuantity,
     refresh,
   };
 }

@@ -12,6 +12,7 @@ export const STORAGE_KEYS = {
   training: 'tpl-training',
   aiSettings: 'tpl-ai-settings-v1',
   inventory: 'tpl-inventory-v3',
+  inventoryPlan: 'tpl-inventory-plan-v1',
   inventoryLegacy: 'tpl-inventory-v2',
   inventoryArchives: 'tpl-inventory-archives-v1',
   inventoryArchivesMeta: 'tpl-inventory-archives-meta',

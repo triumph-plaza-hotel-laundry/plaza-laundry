@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
+import { syncMissingSeedEmployees } from '@/data/repositories/employees-repository';
 import { initAllRepositories } from '@/data/repositories/repository-utils';
 
 type DataProviderProps = {
@@ -7,7 +8,10 @@ type DataProviderProps = {
 
 export function DataProvider({ children }: DataProviderProps) {
   useEffect(() => {
-    void initAllRepositories();
+    void (async () => {
+      await initAllRepositories();
+      await syncMissingSeedEmployees();
+    })();
   }, []);
 
   return children;

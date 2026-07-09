@@ -14,6 +14,7 @@ type TodaysScheduleCardProps = {
   selectedDay: WeekDayId;
   dayLabelKey: TranslationKey;
   daySchedule: Record<ShiftRole, WeeklyCellAssignment>;
+  showHeader?: boolean;
 };
 
 function ShiftNames({
@@ -42,6 +43,7 @@ export const TodaysScheduleCard = memo(function TodaysScheduleCard({
   selectedDay,
   dayLabelKey,
   daySchedule,
+  showHeader = true,
 }: TodaysScheduleCardProps) {
   const { language, t } = useLanguage();
 
@@ -61,18 +63,20 @@ export const TodaysScheduleCard = memo(function TodaysScheduleCard({
       className="shift-today-card"
       data-day={selectedDay}
     >
-      <header className="shift-today-card__header">
-        <p className="shift-today-card__meta">
-          <span aria-hidden="true">📅</span>
-          <span className="shift-today-card__meta-label">{t('shifts.todaysSchedule.todayLabel')}</span>
-          <strong>{t(dayLabelKey)}</strong>
-        </p>
-        <p className="shift-today-card__meta">
-          <span aria-hidden="true">📆</span>
-          <span className="shift-today-card__meta-label">{t('shifts.todaysSchedule.dateLabel')}</span>
-          <strong>{formattedDate}</strong>
-        </p>
-      </header>
+      {showHeader ? (
+        <header className="shift-today-card__header">
+          <p className="shift-today-card__meta">
+            <span aria-hidden="true">📅</span>
+            <span className="shift-today-card__meta-label">{t('shifts.todaysSchedule.todayLabel')}</span>
+            <strong>{t(dayLabelKey)}</strong>
+          </p>
+          <p className="shift-today-card__meta">
+            <span aria-hidden="true">📆</span>
+            <span className="shift-today-card__meta-label">{t('shifts.todaysSchedule.dateLabel')}</span>
+            <strong>{formattedDate}</strong>
+          </p>
+        </header>
+      ) : null}
 
       <div className="shift-today-card__table-wrap">
         <table className="shift-today-card__table">

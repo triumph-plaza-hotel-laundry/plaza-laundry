@@ -14,8 +14,8 @@ type OfficialPriceListDocumentProps = {
   tab: PriceListTab;
   items: readonly PriceListItem[];
   prices: Record<string, ItemPrices>;
-  readOnly: boolean;
-  onPriceChange: (itemId: string, field: PriceField, value: string) => void;
+  readOnly?: boolean;
+  onPriceChange?: (itemId: string, field: PriceField, value: string) => void;
 };
 
 const sectionTitleKeys: Record<PriceListCategory, TranslationKey> = {
@@ -46,7 +46,7 @@ export function OfficialPriceListDocument({
   tab,
   items,
   prices,
-  readOnly,
+  readOnly = false,
   onPriceChange,
 }: OfficialPriceListDocumentProps) {
   return (
@@ -111,15 +111,20 @@ export function OfficialPriceListDocument({
                           </th>
                           {(['wash', 'dryClean', 'iron'] as const).map((field) => (
                             <td key={field}>
-                              <input
-                                aria-label={`${entry.name.en} ${dictionaries.en[columnKeys[field]]}`}
-                                className="tpl-official-table__input"
-                                inputMode="decimal"
-                                onChange={(event) => onPriceChange(entry.id, field, event.target.value)}
-                                readOnly={readOnly}
-                                type="text"
-                                value={rowPrices[field]}
-                              />
+                              {readOnly ? (
+                                <span className="tpl-official-table__input tpl-official-table__input--static">
+                                  {rowPrices[field] || '—'}
+                                </span>
+                              ) : (
+                                <input
+                                  aria-label={`${entry.name.en} ${dictionaries.en[columnKeys[field]]}`}
+                                  className="tpl-official-table__input"
+                                  inputMode="decimal"
+                                  onChange={(event) => onPriceChange?.(entry.id, field, event.target.value)}
+                                  type="text"
+                                  value={rowPrices[field]}
+                                />
+                              )}
                             </td>
                           ))}
                         </tr>

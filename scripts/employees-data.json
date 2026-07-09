@@ -217,20 +217,21 @@
   },
   {
     "id": "ws-02",
-    "employeeId": "",
+    "employeeId": "ws-02",
     "tier": "washingSupervisor",
-    "sortOrder": 5,
+    "status": "active",
+    "sortOrder": 6,
     "name": {
-      "en": "Tariq Ali",
+      "en": "Tarik Ali",
       "ar": "طارق علي"
     },
     "jobTitle": {
-      "en": "Laundry Supervisor",
-      "ar": "مشرف مغسلة"
+      "en": "Lead Supervisor",
+      "ar": "مشرف رئيسي"
     },
     "department": {
-      "en": "Laundry Department",
-      "ar": "قسم المغسلة"
+      "en": "Laundry",
+      "ar": "المغسلة"
     },
     "phone": "",
     "dateOfBirth": {

@@ -50,3 +50,14 @@
   font-size: 0.75rem;
   opacity: 0.88;
 }
+
+@media (max-width: 480px) {
+  .page-back-bar {
+    padding-bottom: 0.5rem;
+  }
+
+  .page-back-bar__btn {
+    min-height: 2.75rem;
+    gap: 0.35rem;
+  }
+}

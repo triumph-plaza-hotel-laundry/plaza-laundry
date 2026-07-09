@@ -337,7 +337,17 @@
 
 @media (max-width: 767px) {
   .admin-shifts-dept__table-wrap {
-    overflow-x: visible;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-shifts-dept__panel {
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .admin-shifts-dept__panel-inner {
+    padding-inline: 0.75rem;
   }
 }
 

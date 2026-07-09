@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600&display=swap');
 
-.minimal-splash {
+/* Premium luxury splash */
+
+.luxury-splash {
   position: fixed;
   inset: 0;
   z-index: 9999;
@@ -9,52 +11,232 @@
   justify-content: center;
   overflow: hidden;
   background: #000000;
-  animation: minimal-splash-fade-in var(--minimal-splash-fade-in-ms, 300ms) ease-out both;
+  animation: luxury-splash-screen-in 500ms ease-out both;
+  pointer-events: auto;
 }
 
-.minimal-splash--exit {
-  animation: minimal-splash-fade-out var(--minimal-splash-fade-out-ms, 300ms) ease-in forwards;
+.luxury-splash--exit {
+  animation: luxury-splash-screen-out var(--luxury-splash-fade-out-ms, 700ms) ease-in forwards;
+  pointer-events: none;
 }
 
-.minimal-splash__logo {
+.luxury-splash__marble {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -8%, rgb(201 164 92 / 7%), transparent 58%),
+    radial-gradient(circle at 18% 88%, rgb(255 255 255 / 2.5%), transparent 42%),
+    radial-gradient(circle at 82% 76%, rgb(201 164 92 / 4%), transparent 38%),
+    linear-gradient(168deg, #050505 0%, #000000 42%, #070707 100%);
+}
+
+.luxury-splash__marble::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  background:
+    linear-gradient(
+      118deg,
+      transparent 36%,
+      rgb(201 164 92 / 6%) 48%,
+      transparent 58%
+    ),
+    linear-gradient(
+      -62deg,
+      transparent 30%,
+      rgb(255 255 255 / 3%) 42%,
+      transparent 52%
+    );
+  pointer-events: none;
+}
+
+.luxury-splash__marble::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 42%, rgb(0 0 0 / 55%) 100%);
+  pointer-events: none;
+}
+
+.luxury-splash__particles--around-logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  width: min(94vw, 28rem);
+  height: min(94vw, 28rem);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.luxury-splash__particle {
+  position: absolute;
+  left: var(--particle-x);
+  top: var(--particle-y);
+  width: var(--particle-size);
+  height: var(--particle-size);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(232 213 166 / 92%) 0%, rgb(201 164 92 / 55%) 55%, transparent 100%);
+  box-shadow:
+    0 0 4px rgb(201 164 92 / 35%),
+    0 0 10px rgb(201 164 92 / 18%);
+  opacity: 0;
+  animation: luxury-splash-star-twinkle var(--particle-duration) ease-in-out var(--particle-delay) infinite;
+}
+
+.luxury-splash__logo-stage {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 1.5rem;
+}
+
+.luxury-splash__logo-wrap {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+}
+
+.luxury-splash__logo {
   display: block;
-  width: clamp(7.5rem, 32vw, 9.375rem);
-  max-width: calc(100vw - 2rem);
+  width: clamp(9.5rem, 44vw, 15rem);
+  max-width: calc(100vw - 3rem);
   height: auto;
   object-fit: contain;
+  filter: drop-shadow(0 8px 28px rgb(0 0 0 / 45%));
+}
+
+.luxury-splash__loader {
+  position: absolute;
+  z-index: 3;
+  bottom: max(1.35rem, env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  width: min(16rem, 72vw);
+  transform: translateX(-50%);
+}
+
+.luxury-splash__loader-track {
+  height: 2px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(201 164 92 / 18%);
+  box-shadow: 0 0 10px rgb(201 164 92 / 8%);
+}
+
+.luxury-splash__loader-fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ae8625 0%, #c9a45c 48%, #e8d5a6 100%);
+  box-shadow:
+    0 0 10px rgb(201 164 92 / 55%),
+    0 0 22px rgb(201 164 92 / 28%);
+  animation: luxury-splash-loader-fill var(--luxury-splash-load-ms, 5000ms) linear forwards;
+}
+
+@keyframes luxury-splash-screen-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes luxury-splash-screen-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes luxury-splash-star-twinkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.55);
+  }
+
+  18% {
+    opacity: var(--particle-peak, 0.55);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  42% {
+    opacity: calc(var(--particle-peak, 0.55) * 0.45);
+    transform: translate3d(var(--particle-dx, 0), var(--particle-dy, -8px), 0) scale(0.9);
+  }
+
+  68% {
+    opacity: calc(var(--particle-peak, 0.55) * 0.75);
+    transform: translate3d(calc(var(--particle-dx, 0) * 0.5), calc(var(--particle-dy, -8px) * 0.6), 0)
+      scale(1.05);
+  }
+
+  86% {
+    opacity: calc(var(--particle-peak, 0.55) * 0.35);
+    transform: translate3d(var(--particle-dx, 0), var(--particle-dy, -8px), 0) scale(0.85);
+  }
+}
+
+@keyframes luxury-splash-loader-fill {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
 }
 
 @media (min-width: 768px) {
-  .minimal-splash__logo {
-    width: clamp(9.375rem, 22vw, 11.25rem);
+  .luxury-splash__logo {
+    width: clamp(11.5rem, 28vw, 16.5rem);
+  }
+
+  .luxury-splash__loader {
+    width: min(18rem, 52vw);
   }
 }
 
 @media (min-width: 1024px) {
-  .minimal-splash__logo {
-    width: clamp(11.25rem, 14vw, 13.75rem);
+  .luxury-splash__logo {
+    width: clamp(13rem, 18vw, 18rem);
   }
 }
 
-@keyframes minimal-splash-fade-in {
-  from {
+@media (prefers-reduced-motion: reduce) {
+  .luxury-splash,
+  .luxury-splash--exit,
+  .luxury-splash__loader-fill,
+  .luxury-splash__particle {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+  }
+
+  .luxury-splash__particles--around-logo {
+    display: none;
+  }
+
+  .luxury-splash--exit {
     opacity: 0;
   }
 
-  to {
-    opacity: 1;
+  .luxury-splash__loader-fill {
+    width: 100%;
   }
 }
 
-@keyframes minimal-splash-fade-out {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
-  }
-}
+/* Admin login shell (unchanged) */
 
 .splash-screen {
   position: fixed;
@@ -202,20 +384,5 @@
 
   .splash-brand__logo {
     width: min(68vw, 18rem);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .minimal-splash,
-  .minimal-splash--exit,
-  .splash-screen,
-  .splash-brand__content {
-    animation: none;
-  }
-
-  .minimal-splash--exit,
-  .splash-screen.is-exiting {
-    opacity: 0;
-    transition-duration: 1ms;
   }
 }

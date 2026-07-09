@@ -12,27 +12,21 @@ function formatCairoTime(date: Date, language: Language): string {
   }).format(date);
 }
 
-function msUntilNextMinute(): number {
-  const now = new Date();
-  return (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
-}
-
 export function useCairoTime(language: Language): string {
   const [time, setTime] = useState(() => formatCairoTime(new Date(), language));
 
   useEffect(() => {
-    setTime(formatCairoTime(new Date(), language));
+    const tick = () => {
+      setTime((previous) => {
+        const next = formatCairoTime(new Date(), language);
+        return next === previous ? previous : next;
+      });
+    };
 
-    let intervalId = 0;
-    const timeoutId = window.setTimeout(() => {
-      setTime(formatCairoTime(new Date(), language));
-      intervalId = window.setInterval(() => {
-        setTime(formatCairoTime(new Date(), language));
-      }, 60_000);
-    }, msUntilNextMinute());
+    tick();
+    const intervalId = window.setInterval(tick, 1000);
 
     return () => {
-      window.clearTimeout(timeoutId);
       window.clearInterval(intervalId);
     };
   }, [language]);

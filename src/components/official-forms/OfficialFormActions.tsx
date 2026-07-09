@@ -4,7 +4,8 @@ import { useLanguage } from '@/hooks';
 
 type OfficialFormActionsProps = {
   onPrint: () => void;
-  saveStatus: FormSaveStatus;
+  saveStatus?: FormSaveStatus;
+  showSync?: boolean;
   printLabelEn?: string;
   printLabelAr?: string;
 };
@@ -12,6 +13,7 @@ type OfficialFormActionsProps = {
 export function OfficialFormActions({
   onPrint,
   saveStatus,
+  showSync = saveStatus !== undefined,
   printLabelEn = 'Print Form',
   printLabelAr = 'طباعة النموذج',
 }: OfficialFormActionsProps) {
@@ -19,29 +21,31 @@ export function OfficialFormActions({
 
   return (
     <div aria-live="polite" className="tpl-form-page__toolbar">
-      <div className="tpl-form-page__sync">
-        {saveStatus === 'saving' ? (
-          <>
-            <Loader2 aria-hidden="true" className="tpl-form-page__sync-icon tpl-form-page__sync-icon--spin" />
-            <span>{language === 'ar' ? 'جاري الحفظ…' : 'Saving…'}</span>
-          </>
-        ) : saveStatus === 'saved' ? (
-          <>
-            <Cloud aria-hidden="true" className="tpl-form-page__sync-icon" />
-            <span>{language === 'ar' ? 'تم الحفظ — مزامنة مباشرة' : 'Saved — live sync active'}</span>
-          </>
-        ) : saveStatus === 'error' ? (
-          <>
-            <CloudOff aria-hidden="true" className="tpl-form-page__sync-icon" />
-            <span>{language === 'ar' ? 'تعذر الحفظ' : 'Save failed'}</span>
-          </>
-        ) : (
-          <>
-            <Cloud aria-hidden="true" className="tpl-form-page__sync-icon" />
-            <span>{language === 'ar' ? 'مزامنة تلقائية مباشرة' : 'Auto-save & live sync'}</span>
-          </>
-        )}
-      </div>
+      {showSync ? (
+        <div className="tpl-form-page__sync">
+          {saveStatus === 'saving' ? (
+            <>
+              <Loader2 aria-hidden="true" className="tpl-form-page__sync-icon tpl-form-page__sync-icon--spin" />
+              <span>{language === 'ar' ? 'جاري الحفظ…' : 'Saving…'}</span>
+            </>
+          ) : saveStatus === 'saved' ? (
+            <>
+              <Cloud aria-hidden="true" className="tpl-form-page__sync-icon" />
+              <span>{language === 'ar' ? 'تم الحفظ — مزامنة مباشرة' : 'Saved — live sync active'}</span>
+            </>
+          ) : saveStatus === 'error' ? (
+            <>
+              <CloudOff aria-hidden="true" className="tpl-form-page__sync-icon" />
+              <span>{language === 'ar' ? 'تعذر الحفظ' : 'Save failed'}</span>
+            </>
+          ) : (
+            <>
+              <Cloud aria-hidden="true" className="tpl-form-page__sync-icon" />
+              <span>{language === 'ar' ? 'مزامنة تلقائية مباشرة' : 'Auto-save & live sync'}</span>
+            </>
+          )}
+        </div>
+      ) : null}
 
       <button className="tpl-form-page__print" onClick={onPrint} type="button">
         <Printer aria-hidden="true" strokeWidth={1.6} />

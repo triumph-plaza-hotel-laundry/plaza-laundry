@@ -8,7 +8,8 @@
   --gold-mid: #e8d5a6;
   --champagne-gold: #c9a45c;
   --hero-viewport-h: calc(100dvh - var(--header-height));
-  --hero-showcase-max: min(calc(var(--hero-viewport-h) * 0.88), calc(var(--hero-viewport-h) - 1rem));
+  --hero-showcase-max: min(calc(var(--hero-viewport-h) * 0.368), calc(var(--hero-viewport-h) - 1.25rem));
+  --hero-bird-offset-x: -5.5%;
   --bird-gold-highlight: #e8d5a6;
   --bird-gold-mid: #c9a45c;
   --bird-gold-shadow: #ae8625;
@@ -100,9 +101,9 @@
   top: 50%;
   left: 50%;
   z-index: 0;
-  width: min(88vw, 46rem);
-  height: min(72vh, 34rem);
-  transform: translate(-50%, -50%);
+  width: min(36vw, 19.4rem);
+  height: min(29.5vh, 14rem);
+  transform: translate(calc(-50% + var(--hero-bird-offset-x)), -50%);
   pointer-events: none;
 }
 
@@ -124,6 +125,7 @@
   max-height: 100%;
   line-height: 0;
   background: transparent;
+  transform: translateX(var(--hero-bird-offset-x));
 }
 
 .home-hero__bird-stage {
@@ -143,10 +145,29 @@
   max-height: 100%;
   line-height: 0;
   transform: translate3d(0, 0, 0);
-  transform-origin: 50% 58%;
   backface-visibility: hidden;
   will-change: transform;
-  animation: home-hero-bird-flight 14s cubic-bezier(0.42, 0, 0.58, 1) infinite;
+  animation: home-hero-bird-float 9s ease-in-out infinite;
+}
+
+.home-hero__bird::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 0;
+  width: min(72%, 14rem);
+  height: min(58%, 10rem);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgb(246 215 107 / 18%) 0%,
+    rgb(201 164 92 / 8%) 42%,
+    transparent 72%
+  );
+  filter: blur(18px);
+  transform: translate(-50%, -48%);
+  pointer-events: none;
 }
 
 .home-hero__showcase-img {
@@ -156,99 +177,47 @@
   width: auto;
   height: auto;
   max-height: min(var(--hero-showcase-max), 100%);
-  max-width: min(95vw, 60.75rem);
+  max-width: min(39.8vw, 25.4rem);
   object-fit: contain;
   object-position: center;
   background: transparent;
-  filter: var(--bird-gold-grade);
+  filter:
+    var(--bird-gold-grade)
+    drop-shadow(0 0 18px rgb(246 215 107 / 16%))
+    drop-shadow(0 8px 24px rgb(0 0 0 / 28%));
   image-rendering: auto;
   pointer-events: none;
   user-select: none;
 }
 
-@keyframes home-hero-bird-flight {
+@keyframes home-hero-bird-float {
   0%,
   100% {
-    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    transform: translate3d(0, 0, 0);
   }
 
-  2.5% {
-    transform: translate3d(0, 2px, 0) rotate(-0.6deg) scale(1, 0.987);
-  }
-
-  5% {
-    transform: translate3d(0, -7px, 0) rotate(0.5deg) scale(1, 1.006);
-  }
-
-  7.5% {
-    transform: translate3d(0, 1px, 0) rotate(-0.5deg) scale(1, 0.988);
-  }
-
-  10% {
-    transform: translate3d(0, -9px, 0) rotate(0.7deg) scale(1, 1.005);
-  }
-
-  12.5% {
-    transform: translate3d(0, 1px, 0) rotate(-0.4deg) scale(1, 0.991);
-  }
-
-  15% {
-    transform: translate3d(0, -6px, 0) rotate(0.4deg) scale(1, 1.003);
-  }
-
-  22% {
-    transform: translate3d(1px, -12px, 0) rotate(1deg) scale(1);
-  }
-
-  30% {
-    transform: translate3d(3px, -16px, 0) rotate(1.6deg) scale(1);
-  }
-
-  38% {
-    transform: translate3d(4px, -18px, 0) rotate(2deg) scale(1);
-  }
-
-  46% {
-    transform: translate3d(3px, -17px, 0) rotate(1.5deg) scale(1);
-  }
-
-  54% {
-    transform: translate3d(2px, -14px, 0) rotate(1deg) scale(1);
-  }
-
-  62% {
-    transform: translate3d(1px, -10px, 0) rotate(0.6deg) scale(1);
-  }
-
-  70% {
-    transform: translate3d(0, -6px, 0) rotate(0.3deg) scale(1);
-  }
-
-  78% {
-    transform: translate3d(-1px, -3px, 0) rotate(-0.3deg) scale(1);
-  }
-
-  86% {
-    transform: translate3d(0, -1px, 0) rotate(-0.2deg) scale(1);
-  }
-
-  94% {
-    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  50% {
+    transform: translate3d(0, -4px, 0);
   }
 }
 
 /* ── Responsive ── */
 
 @media (min-width: 768px) {
+  .home-hero {
+    --hero-bird-offset-x: -6.5%;
+  }
+
   .home-hero__showcase-fx {
-    width: min(86vw, 48rem);
-    height: min(74vh, 36rem);
+    width: min(35vw, 20.2rem);
+    height: min(30.5vh, 15rem);
   }
 }
 
 @media (max-width: 480px) {
   .home-hero {
-    --hero-showcase-max: min(calc(var(--hero-viewport-h) * 0.82), calc(var(--hero-viewport-h) - 0.75rem));
+    --hero-showcase-max: min(calc(var(--hero-viewport-h) * 0.343), calc(var(--hero-viewport-h) - 0.85rem));
+    --hero-bird-offset-x: -4.5%;
   }
 
   .home-hero__content {
@@ -256,7 +225,7 @@
   }
 
   .home-hero__showcase-img {
-    max-width: 96vw;
+    max-width: 40vw;
   }
 }
 

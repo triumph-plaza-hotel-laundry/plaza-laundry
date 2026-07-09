@@ -1,6 +1,8 @@
+import { memo } from 'react';
 import { Bell, Globe, Menu, Moon, Sun } from 'lucide-react';
+import { HeaderClock } from '@/components/layout/HeaderClock';
 import { HeaderLogo } from '@/components/layout/HeaderLogo';
-import { useCairoTime, useLanguage } from '@/hooks';
+import { useLanguage } from '@/hooks';
 import { toggleTheme } from '@/lib/theme';
 import '@/components/layout/header.css';
 
@@ -8,12 +10,11 @@ const ICON_STROKE = 1.75;
 const ICON_SIZE = 18;
 
 type HeaderProps = {
-  onOpenSidebar: () => void;
+  onToggleSidebar: () => void;
 };
 
-export function Header({ onOpenSidebar }: HeaderProps) {
-  const { language, t, toggleLanguage } = useLanguage();
-  const cairoTime = useCairoTime(language);
+export const Header = memo(function Header({ onToggleSidebar }: HeaderProps) {
+  const { t, toggleLanguage } = useLanguage();
 
   return (
     <header className="luxury-header">
@@ -22,21 +23,14 @@ export function Header({ onOpenSidebar }: HeaderProps) {
       <div className="luxury-header__inner">
         <button
           aria-label={t('common.menu')}
-          className="luxury-header__control"
-          onClick={onOpenSidebar}
+          className="luxury-header__control luxury-header__menu"
+          onClick={onToggleSidebar}
           type="button"
         >
           <Menu aria-hidden="true" size={ICON_SIZE} strokeWidth={ICON_STROKE} />
         </button>
 
-        <time
-          className="luxury-header__control luxury-header__time"
-          dateTime={cairoTime}
-          suppressHydrationWarning
-          title="Africa/Cairo"
-        >
-          {cairoTime}
-        </time>
+        <HeaderClock />
 
         <button
           aria-label={t('common.theme')}
@@ -79,4 +73,4 @@ export function Header({ onOpenSidebar }: HeaderProps) {
       </div>
     </header>
   );
-}
+});

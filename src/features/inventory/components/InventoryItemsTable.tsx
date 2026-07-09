@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type { InventoryItem } from '@/features/inventory';
+import type { InventoryItem, InventoryQuantityField } from '@/features/inventory';
 import { InventorySearchCombobox } from '@/features/inventory/components/InventorySearchCombobox';
 import { useLanguage } from '@/hooks';
 
@@ -10,9 +10,163 @@ type SortKey = 'code' | 'name' | 'totalQuantity' | 'issuedQuantity' | 'remaining
 
 type InventoryItemsTableProps = {
   items: InventoryItem[];
+  editable?: boolean;
+  onQuantityChange?: (itemId: string, field: InventoryQuantityField, value: number) => Promise<void>;
 };
 
-export function InventoryItemsTable({ items }: InventoryItemsTableProps) {
+const quantityInputStyle = {
+  width: '100%',
+  minWidth: 0,
+  padding: 0,
+  border: 'none',
+  background: 'transparent',
+  color: 'inherit',
+  font: 'inherit',
+  fontVariantNumeric: 'tabular-nums',
+  textAlign: 'center' as const,
+  outline: 'none',
+};
+
+type EditableQuantityCellProps = {
+  className: string;
+  editable: boolean;
+  field: InventoryQuantityField;
+  itemId: string;
+  onQuantityChange?: (itemId: string, field: InventoryQuantityField, value: number) => Promise<void>;
+  value: number;
+};
+
+function EditableQuantityCell({
+  className,
+  editable,
+  field,
+  itemId,
+  onQuantityChange,
+  value,
+}: EditableQuantityCellProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const committedRef = useRef(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(String(value));
+
+  useEffect(() => {
+    if (!isEditing) {
+      setDraft(String(value));
+    }
+  }, [isEditing, value]);
+
+  useEffect(() => {
+    if (isEditing) {
+      committedRef.current = false;
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
+  }, [isEditing]);
+
+  const cancelEdit = () => {
+    setDraft(String(value));
+    setIsEditing(false);
+  };
+
+  const commitEdit = async () => {
+    if (committedRef.current || !onQuantityChange) {
+      setIsEditing(false);
+      return;
+    }
+
+    committedRef.current = true;
+
+    const trimmed = draft.trim();
+    if (!trimmed) {
+      cancelEdit();
+      return;
+    }
+
+    const parsed = Number.parseInt(trimmed, 10);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      cancelEdit();
+      return;
+    }
+
+    if (parsed === value) {
+      setIsEditing(false);
+      return;
+    }
+
+    setIsEditing(false);
+
+    try {
+      await onQuantityChange(itemId, field, parsed);
+    } catch {
+      setDraft(String(value));
+    }
+  };
+
+  const startEdit = () => {
+    if (!editable || !onQuantityChange) {
+      return;
+    }
+    setDraft(String(value));
+    setIsEditing(true);
+  };
+
+  if (!editable) {
+    return <td className={className}>{value}</td>;
+  }
+
+  if (isEditing) {
+    return (
+      <td className={className}>
+        <input
+          aria-label={`Edit ${field}`}
+          inputMode="numeric"
+          onBlur={() => {
+            void commitEdit();
+          }}
+          onChange={(event) => setDraft(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              void commitEdit();
+            }
+
+            if (event.key === 'Escape') {
+              event.preventDefault();
+              cancelEdit();
+            }
+          }}
+          ref={inputRef}
+          style={quantityInputStyle}
+          type="text"
+          value={draft}
+        />
+      </td>
+    );
+  }
+
+  return (
+    <td
+      className={className}
+      onClick={startEdit}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          startEdit();
+        }
+      }}
+      role="button"
+      tabIndex={0}
+    >
+      {value}
+    </td>
+  );
+}
+
+export function InventoryItemsTable({
+  items,
+  editable = false,
+  onQuantityChange,
+}: InventoryItemsTableProps) {
   const { language, t } = useLanguage();
   const [codeQuery, setCodeQuery] = useState('');
   const [nameQuery, setNameQuery] = useState('');
@@ -206,9 +360,30 @@ export function InventoryItemsTable({ items }: InventoryItemsTableProps) {
                     <td className="inv-erp-table__name" title={item.name}>
                       {item.name}
                     </td>
-                    <td className="inv-erp-table__num">{item.totalQuantity}</td>
-                    <td className="inv-erp-table__num">{item.issuedQuantity}</td>
-                    <td className="inv-erp-table__num inv-erp-table__remaining">{item.remainingQuantity}</td>
+                    <EditableQuantityCell
+                      className="inv-erp-table__num"
+                      editable={editable}
+                      field="totalQuantity"
+                      itemId={item.id}
+                      onQuantityChange={onQuantityChange}
+                      value={item.totalQuantity}
+                    />
+                    <EditableQuantityCell
+                      className="inv-erp-table__num"
+                      editable={editable}
+                      field="issuedQuantity"
+                      itemId={item.id}
+                      onQuantityChange={onQuantityChange}
+                      value={item.issuedQuantity}
+                    />
+                    <EditableQuantityCell
+                      className="inv-erp-table__num inv-erp-table__remaining"
+                      editable={editable}
+                      field="remainingQuantity"
+                      itemId={item.id}
+                      onQuantityChange={onQuantityChange}
+                      value={item.remainingQuantity}
+                    />
                   </tr>
                 ))
               )}

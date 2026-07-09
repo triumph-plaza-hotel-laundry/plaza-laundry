@@ -51,9 +51,6 @@ export function ShiftsPage() {
               ✦
             </span>
             <h1 className="shifts-page__title-en">{t('nav.shifts')}</h1>
-            <h1 className="shifts-page__title-ar">جدول المناوبات</h1>
-            <p className="shifts-page__subtitle-en">{t('shifts.subtitle')}</p>
-            <p className="shifts-page__subtitle-ar">{t('shifts.subtitleAr')}</p>
           </div>
 
           <button

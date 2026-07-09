@@ -1,13 +1,16 @@
 import { inventoryItems as OFFICIAL_SEED_ITEMS } from '@/data/laundry-inventory';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import {
+  applyInventoryQuantityUpdate,
   calculateRemaining,
   mapInventoryItem,
   NOT_ENOUGH_STOCK_MESSAGE,
   type InventoryItem,
+  type InventoryQuantityField,
   type InventoryTransaction,
   type IssueItemsInput,
   type ReceiveItemsInput,
+  type UpdateInventoryQuantityInput,
 } from '@/features/inventory/types';
 
 type DbItemRow = {
@@ -388,6 +391,69 @@ export async function receiveInventoryItems(input: ReceiveItemsInput) {
   }
 
   invalidateInventoryCache();
+}
+
+function buildQuantityUpdatePayload(field: InventoryQuantityField, item: InventoryItem) {
+  const timestamp = new Date().toISOString();
+
+  if (field === 'issuedQuantity') {
+    return {
+      issued_quantity: item.issuedQuantity,
+      updated_at: timestamp,
+      last_updated_at: timestamp,
+    };
+  }
+
+  if (field === 'totalQuantity') {
+    return {
+      total_quantity: item.totalQuantity,
+      issued_quantity: item.issuedQuantity,
+      updated_at: timestamp,
+      last_updated_at: timestamp,
+    };
+  }
+
+  return {
+    total_quantity: item.totalQuantity,
+    updated_at: timestamp,
+    last_updated_at: timestamp,
+  };
+}
+
+export async function updateInventoryItemQuantity(
+  input: UpdateInventoryQuantityInput,
+): Promise<InventoryItem> {
+  const client = requireClient();
+
+  const { data: item, error: itemError } = await client
+    .from('inventory_items')
+    .select('id, code, name, name_ar, total_quantity, incoming_quantity, quantity, issued_quantity, remaining_quantity, created_at, updated_at, last_updated_at')
+    .eq('id', input.itemId)
+    .is('deleted_at', null)
+    .maybeSingle();
+
+  if (itemError) {
+    throw itemError;
+  }
+
+  if (!item) {
+    throw new Error('Item not found.');
+  }
+
+  const current = mapInventoryItem(item as DbItemRow);
+  const next = applyInventoryQuantityUpdate(current, input.field, input.value);
+  const { error: updateError } = await client
+    .from('inventory_items')
+    .update(buildQuantityUpdatePayload(input.field, next))
+    .eq('id', input.itemId);
+
+  if (updateError) {
+    throw updateError;
+  }
+
+  invalidateInventoryCache();
+
+  return next;
 }
 
 export async function issueInventoryItems(input: IssueItemsInput) {

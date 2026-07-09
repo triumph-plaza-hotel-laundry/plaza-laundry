@@ -6,9 +6,6 @@ import '@/styles/index.css';
 
 registerSW({
   immediate: true,
-  onRegisteredSW(_swUrl, registration) {
-    registration?.update();
-  },
 });
 
 createRoot(document.getElementById('root')!).render(

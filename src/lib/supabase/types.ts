@@ -235,6 +235,27 @@ export type Database = {
         };
         Relationships: [];
       };
+      inventory_monthly_archives: {
+        Row: {
+          archive_month: string;
+          inventory_data: Json;
+          plan_data: Json;
+          archived_at: string;
+        };
+        Insert: {
+          archive_month: string;
+          inventory_data: Json;
+          plan_data: Json;
+          archived_at?: string;
+        };
+        Update: {
+          archive_month?: string;
+          inventory_data?: Json;
+          plan_data?: Json;
+          archived_at?: string;
+        };
+        Relationships: [];
+      };
       inventory_movements: {
         Row: {
           id: string;

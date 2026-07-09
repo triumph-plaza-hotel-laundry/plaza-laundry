@@ -4,7 +4,9 @@ export {
   getEmployeesByTier,
   employeeHierarchy,
   normalizeEmployee,
+  syncMissingSeedEmployees,
   type EmployeeTier,
+  type EmployeeStatus,
   type LaundryEmployee,
 } from '@/data/repositories/employees-repository';
 

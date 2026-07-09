@@ -1,25 +1,51 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/styles';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { PageBackBar } from '@/components/layout/PageBackBar';
+import { Sidebar } from '@/components/layout/Sidebar';
 import { InstallPrompt } from '@/components/pwa/InstallPrompt';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
-const Sidebar = lazy(() =>
-  import('@/components/layout/Sidebar').then((module) => ({
-    default: module.Sidebar,
-  })),
-);
+const DESKTOP_SIDEBAR_QUERY = '(min-width: 1024px)';
 
 export function AppShell() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const isDesktopSidebar = useMediaQuery(DESKTOP_SIDEBAR_QUERY);
   const location = useLocation();
   const isHome = location.pathname === '/';
+  const prevPathnameRef = useRef(location.pathname);
+  const wasDesktopRef = useRef(isDesktopSidebar);
 
   useEffect(() => {
+    if (prevPathnameRef.current === location.pathname) {
+      return;
+    }
+
+    prevPathnameRef.current = location.pathname;
     setIsSidebarOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (isDesktopSidebar && !wasDesktopRef.current) {
+      setIsSidebarOpen(false);
+    }
+
+    wasDesktopRef.current = isDesktopSidebar;
+  }, [isDesktopSidebar]);
+
+  const handleToggleSidebar = useCallback(() => {
+    if (isDesktopSidebar) {
+      return;
+    }
+
+    setIsSidebarOpen((open) => !open);
+  }, [isDesktopSidebar]);
+
+  const handleCloseSidebar = useCallback(() => {
+    setIsSidebarOpen(false);
+  }, []);
 
   return (
     <div
@@ -28,14 +54,13 @@ export function AppShell() {
         isHome ? 'bg-[var(--home-shell-bg)]' : 'bg-[var(--app-bg)]',
       )}
     >
-      <Suspense fallback={null}>
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-        />
-      </Suspense>
+      <Sidebar
+        isDesktop={isDesktopSidebar}
+        isOpen={isSidebarOpen}
+        onClose={handleCloseSidebar}
+      />
       <div className="flex min-h-dvh flex-col lg:ps-72">
-        <Header onOpenSidebar={() => setIsSidebarOpen(true)} />
+        <Header onToggleSidebar={handleToggleSidebar} />
         <main
           className={cn(
             'flex flex-1 flex-col',
