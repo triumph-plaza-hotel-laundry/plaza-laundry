@@ -1,43 +1,28 @@
-import { createPortal } from 'react-dom';
-import { useEffect, useState } from 'react';
-import desktopBackground from '@/assets/images/home/triumph-home-desktop.avif';
-import mobileBackground from '@/assets/images/home/triumph-home-mobile.avif';
+import desktopAvif from '@/assets/images/home/triumph-home-desktop.avif';
+import mobileAvif from '@/assets/images/home/triumph-home-mobile.avif';
+import darkBgPng from '@/assets/images/home-luxury-laundry.png';
 import lightBgUrl from '@/assets/images/luxury-light.png';
 import '@/components/home/home-cinematic-background.css';
 
-const HOST_ID = 'home-cinematic-bg-host';
-
 export function HomeCinematicBackground() {
-  const [host, setHost] = useState<HTMLElement | null>(null);
-
-  useEffect(() => {
-    let portalHost = document.getElementById(HOST_ID);
-    if (!portalHost) {
-      portalHost = document.createElement('div');
-      portalHost.id = HOST_ID;
-      document.body.prepend(portalHost);
-    }
-
-    setHost(portalHost);
-
-    return () => {
-      document.getElementById(HOST_ID)?.remove();
-      setHost(null);
-    };
-  }, []);
-
-  if (!host) {
-    return null;
-  }
-
-  return createPortal(
+  return (
     <div aria-hidden="true" className="home-cinematic-bg">
       <div className="home-cinematic-bg__stage">
         <div className="home-cinematic-bg__motion home-cinematic-bg__motion--dark">
           <picture className="home-cinematic-bg__picture">
             <source
               media="(max-width: 768px)"
-              srcSet={mobileBackground}
+              srcSet={mobileAvif}
+              type="image/avif"
+            />
+            <source
+              media="(max-width: 768px)"
+              srcSet={darkBgPng}
+              type="image/png"
+            />
+            <source
+              media="(min-width: 769px)"
+              srcSet={desktopAvif}
               type="image/avif"
             />
             <img
@@ -48,7 +33,7 @@ export function HomeCinematicBackground() {
               fetchPriority="high"
               height={576}
               loading="eager"
-              src={desktopBackground}
+              src={darkBgPng}
               width={1024}
             />
           </picture>
@@ -65,7 +50,6 @@ export function HomeCinematicBackground() {
       </div>
       <div className="home-cinematic-bg__glow" />
       <div className="home-cinematic-bg__overlay" />
-    </div>,
-    host,
+    </div>
   );
 }
