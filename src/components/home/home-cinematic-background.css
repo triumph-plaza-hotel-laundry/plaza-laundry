@@ -42,12 +42,19 @@
   opacity: 0;
 }
 
+.home-cinematic-bg__picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
 .home-cinematic-bg__image {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 31% 34%;
+  object-position: center center;
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
@@ -86,12 +93,6 @@
 
 :root[data-theme='luxury-light'] .home-cinematic-bg__glow {
   opacity: 0.28;
-}
-
-@media (min-width: 768px) {
-  .home-cinematic-bg__image--dark {
-    object-position: 28% 32%;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
