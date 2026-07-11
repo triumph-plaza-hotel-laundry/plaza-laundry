@@ -209,7 +209,7 @@ const navigationAccess: Record<PermissionResource, UserRole[]> = {
   shifts: ['OWNER', 'SUPER_ADMIN', 'ADMIN', 'EMPLOYEE'],
   training: ADMIN_ROLES,
   inventory: ALL_ROLES,
-  admin: ELEVATED_ROLES,
+  admin: ADMIN_ROLES,
   leaves: ['OWNER', 'SUPER_ADMIN', 'ADMIN', 'MANAGER'],
 };
 
