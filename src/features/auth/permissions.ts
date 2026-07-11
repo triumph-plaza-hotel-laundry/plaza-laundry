@@ -12,7 +12,7 @@ const ALL_ROLES: UserRole[] = [
   'EMPLOYEE',
 ];
 const ADMIN_ROLES: UserRole[] = ['OWNER', 'SUPER_ADMIN', 'ADMIN'];
-const ELEVATED_ROLES: UserRole[] = ['OWNER', 'SUPER_ADMIN'];
+
 const ADMIN_PORTAL_ROLES: UserRole[] = [
   'OWNER',
   'SUPER_ADMIN',
