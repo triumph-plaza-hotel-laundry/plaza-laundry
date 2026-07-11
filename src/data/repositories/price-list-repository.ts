@@ -24,7 +24,11 @@ export type PriceListState = {
   prices: Record<PriceListTab, Record<string, ItemPrices>>;
 };
 
-export const priceListCategories: readonly PriceListCategory[] = ['mens', 'womens', 'bedding'];
+export const priceListCategories: readonly PriceListCategory[] = [
+  'mens',
+  'womens',
+  'bedding',
+];
 
 function seedPriceListState(): PriceListState {
   return {
@@ -33,14 +37,19 @@ function seedPriceListState(): PriceListState {
   };
 }
 
-function readLegacyPrices(): Record<PriceListTab, Record<string, ItemPrices>> | null {
+function readLegacyPrices(): Record<
+  PriceListTab,
+  Record<string, ItemPrices>
+> | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.priceListLegacy);
     if (!raw) {
       return null;
     }
 
-    const parsed = JSON.parse(raw) as Partial<Record<PriceListTab, Record<string, ItemPrices>>>;
+    const parsed = JSON.parse(raw) as Partial<
+      Record<PriceListTab, Record<string, ItemPrices>>
+    >;
     const defaults = createDefaultPriceState();
     return {
       guest: { ...defaults.guest, ...parsed.guest },
@@ -51,7 +60,10 @@ function readLegacyPrices(): Record<PriceListTab, Record<string, ItemPrices>> | 
   }
 }
 
-function normalizePriceList(parsed: unknown, seed: PriceListState): PriceListState {
+function normalizePriceList(
+  parsed: unknown,
+  seed: PriceListState,
+): PriceListState {
   if (!parsed || typeof parsed !== 'object') {
     const legacy = readLegacyPrices();
     return legacy ? { ...seed, prices: legacy } : seed;
@@ -64,12 +76,17 @@ function normalizePriceList(parsed: unknown, seed: PriceListState): PriceListSta
       items: value.items as PriceListItem[],
       prices: {
         guest: { ...seed.prices.guest, ...value.prices.guest },
-        outsideGuest: { ...seed.prices.outsideGuest, ...value.prices.outsideGuest },
+        outsideGuest: {
+          ...seed.prices.outsideGuest,
+          ...value.prices.outsideGuest,
+        },
       },
     };
   }
 
-  const legacy = value as Partial<Record<PriceListTab, Record<string, ItemPrices>>>;
+  const legacy = value as Partial<
+    Record<PriceListTab, Record<string, ItemPrices>>
+  >;
   if (legacy.guest || legacy.outsideGuest) {
     return {
       items: seed.items,
@@ -102,11 +119,22 @@ export const priceListRepository = {
     return store.getSnapshot().prices;
   },
   getItemsByCategory(category: PriceListCategory) {
-    return store.getSnapshot().items.filter((entry) => entry.category === category);
+    return store
+      .getSnapshot()
+      .items.filter((entry) => entry.category === category);
   },
-  updatePrice(tab: PriceListTab, itemId: string, field: PriceField, value: string) {
+  updatePrice(
+    tab: PriceListTab,
+    itemId: string,
+    field: PriceField,
+    value: string,
+  ) {
     const snapshot = store.getSnapshot();
-    const current = snapshot.prices[tab][itemId] ?? { wash: '', dryClean: '', iron: '' };
+    const current = snapshot.prices[tab][itemId] ?? {
+      wash: '',
+      dryClean: '',
+      iron: '',
+    };
     const oldValue = { tab, itemId, field, value: current[field] };
 
     store.replaceState({
@@ -150,7 +178,8 @@ export const priceListRepository = {
   removeItem(id: string) {
     const snapshot = store.getSnapshot();
     const { [id]: guestRemoved, ...guestPrices } = snapshot.prices.guest;
-    const { [id]: outsideRemoved, ...outsidePrices } = snapshot.prices.outsideGuest;
+    const { [id]: outsideRemoved, ...outsidePrices } =
+      snapshot.prices.outsideGuest;
     void guestRemoved;
     void outsideRemoved;
 

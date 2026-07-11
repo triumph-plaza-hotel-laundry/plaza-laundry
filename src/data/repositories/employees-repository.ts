@@ -1,10 +1,18 @@
-import { laundryEmployees, type EmployeeTier, type LaundryEmployee } from '@/data/laundry-employees';
+import {
+  laundryEmployees,
+  type EmployeeTier,
+  type LaundryEmployee,
+} from '@/data/laundry-employees';
 import { inferEmployeeTierFromPosition } from '@/lib/employee-org-hierarchy';
 import { createLocalStore } from '@/lib/data-store';
 import { registerRepository } from '@/data/repositories/repository-utils';
 import { STORAGE_KEYS } from '@/lib/data-store/storage-keys';
 
-export type { EmployeeTier, EmployeeStatus, LaundryEmployee } from '@/data/laundry-employees';
+export type {
+  EmployeeTier,
+  EmployeeStatus,
+  LaundryEmployee,
+} from '@/data/laundry-employees';
 export { employeeHierarchy } from '@/data/laundry-employees';
 
 const emptyLocalized = () => ({ en: '', ar: '' });
@@ -13,7 +21,10 @@ function normalizeJobTitle(value: string) {
   return value.trim().toLowerCase();
 }
 
-function shouldRefreshSeedEmployee(existing: LaundryEmployee, seed: LaundryEmployee) {
+function shouldRefreshSeedEmployee(
+  existing: LaundryEmployee,
+  seed: LaundryEmployee,
+) {
   if (existing.id !== seed.id) {
     return false;
   }
@@ -24,7 +35,10 @@ function shouldRefreshSeedEmployee(existing: LaundryEmployee, seed: LaundryEmplo
   );
 }
 
-function mergeSeedEmployee(existing: LaundryEmployee, seed: LaundryEmployee): LaundryEmployee {
+function mergeSeedEmployee(
+  existing: LaundryEmployee,
+  seed: LaundryEmployee,
+): LaundryEmployee {
   const normalized = normalizeEmployee(seed);
 
   return {
@@ -39,7 +53,9 @@ function mergeSeedEmployee(existing: LaundryEmployee, seed: LaundryEmployee): La
   };
 }
 
-export function normalizeEmployee(raw: Partial<LaundryEmployee>): LaundryEmployee {
+export function normalizeEmployee(
+  raw: Partial<LaundryEmployee>,
+): LaundryEmployee {
   const jobTitle = raw.jobTitle ?? emptyLocalized();
   const tier = jobTitle.en.trim()
     ? inferEmployeeTierFromPosition(jobTitle.en, raw.tier)
@@ -72,7 +88,11 @@ const store = createLocalStore<LaundryEmployee[]>({
     }
 
     return parsed.map((entry) =>
-      normalizeEmployee(typeof entry === 'object' && entry ? (entry as Partial<LaundryEmployee>) : {}),
+      normalizeEmployee(
+        typeof entry === 'object' && entry
+          ? (entry as Partial<LaundryEmployee>)
+          : {},
+      ),
     );
   },
 });
@@ -161,7 +181,9 @@ export async function syncMissingSeedEmployees(): Promise<number> {
 }
 
 export function getEmployeesByTier(tier: EmployeeTier): LaundryEmployee[] {
-  return employeesRepository.getSnapshot().filter((employee) => employee.tier === tier);
+  return employeesRepository
+    .getSnapshot()
+    .filter((employee) => employee.tier === tier);
 }
 
 export function getEmployeeById(id: string): LaundryEmployee | undefined {

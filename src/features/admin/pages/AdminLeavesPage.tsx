@@ -10,7 +10,8 @@ import '@/features/admin/admin-leaves-page.css';
 export function AdminLeavesPage() {
   const { t } = useLanguage();
   const { assertCan, logAction, user } = useAuth();
-  const { draft, isDirty, setDraft, resetDraft, commitDraft } = useDraftState(leavesRepository);
+  const { draft, isDirty, setDraft, resetDraft, commitDraft } =
+    useDraftState(leavesRepository);
   const [isSaving, setIsSaving] = useState(false);
   const [saveNotice, setSaveNotice] = useState<string | null>(null);
   const [saveNoticeIsError, setSaveNoticeIsError] = useState(false);
@@ -23,11 +24,17 @@ export function AdminLeavesPage() {
       assertCan('leaves', 'update');
       await commitDraft(async (value) => {
         await leavesRepository.replaceAll(value);
-        logAction({ action: 'leaves.replaceAll', page: 'admin/leaves', newValue: value });
+        logAction({
+          action: 'leaves.replaceAll',
+          page: 'admin/leaves',
+          newValue: value,
+        });
       });
       setSaveNotice(t('admin.editor.saveSuccess'));
     } catch (error) {
-      setSaveNotice(error instanceof Error ? error.message : t('admin.editor.saveError'));
+      setSaveNotice(
+        error instanceof Error ? error.message : t('admin.editor.saveError'),
+      );
       setSaveNoticeIsError(true);
     } finally {
       setIsSaving(false);
@@ -43,8 +50,12 @@ export function AdminLeavesPage() {
         <span aria-hidden="true" className="admin-leaves-page__emoji">
           ✦
         </span>
-        <h1 className="admin-leaves-page__title">{t('admin.leaves.pageTitle')}</h1>
-        <p className="admin-leaves-page__subtitle">{t('admin.editor.leavesSubtitle')}</p>
+        <h1 className="admin-leaves-page__title">
+          {t('admin.leaves.pageTitle')}
+        </h1>
+        <p className="admin-leaves-page__subtitle">
+          {t('admin.editor.leavesSubtitle')}
+        </p>
       </header>
 
       <AdminEditToolbar

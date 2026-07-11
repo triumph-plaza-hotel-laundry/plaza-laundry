@@ -19,14 +19,21 @@ export function DashboardCard({ item, index }: DashboardCardProps) {
     >
       <div className="relative">
         <div className="flex size-11 items-center justify-center rounded-[var(--card-radius)] border border-[var(--app-border)] bg-[var(--app-surface-soft)] text-[var(--app-gold)]">
-          <Icon aria-hidden="true" className="luxury-icon" size={18} strokeWidth={1.75} />
+          <Icon
+            aria-hidden="true"
+            className="luxury-icon"
+            size={18}
+            strokeWidth={1.75}
+          />
         </div>
 
         <h2 className="luxury-page-title mt-4 text-lg">{item.title}</h2>
         <p className="luxury-page-subtitle mt-2 text-sm">{item.subtitle}</p>
 
         <hr className="luxury-section-divider mt-4" />
-        <p className="luxury-page-eyebrow mt-3 text-[0.6875rem] tracking-[0.22em]">Ready</p>
+        <p className="luxury-page-eyebrow mt-3 text-[0.6875rem] tracking-[0.22em]">
+          Ready
+        </p>
       </div>
     </motion.article>
   );

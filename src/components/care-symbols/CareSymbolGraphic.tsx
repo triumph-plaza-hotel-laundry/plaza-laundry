@@ -19,7 +19,12 @@ function WashTub({ children }: { children?: ReactNode }) {
         strokeLinejoin="round"
         strokeWidth={sw}
       />
-      <path d="M18 18c4-6 24-6 28 0" fill="none" stroke={stroke} strokeWidth={sw} />
+      <path
+        d="M18 18c4-6 24-6 28 0"
+        fill="none"
+        stroke={stroke}
+        strokeWidth={sw}
+      />
       {children}
     </g>
   );
@@ -35,7 +40,12 @@ function IronBase({ children }: { children?: ReactNode }) {
         strokeLinejoin="round"
         strokeWidth={sw}
       />
-      <path d="M20 40V26c0-4 24-4 24 0v14" fill="none" stroke={stroke} strokeWidth={sw} />
+      <path
+        d="M20 40V26c0-4 24-4 24 0v14"
+        fill="none"
+        stroke={stroke}
+        strokeWidth={sw}
+      />
       {children}
     </g>
   );
@@ -74,7 +84,12 @@ function graphicContent(graphic: CareSymbolGraphic) {
             stroke={stroke}
             strokeWidth={sw}
           />
-          <path d="M30 24v4M26 28h8" fill="none" stroke={stroke} strokeWidth={sw} />
+          <path
+            d="M30 24v4M26 28h8"
+            fill="none"
+            stroke={stroke}
+            strokeWidth={sw}
+          />
         </WashTub>
       );
     case 'do-not-wash':
@@ -110,7 +125,12 @@ function graphicContent(graphic: CareSymbolGraphic) {
     case 'delicate-cycle':
       return (
         <WashTub>
-          <path d="M28 32c0 3 2 6 4 8" fill="none" stroke={stroke} strokeWidth={1.75} />
+          <path
+            d="M28 32c0 3 2 6 4 8"
+            fill="none"
+            stroke={stroke}
+            strokeWidth={1.75}
+          />
         </WashTub>
       );
     case 'bleach-allowed':
@@ -162,59 +182,161 @@ function graphicContent(graphic: CareSymbolGraphic) {
     case 'tumble-dry':
       return (
         <g>
-          <rect fill="none" height="32" stroke={stroke} strokeWidth={sw} width="32" x="16" y="16" />
-          <circle cx="32" cy="32" fill="none" r="10" stroke={stroke} strokeWidth={sw} />
+          <rect
+            fill="none"
+            height="32"
+            stroke={stroke}
+            strokeWidth={sw}
+            width="32"
+            x="16"
+            y="16"
+          />
+          <circle
+            cx="32"
+            cy="32"
+            fill="none"
+            r="10"
+            stroke={stroke}
+            strokeWidth={sw}
+          />
         </g>
       );
     case 'tumble-low':
       return (
         <g>
-          <rect fill="none" height="32" stroke={stroke} strokeWidth={sw} width="32" x="16" y="16" />
-          <circle cx="32" cy="32" fill="none" r="10" stroke={stroke} strokeWidth={sw} />
+          <rect
+            fill="none"
+            height="32"
+            stroke={stroke}
+            strokeWidth={sw}
+            width="32"
+            x="16"
+            y="16"
+          />
+          <circle
+            cx="32"
+            cy="32"
+            fill="none"
+            r="10"
+            stroke={stroke}
+            strokeWidth={sw}
+          />
           <Dots count={1} x={32} y={32} />
         </g>
       );
     case 'tumble-medium':
       return (
         <g>
-          <rect fill="none" height="32" stroke={stroke} strokeWidth={sw} width="32" x="16" y="16" />
-          <circle cx="32" cy="32" fill="none" r="10" stroke={stroke} strokeWidth={sw} />
+          <rect
+            fill="none"
+            height="32"
+            stroke={stroke}
+            strokeWidth={sw}
+            width="32"
+            x="16"
+            y="16"
+          />
+          <circle
+            cx="32"
+            cy="32"
+            fill="none"
+            r="10"
+            stroke={stroke}
+            strokeWidth={sw}
+          />
           <Dots count={2} x={32} y={32} />
         </g>
       );
     case 'tumble-high':
       return (
         <g>
-          <rect fill="none" height="32" stroke={stroke} strokeWidth={sw} width="32" x="16" y="16" />
-          <circle cx="32" cy="32" fill="none" r="10" stroke={stroke} strokeWidth={sw} />
+          <rect
+            fill="none"
+            height="32"
+            stroke={stroke}
+            strokeWidth={sw}
+            width="32"
+            x="16"
+            y="16"
+          />
+          <circle
+            cx="32"
+            cy="32"
+            fill="none"
+            r="10"
+            stroke={stroke}
+            strokeWidth={sw}
+          />
           <Dots count={3} x={32} y={32} />
         </g>
       );
     case 'hang-dry':
       return (
         <g>
-          <rect fill="none" height="32" stroke={stroke} strokeWidth={sw} width="32" x="16" y="16" />
-          <path d="M22 28c8 10 20 10 28 0" fill="none" stroke={stroke} strokeWidth={sw} />
+          <rect
+            fill="none"
+            height="32"
+            stroke={stroke}
+            strokeWidth={sw}
+            width="32"
+            x="16"
+            y="16"
+          />
+          <path
+            d="M22 28c8 10 20 10 28 0"
+            fill="none"
+            stroke={stroke}
+            strokeWidth={sw}
+          />
         </g>
       );
     case 'flat-dry':
       return (
         <g>
-          <rect fill="none" height="32" stroke={stroke} strokeWidth={sw} width="32" x="16" y="16" />
+          <rect
+            fill="none"
+            height="32"
+            stroke={stroke}
+            strokeWidth={sw}
+            width="32"
+            x="16"
+            y="16"
+          />
           <path d="M22 36h28" fill="none" stroke={stroke} strokeWidth={sw} />
         </g>
       );
     case 'drip-dry':
       return (
         <g>
-          <rect fill="none" height="32" stroke={stroke} strokeWidth={sw} width="32" x="16" y="16" />
-          <path d="M26 28v14M32 28v14M38 28v14" fill="none" stroke={stroke} strokeWidth={sw} />
+          <rect
+            fill="none"
+            height="32"
+            stroke={stroke}
+            strokeWidth={sw}
+            width="32"
+            x="16"
+            y="16"
+          />
+          <path
+            d="M26 28v14M32 28v14M38 28v14"
+            fill="none"
+            stroke={stroke}
+            strokeWidth={sw}
+          />
         </g>
       );
     case 'do-not-tumble':
       return (
         <g>
-          <rect fill="none" height="32" stroke={stroke} strokeWidth={sw} width="32" x="16" y="16" />
+          <rect
+            fill="none"
+            height="32"
+            stroke={stroke}
+            strokeWidth={sw}
+            width="32"
+            x="16"
+            y="16"
+          />
           <Cross size={9} x={32} y={32} />
         </g>
       );
@@ -239,7 +361,12 @@ function graphicContent(graphic: CareSymbolGraphic) {
     case 'steam-iron':
       return (
         <IronBase>
-          <path d="M24 18c2-4 16-4 18 0M22 14c4-6 20-6 24 0" fill="none" stroke={stroke} strokeWidth={1.75} />
+          <path
+            d="M24 18c2-4 16-4 18 0M22 14c4-6 20-6 24 0"
+            fill="none"
+            stroke={stroke}
+            strokeWidth={1.75}
+          />
         </IronBase>
       );
     case 'do-not-iron':
@@ -251,7 +378,14 @@ function graphicContent(graphic: CareSymbolGraphic) {
     case 'dry-clean':
       return (
         <g>
-          <circle cx="32" cy="32" fill="none" r="18" stroke={stroke} strokeWidth={sw} />
+          <circle
+            cx="32"
+            cy="32"
+            fill="none"
+            r="18"
+            stroke={stroke}
+            strokeWidth={sw}
+          />
           <text
             fill={stroke}
             fontFamily="Inter, sans-serif"
@@ -268,7 +402,14 @@ function graphicContent(graphic: CareSymbolGraphic) {
     case 'dry-clean-professional':
       return (
         <g>
-          <circle cx="32" cy="32" fill="none" r="18" stroke={stroke} strokeWidth={sw} />
+          <circle
+            cx="32"
+            cy="32"
+            fill="none"
+            r="18"
+            stroke={stroke}
+            strokeWidth={sw}
+          />
           <text
             fill={stroke}
             fontFamily="Inter, sans-serif"
@@ -280,13 +421,27 @@ function graphicContent(graphic: CareSymbolGraphic) {
           >
             P
           </text>
-          <circle cx="32" cy="32" fill="none" r="12" stroke={stroke} strokeWidth={1.25} />
+          <circle
+            cx="32"
+            cy="32"
+            fill="none"
+            r="12"
+            stroke={stroke}
+            strokeWidth={1.25}
+          />
         </g>
       );
     case 'petroleum-solvent':
       return (
         <g>
-          <circle cx="32" cy="32" fill="none" r="18" stroke={stroke} strokeWidth={sw} />
+          <circle
+            cx="32"
+            cy="32"
+            fill="none"
+            r="18"
+            stroke={stroke}
+            strokeWidth={sw}
+          />
           <text
             fill={stroke}
             fontFamily="Inter, sans-serif"
@@ -303,7 +458,14 @@ function graphicContent(graphic: CareSymbolGraphic) {
     case 'do-not-dry-clean':
       return (
         <g>
-          <circle cx="32" cy="32" fill="none" r="18" stroke={stroke} strokeWidth={sw} />
+          <circle
+            cx="32"
+            cy="32"
+            fill="none"
+            r="18"
+            stroke={stroke}
+            strokeWidth={sw}
+          />
           <Cross size={12} x={32} y={32} />
         </g>
       );
@@ -312,7 +474,10 @@ function graphicContent(graphic: CareSymbolGraphic) {
   }
 }
 
-export function CareSymbolGraphicView({ className = '', graphic }: CareSymbolGraphicProps) {
+export function CareSymbolGraphicView({
+  className = '',
+  graphic,
+}: CareSymbolGraphicProps) {
   return (
     <svg
       aria-hidden="true"

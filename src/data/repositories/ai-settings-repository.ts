@@ -12,7 +12,8 @@ export type AiSettings = {
 const DEFAULT_AI_SETTINGS: AiSettings = {
   enabled: false,
   assistantName: 'Laundry Assistant',
-  systemPrompt: 'You are a helpful assistant for Triumph Plaza Hotel Laundry operations.',
+  systemPrompt:
+    'You are a helpful assistant for Triumph Plaza Hotel Laundry operations.',
   model: 'gpt-4o-mini',
 };
 

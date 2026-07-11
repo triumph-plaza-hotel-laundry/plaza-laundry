@@ -4,13 +4,19 @@
   --emp-bg: #0a0a0a;
   --emp-surface: rgb(15 15 15 / 72%);
   --emp-glass: rgb(12 12 12 / 55%);
-  --emp-marble: linear-gradient(145deg, rgb(18 18 18 / 92%) 0%, rgb(8 8 8 / 96%) 48%, rgb(14 14 14 / 90%) 100%);
+  --emp-marble: linear-gradient(
+    145deg,
+    rgb(18 18 18 / 92%) 0%,
+    rgb(8 8 8 / 96%) 48%,
+    rgb(14 14 14 / 90%) 100%
+  );
   --emp-text: #f5f5f5;
   --emp-muted: rgb(255 255 255 / 55%);
   --emp-gold: #d6b76e;
   --emp-gold-soft: #e8d5a6;
   --emp-input: #050505;
-  --emp-font-en: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --emp-font-en:
+    Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --emp-font-ar: 'Noto Kufi Arabic', 'Segoe UI', Tahoma, sans-serif;
   display: flex;
   width: 100%;
@@ -118,7 +124,9 @@
   color: var(--emp-text);
   font-size: 0.9375rem;
   outline: none;
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 html[dir='rtl'] .employees-page__search-input {
@@ -200,7 +208,12 @@ html[dir='rtl'] .employees-page__search-input {
 .org-chart__connector-line {
   width: 1px;
   height: 0.875rem;
-  background: linear-gradient(180deg, transparent, var(--emp-gold), transparent);
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--emp-gold),
+    transparent
+  );
 }
 
 .org-chart__connector-arrow {

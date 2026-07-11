@@ -17,7 +17,10 @@ export const careCatalogFilters: readonly CareCatalogFilter[] = [
   'dryCleaning',
 ] as const;
 
-export const categoryLabels: Record<CareSymbolCategory, { en: string; ar: string }> = {
+export const categoryLabels: Record<
+  CareSymbolCategory,
+  { en: string; ar: string }
+> = {
   washing: { en: 'Washing', ar: 'غسيل' },
   bleaching: { en: 'Bleaching', ar: 'تبييض' },
   drying: { en: 'Drying', ar: 'تجفيف' },
@@ -25,7 +28,10 @@ export const categoryLabels: Record<CareSymbolCategory, { en: string; ar: string
   dryCleaning: { en: 'Dry Cleaning', ar: 'تنظيف جاف' },
 };
 
-export function matchesCareFilter(label: CareLabel, filter: CareCatalogFilter): boolean {
+export function matchesCareFilter(
+  label: CareLabel,
+  filter: CareCatalogFilter,
+): boolean {
   if (filter === 'all') {
     return true;
   }

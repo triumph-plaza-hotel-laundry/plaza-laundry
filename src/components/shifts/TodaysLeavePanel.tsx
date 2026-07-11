@@ -49,13 +49,25 @@ export function TodaysLeavePanel() {
   );
 
   return (
-    <section aria-label={t('shifts.todaysLeave.title')} className="leave-panel leave-panel--readonly">
+    <section
+      aria-label={t('shifts.todaysLeave.title')}
+      className="leave-panel leave-panel--readonly"
+    >
       <header className="leave-panel__header">
         <div className="leave-panel__title-wrap">
-          <CalendarOff aria-hidden="true" className="leave-panel__icon" size={20} strokeWidth={1.5} />
+          <CalendarOff
+            aria-hidden="true"
+            className="leave-panel__icon"
+            size={20}
+            strokeWidth={1.5}
+          />
           <div>
-            <h2 className="leave-panel__title-en">{t('shifts.todaysLeave.title')}</h2>
-            <p className="leave-panel__subtitle">{t('shifts.todaysLeave.subtitle')}</p>
+            <h2 className="leave-panel__title-en">
+              {t('shifts.todaysLeave.title')}
+            </h2>
+            <p className="leave-panel__subtitle">
+              {t('shifts.todaysLeave.subtitle')}
+            </p>
           </div>
         </div>
       </header>
@@ -65,9 +77,14 @@ export function TodaysLeavePanel() {
       ) : (
         <div className="leave-panel__grid">
           {todaysLeaves.map((entry) => (
-            <article className={`leave-card leave-card--${entry.status}`} key={entry.id}>
+            <article
+              className={`leave-card leave-card--${entry.status}`}
+              key={entry.id}
+            >
               <div className="leave-card__top">
-                <span className={`leave-card__status leave-card__status--${entry.status}`}>
+                <span
+                  className={`leave-card__status leave-card__status--${entry.status}`}
+                >
                   {t(statusKeys[entry.status])}
                 </span>
               </div>

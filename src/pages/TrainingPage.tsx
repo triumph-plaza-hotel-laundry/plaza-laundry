@@ -1,8 +1,31 @@
+import DOMPurify from 'dompurify';
 import { motion } from 'framer-motion';
 import { BookOpenText, PlayCircle, Video } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type KeyboardEvent } from 'react';
 import { useTrainingStorage, useLanguage } from '@/hooks';
 import '@/components/training/training-page.css';
+
+function sanitizeTrainingHtml(html: string): string {
+  return DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
+}
+
+function openTrainingSection(
+  section: 'written' | 'video',
+  setOpenSection: (value: 'written' | 'video') => void,
+) {
+  setOpenSection(section);
+}
+
+function handleTrainingCardKeyDown(
+  event: KeyboardEvent,
+  section: 'written' | 'video',
+  setOpenSection: (value: 'written' | 'video') => void,
+) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    openTrainingSection(section, setOpenSection);
+  }
+}
 
 function getYoutubeVideoId(url: string): string | null {
   try {
@@ -22,17 +45,26 @@ function getYoutubeVideoId(url: string): string | null {
 export function TrainingPage() {
   const { language, t } = useLanguage();
   const { training } = useTrainingStorage();
-  const [openSection, setOpenSection] = useState<'written' | 'video' | null>(null);
+  const [openSection, setOpenSection] = useState<'written' | 'video' | null>(
+    null,
+  );
   const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
   const [videoTitles, setVideoTitles] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const ids = training.videos
-      .map((video) => ({ videoId: video.id, ytId: getYoutubeVideoId(video.youtubeUrl) }))
-      .filter((item): item is { videoId: string; ytId: string } => Boolean(item.ytId));
+      .map((video) => ({
+        videoId: video.id,
+        ytId: getYoutubeVideoId(video.youtubeUrl),
+      }))
+      .filter((item): item is { videoId: string; ytId: string } =>
+        Boolean(item.ytId),
+      );
 
     ids.forEach(({ videoId, ytId }) => {
-      fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${ytId}&format=json`)
+      fetch(
+        `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${ytId}&format=json`,
+      )
         .then((res) => res.json())
         .then((data: { title?: string }) => {
           setVideoTitles((prev) => ({ ...prev, [videoId]: data.title ?? '' }));
@@ -59,18 +91,29 @@ export function TrainingPage() {
             className="training-overview-card"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            onClick={() => setOpenSection('written')}
+            onClick={() => openTrainingSection('written', setOpenSection)}
+            onKeyDown={(event) =>
+              handleTrainingCardKeyDown(event, 'written', setOpenSection)
+            }
+            role="button"
+            tabIndex={0}
           >
             <div className="training-overview-card__head">
               <span className="training-overview-card__icon">
                 <BookOpenText size={19} />
               </span>
               <div>
-                <h2 className="training-overview-card__title-en">{t('training.writtenTitle')}</h2>
-                <p className="training-overview-card__title-ar">{t('training.writtenTitleAr')}</p>
+                <h2 className="training-overview-card__title-en">
+                  {t('training.writtenTitle')}
+                </h2>
+                <p className="training-overview-card__title-ar">
+                  {t('training.writtenTitleAr')}
+                </p>
               </div>
             </div>
-            <p className="training-overview-card__desc">{t('training.writtenHint')}</p>
+            <p className="training-overview-card__desc">
+              {t('training.writtenHint')}
+            </p>
           </motion.article>
 
           <motion.article
@@ -78,18 +121,29 @@ export function TrainingPage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.06 }}
-            onClick={() => setOpenSection('video')}
+            onClick={() => openTrainingSection('video', setOpenSection)}
+            onKeyDown={(event) =>
+              handleTrainingCardKeyDown(event, 'video', setOpenSection)
+            }
+            role="button"
+            tabIndex={0}
           >
             <div className="training-overview-card__head">
               <span className="training-overview-card__icon">
                 <Video size={19} />
               </span>
               <div>
-                <h2 className="training-overview-card__title-en">{t('training.videoTitle')}</h2>
-                <p className="training-overview-card__title-ar">{t('training.videoTitleAr')}</p>
+                <h2 className="training-overview-card__title-en">
+                  {t('training.videoTitle')}
+                </h2>
+                <p className="training-overview-card__title-ar">
+                  {t('training.videoTitleAr')}
+                </p>
               </div>
             </div>
-            <p className="training-overview-card__desc">{t('training.videoHint')}</p>
+            <p className="training-overview-card__desc">
+              {t('training.videoHint')}
+            </p>
           </motion.article>
         </div>
       ) : null}
@@ -98,7 +152,11 @@ export function TrainingPage() {
         <div className="training-panel">
           <div className="training-panel__header">
             <h2>{t('training.writtenLessons')}</h2>
-            <button className="training-panel__back" onClick={() => setOpenSection(null)} type="button">
+            <button
+              className="training-panel__back"
+              onClick={() => setOpenSection(null)}
+              type="button"
+            >
               {t('training.back')}
             </button>
           </div>
@@ -106,14 +164,22 @@ export function TrainingPage() {
             {training.lessons.map((lesson) => (
               <article className="training-lesson" key={lesson.id}>
                 <h3>{language === 'ar' ? lesson.title.ar : lesson.title.en}</h3>
-                <p>{language === 'ar' ? lesson.description.ar : lesson.description.en}</p>
+                <p>
+                  {language === 'ar'
+                    ? lesson.description.ar
+                    : lesson.description.en}
+                </p>
                 <p className="training-lesson__date">
                   {t('training.lastUpdated')}: {lesson.lastUpdated}
                 </p>
                 <div
                   className="training-rich"
                   dangerouslySetInnerHTML={{
-                    __html: language === 'ar' ? lesson.contentHtml.ar : lesson.contentHtml.en,
+                    __html: sanitizeTrainingHtml(
+                      language === 'ar'
+                        ? lesson.contentHtml.ar
+                        : lesson.contentHtml.en,
+                    ),
                   }}
                 />
               </article>
@@ -126,24 +192,47 @@ export function TrainingPage() {
         <div className="training-panel">
           <div className="training-panel__header">
             <h2>{t('training.videoLessons')}</h2>
-            <button className="training-panel__back" onClick={() => setOpenSection(null)} type="button">
+            <button
+              className="training-panel__back"
+              onClick={() => setOpenSection(null)}
+              type="button"
+            >
               {t('training.back')}
             </button>
           </div>
           <div className="training-videos">
             {training.videos.map((video) => {
               const ytId = getYoutubeVideoId(video.youtubeUrl);
-              const thumbnail = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : '';
+              const thumbnail = ytId
+                ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`
+                : '';
               const title = videoTitles[video.id] ?? '';
               return (
                 <article className="training-video" key={video.id}>
-                  {thumbnail ? <img alt="" className="training-video__thumb" src={thumbnail} /> : null}
-                  <h3>{title || (language === 'ar' ? 'فيديو تدريبي' : 'Training Video')}</h3>
-                  <p>{language === 'ar' ? video.description.ar : video.description.en}</p>
+                  {thumbnail ? (
+                    <img
+                      alt=""
+                      className="training-video__thumb"
+                      src={thumbnail}
+                    />
+                  ) : null}
+                  <h3>
+                    {title ||
+                      (language === 'ar' ? 'فيديو تدريبي' : 'Training Video')}
+                  </h3>
+                  <p>
+                    {language === 'ar'
+                      ? video.description.ar
+                      : video.description.en}
+                  </p>
                   <p className="training-video__meta">{video.duration}</p>
                   <button
                     className="training-video__play"
-                    onClick={() => setPlayingVideoId(playingVideoId === video.id ? null : video.id)}
+                    onClick={() =>
+                      setPlayingVideoId(
+                        playingVideoId === video.id ? null : video.id,
+                      )
+                    }
                     type="button"
                   >
                     <PlayCircle size={15} /> {t('training.play')}

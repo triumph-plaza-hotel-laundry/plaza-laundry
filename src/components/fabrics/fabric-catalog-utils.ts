@@ -62,7 +62,10 @@ export function isDelicateFabric(fabric: LaundryFabric): boolean {
   return program.includes('delicate') || program.includes('wool');
 }
 
-export function matchesCatalogFilter(fabric: LaundryFabric, filter: CatalogFilter): boolean {
+export function matchesCatalogFilter(
+  fabric: LaundryFabric,
+  filter: CatalogFilter,
+): boolean {
   if (filter === 'all') {
     return true;
   }
@@ -75,13 +78,23 @@ export function matchesCatalogFilter(fabric: LaundryFabric, filter: CatalogFilte
 }
 
 export function getCategoryBadge(fabric: LaundryFabric): FabricFilterCategory {
-  return badgePriority.find((category) => fabric.categories.includes(category)) ?? fabric.categories[0];
+  return (
+    badgePriority.find((category) => fabric.categories.includes(category)) ??
+    fabric.categories[0]
+  );
 }
 
-export function inferSpinSpeed(fabric: LaundryFabric): { en: string; ar: string } {
+export function inferSpinSpeed(fabric: LaundryFabric): {
+  en: string;
+  ar: string;
+} {
   const program = fabric.washingProgram.en.toLowerCase();
 
-  if (program.includes('delicate') || program.includes('wool') || program.includes('silk')) {
+  if (
+    program.includes('delicate') ||
+    program.includes('wool') ||
+    program.includes('silk')
+  ) {
     return { en: '400 RPM', ar: '400 دورة/د' };
   }
 
@@ -96,7 +109,10 @@ export function inferSpinSpeed(fabric: LaundryFabric): { en: string; ar: string 
   return { en: '600 RPM', ar: '600 دورة/د' };
 }
 
-export function splitHotelUses(fabric: LaundryFabric): { en: string[]; ar: string[] } {
+export function splitHotelUses(fabric: LaundryFabric): {
+  en: string[];
+  ar: string[];
+} {
   const split = (text: string) =>
     text
       .split(/[,،;]/g)
@@ -109,12 +125,17 @@ export function splitHotelUses(fabric: LaundryFabric): { en: string[]; ar: strin
   };
 }
 
-export function getRelatedFabrics(fabric: LaundryFabric, limit = 4): LaundryFabric[] {
+export function getRelatedFabrics(
+  fabric: LaundryFabric,
+  limit = 4,
+): LaundryFabric[] {
   return [...getAllFabrics()]
     .filter((item) => item.id !== fabric.id)
     .map((item) => ({
       item,
-      score: item.categories.filter((category) => fabric.categories.includes(category)).length,
+      score: item.categories.filter((category) =>
+        fabric.categories.includes(category),
+      ).length,
     }))
     .sort((a, b) => b.score - a.score)
     .slice(0, limit)
@@ -137,11 +158,17 @@ export const mostUsedFabricIds = [
 ] as const;
 
 export function getFabricsByIds(ids: readonly string[]): LaundryFabric[] {
-  const fabricById = new Map(getAllFabrics().map((fabric) => [fabric.id, fabric]));
-  return ids.map((id) => fabricById.get(id)).filter((fabric): fabric is LaundryFabric => Boolean(fabric));
+  const fabricById = new Map(
+    getAllFabrics().map((fabric) => [fabric.id, fabric]),
+  );
+  return ids
+    .map((id) => fabricById.get(id))
+    .filter((fabric): fabric is LaundryFabric => Boolean(fabric));
 }
 
-export function extractWashTemperatureBadge(fabric: LaundryFabric): string | null {
+export function extractWashTemperatureBadge(
+  fabric: LaundryFabric,
+): string | null {
   const match = fabric.washTemperature.en.match(/(\d+)\s*°?\s*C/i);
 
   if (!match) {
@@ -151,20 +178,35 @@ export function extractWashTemperatureBadge(fabric: LaundryFabric): string | nul
   return `${match[1]}°C`;
 }
 
-export type CareSymbolKind = 'machine' | 'delicate' | 'dryClean' | 'handWash' | 'wool';
+export type CareSymbolKind =
+  | 'machine'
+  | 'delicate'
+  | 'dryClean'
+  | 'handWash'
+  | 'wool';
 
 export function getCareSymbolKind(fabric: LaundryFabric): CareSymbolKind {
   const program = fabric.washingProgram.en.toLowerCase();
 
-  if (fabric.dryCleaning && (program.includes('dry clean') || program.includes('dry-clean'))) {
+  if (
+    fabric.dryCleaning &&
+    (program.includes('dry clean') || program.includes('dry-clean'))
+  ) {
     return 'dryClean';
   }
 
-  if (program.includes('wool') || fabric.fabricType.en.toLowerCase().includes('wool')) {
+  if (
+    program.includes('wool') ||
+    fabric.fabricType.en.toLowerCase().includes('wool')
+  ) {
     return 'wool';
   }
 
-  if (isDelicateFabric(fabric) || program.includes('delicate') || program.includes('silk')) {
+  if (
+    isDelicateFabric(fabric) ||
+    program.includes('delicate') ||
+    program.includes('silk')
+  ) {
     return 'delicate';
   }
 

@@ -8,9 +8,16 @@ import { createLocalStore } from '@/lib/data-store';
 import { registerRepository } from '@/data/repositories/repository-utils';
 import { STORAGE_KEYS } from '@/lib/data-store/storage-keys';
 
-export type { TrainingLesson, TrainingState, TrainingVideo } from '@/data/training-content';
+export type {
+  TrainingLesson,
+  TrainingState,
+  TrainingVideo,
+} from '@/data/training-content';
 
-function normalizeTraining(parsed: unknown, seed: TrainingState): TrainingState {
+function normalizeTraining(
+  parsed: unknown,
+  seed: TrainingState,
+): TrainingState {
   if (!parsed || typeof parsed !== 'object') {
     return seed;
   }
@@ -46,7 +53,9 @@ export const trainingRepository = {
     const oldValue = current.lessons.find((lesson) => lesson.id === lessonId);
     store.replaceState({
       ...current,
-      lessons: current.lessons.map((lesson) => (lesson.id === lessonId ? next : lesson)),
+      lessons: current.lessons.map((lesson) =>
+        lesson.id === lessonId ? next : lesson,
+      ),
     });
     return oldValue;
   },
@@ -68,7 +77,9 @@ export const trainingRepository = {
     const oldValue = current.videos.find((video) => video.id === videoId);
     store.replaceState({
       ...current,
-      videos: current.videos.map((video) => (video.id === videoId ? next : video)),
+      videos: current.videos.map((video) =>
+        video.id === videoId ? next : video,
+      ),
     });
     return oldValue;
   },

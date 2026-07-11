@@ -1,15 +1,22 @@
 import { getSupabaseClient } from '@/lib/supabase/client';
 import type { Json } from '@/lib/supabase/types';
 import { STORAGE_KEYS } from '@/lib/data-store/storage-keys';
-import type { InventoryPlanDocument, PlanRowDrafts } from '@/features/inventory/monthly-archive-types';
+import type {
+  InventoryPlanDocument,
+  PlanRowDrafts,
+} from '@/features/inventory/monthly-archive-types';
 import { createInitialPlanRowDrafts } from '@/features/inventory/inventory-plan-schema';
+import type { DepartmentItemCategory } from '@/features/inventory/department-items-types';
+import { mergePlanRowDraftsWithCatalog } from '@/features/inventory/department-items-catalog';
 
 const PLAN_DOCUMENT_KEY = STORAGE_KEYS.inventoryPlan;
 
 function requireClient() {
   const client = getSupabaseClient();
   if (!client) {
-    throw new Error('Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
+    throw new Error(
+      'Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.',
+    );
   }
   return client;
 }
@@ -24,40 +31,51 @@ export function nextMonthKey(monthKey: string) {
   return getCurrentMonthKey(next);
 }
 
-export function mergePlanRowDrafts(saved?: PlanRowDrafts): PlanRowDrafts {
-  const initial = createInitialPlanRowDrafts();
-  if (!saved) {
-    return initial;
-  }
-
-  return { ...initial, ...saved };
+export function mergePlanRowDrafts(
+  saved?: PlanRowDrafts,
+  categories: readonly DepartmentItemCategory[] = [],
+): PlanRowDrafts {
+  return mergePlanRowDraftsWithCatalog(
+    saved,
+    categories,
+    createInitialPlanRowDrafts,
+  );
 }
 
-export function createEmptyPlanDocument(workingMonth = getCurrentMonthKey()): InventoryPlanDocument {
+export function createEmptyPlanDocument(
+  workingMonth = getCurrentMonthKey(),
+): InventoryPlanDocument {
   return {
     workingMonth,
     rowDrafts: createInitialPlanRowDrafts(),
   };
 }
 
-function normalizePlanDocument(parsed: unknown, workingMonth: string): InventoryPlanDocument {
+function normalizePlanDocument(
+  parsed: unknown,
+  workingMonth: string,
+  categories: readonly DepartmentItemCategory[] = [],
+): InventoryPlanDocument {
   if (!parsed || typeof parsed !== 'object') {
     return createEmptyPlanDocument(workingMonth);
   }
 
   const record = parsed as Partial<InventoryPlanDocument>;
   const month =
-    typeof record.workingMonth === 'string' && /^\d{4}-\d{2}$/.test(record.workingMonth)
+    typeof record.workingMonth === 'string' &&
+    /^\d{4}-\d{2}$/.test(record.workingMonth)
       ? record.workingMonth
       : workingMonth;
 
   return {
     workingMonth: month,
-    rowDrafts: mergePlanRowDrafts(record.rowDrafts),
+    rowDrafts: mergePlanRowDrafts(record.rowDrafts, categories),
   };
 }
 
-export async function loadPlanDocument(): Promise<InventoryPlanDocument> {
+export async function loadPlanDocument(
+  categories: readonly DepartmentItemCategory[] = [],
+): Promise<InventoryPlanDocument> {
   const client = requireClient();
   const currentMonth = getCurrentMonthKey();
   const seed = createEmptyPlanDocument(currentMonth);
@@ -76,10 +94,12 @@ export async function loadPlanDocument(): Promise<InventoryPlanDocument> {
     return seed;
   }
 
-  return normalizePlanDocument(data.data, currentMonth);
+  return normalizePlanDocument(data.data, currentMonth, categories);
 }
 
-export async function savePlanDocument(document: InventoryPlanDocument): Promise<void> {
+export async function savePlanDocument(
+  document: InventoryPlanDocument,
+): Promise<void> {
   const client = requireClient();
   const { error } = await client.from('app_data_documents').upsert(
     {

@@ -8,7 +8,8 @@
   --catalog-gold: #d6b76e;
   --catalog-gold-soft: #e8d5a6;
   --catalog-input: #050505;
-  --catalog-font-en: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --catalog-font-en:
+    Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --catalog-font-ar: 'Noto Kufi Arabic', 'Segoe UI', Tahoma, sans-serif;
   display: flex;
   width: 100%;
@@ -620,7 +621,9 @@ html[dir='rtl'] .fabrics-catalog__filter {
   background: var(--catalog-surface);
   padding: 1.5rem;
   margin: auto;
-  box-shadow: 0 24px 64px rgb(0 0 0 / 45%), 0 0 0 1px rgb(201 164 92 / 8%);
+  box-shadow:
+    0 24px 64px rgb(0 0 0 / 45%),
+    0 0 0 1px rgb(201 164 92 / 8%);
 }
 
 .fabric-modal__close {

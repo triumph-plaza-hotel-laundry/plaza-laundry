@@ -14,7 +14,13 @@ type TextSectionKey =
   | 'chemicals.sections.safety'
   | 'chemicals.sections.storage';
 
-type TextField = 'description' | 'howItWorks' | 'usage' | 'dosage' | 'safety' | 'storage';
+type TextField =
+  | 'description'
+  | 'howItWorks'
+  | 'usage'
+  | 'dosage'
+  | 'safety'
+  | 'storage';
 
 const textSections: Array<{ key: TextSectionKey; field: TextField }> = [
   { key: 'chemicals.sections.description', field: 'description' },
@@ -48,9 +54,12 @@ export function ChemicalCard({ chemical }: ChemicalCardProps) {
 
       <div className="chemicals-card__head">
         <span className="chemicals-card__badge">
-          {chemical.productCode} · {chemical.brand} · {localizedText(chemical.category, language)}
+          {chemical.productCode} · {chemical.brand} ·{' '}
+          {localizedText(chemical.category, language)}
         </span>
-        <h2 className="chemicals-card__name">{localizedText(chemical.name, language)}</h2>
+        <h2 className="chemicals-card__name">
+          {localizedText(chemical.name, language)}
+        </h2>
       </div>
 
       <div className="chemicals-card__sections">
@@ -65,7 +74,9 @@ export function ChemicalCard({ chemical }: ChemicalCardProps) {
 
         {features.length > 0 ? (
           <section className="chemicals-card__section">
-            <h3 className="chemicals-card__section-title">{t('chemicals.sections.features')}</h3>
+            <h3 className="chemicals-card__section-title">
+              {t('chemicals.sections.features')}
+            </h3>
             <ul className="chemicals-card__list">
               {features.map((item) => (
                 <li className="chemicals-card__list-item" key={item}>
@@ -78,7 +89,9 @@ export function ChemicalCard({ chemical }: ChemicalCardProps) {
 
         {warnings.length > 0 ? (
           <section className="chemicals-card__section">
-            <h3 className="chemicals-card__section-title">{t('chemicals.sections.warnings')}</h3>
+            <h3 className="chemicals-card__section-title">
+              {t('chemicals.sections.warnings')}
+            </h3>
             <ul className="chemicals-card__list chemicals-card__list--warnings">
               {warnings.map((item) => (
                 <li className="chemicals-card__list-item" key={item}>
@@ -90,7 +103,9 @@ export function ChemicalCard({ chemical }: ChemicalCardProps) {
         ) : null}
 
         <section className="chemicals-card__section">
-          <h3 className="chemicals-card__section-title">{t('chemicals.sections.technical')}</h3>
+          <h3 className="chemicals-card__section-title">
+            {t('chemicals.sections.technical')}
+          </h3>
           <div className="chemicals-card__tech-table-wrap">
             <table className="chemicals-card__tech-table">
               <tbody>

@@ -21,7 +21,9 @@ export function AdminEditToolbar({
 }: AdminEditToolbarProps) {
   const { t } = useLanguage();
 
-  const hint = notice ?? (isDirty ? t('admin.editor.unsavedChanges') : t('admin.editor.allSaved'));
+  const hint =
+    notice ??
+    (isDirty ? t('admin.editor.unsavedChanges') : t('admin.editor.allSaved'));
 
   return (
     <div className="admin-edit-toolbar" role="toolbar">

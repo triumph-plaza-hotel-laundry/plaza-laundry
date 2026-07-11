@@ -17,14 +17,20 @@ function formatDateTime(value: string, language: string) {
   };
 }
 
-export function TransactionHistoryTable({ transactions }: TransactionHistoryTableProps) {
+export function TransactionHistoryTable({
+  transactions,
+}: TransactionHistoryTableProps) {
   const { language, t } = useLanguage();
 
   return (
     <section className="inv-panel">
       <header className="inv-panel__header">
-        <h2 className="inv-panel__title-en">{t('inventory.v2.historyTitle')}</h2>
-        <h2 className="inv-panel__title-ar">{t('inventory.v2.historyTitleAr')}</h2>
+        <h2 className="inv-panel__title-en">
+          {t('inventory.v2.historyTitle')}
+        </h2>
+        <h2 className="inv-panel__title-ar">
+          {t('inventory.v2.historyTitleAr')}
+        </h2>
       </header>
 
       {transactions.length === 0 ? (
@@ -66,21 +72,33 @@ export function TransactionHistoryTable({ transactions }: TransactionHistoryTabl
             </thead>
             <tbody>
               {transactions.map((transaction) => {
-                const { date, time } = formatDateTime(transaction.createdAt, language);
+                const { date, time } = formatDateTime(
+                  transaction.createdAt,
+                  language,
+                );
                 return (
                   <tr key={`${transaction.type}-${transaction.id}`}>
                     <td>
-                      <span className={`inv-transaction-badge inv-transaction-badge--${transaction.type}`}>
+                      <span
+                        className={`inv-transaction-badge inv-transaction-badge--${transaction.type}`}
+                      >
                         {transaction.type === 'receive'
                           ? t('inventory.v2.typeReceive')
                           : t('inventory.v2.typeIssue')}
                       </span>
                     </td>
-                    <td className="inv-erp-table__code">{transaction.itemCode || '—'}</td>
-                    <td className="inv-erp-table__name" title={transaction.itemName}>
+                    <td className="inv-erp-table__code">
+                      {transaction.itemCode || '—'}
+                    </td>
+                    <td
+                      className="inv-erp-table__name"
+                      title={transaction.itemName}
+                    >
                       {transaction.itemName}
                     </td>
-                    <td className="inv-erp-table__num">{transaction.quantity}</td>
+                    <td className="inv-erp-table__num">
+                      {transaction.quantity}
+                    </td>
                     <td>{transaction.supplier || '—'}</td>
                     <td>{transaction.receiver || '—'}</td>
                     <td>{transaction.employee || '—'}</td>

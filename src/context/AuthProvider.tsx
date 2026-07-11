@@ -1,7 +1,16 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import { appendAuditLog } from '@/features/audit';
 import { AuthContext, type AuthContextValue } from '@/context/auth-context';
-import { authenticateLogin, type LoginCredentials } from '@/features/auth/login';
+import {
+  authenticateLogin,
+  type LoginCredentials,
+} from '@/features/auth/login';
 import {
   assertPermission,
   canAccessRoute,
@@ -10,21 +19,42 @@ import {
   hasPermission,
   PERMISSION_DENIED,
 } from '@/features/auth/permissions';
-import { clearAuthSession, readAuthSession, writeAuthSession } from '@/features/auth/session';
+import {
+  clearAuthSession,
+  readAuthSession,
+  writeAuthSession,
+} from '@/features/auth/session';
 import { ensureUsersStoreReady } from '@/features/auth/users';
-import type { AuthSession, PermissionAction, PermissionResource } from '@/features/auth/types';
+import { ensureInventoryPermissionsBootstrapped } from '@/features/inventory/inventory-permissions-service';
+import type {
+  AuthSession,
+  PermissionAction,
+  PermissionResource,
+} from '@/features/auth/types';
 
 type AuthProviderProps = {
   children: ReactNode;
 };
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [session, setSession] = useState<AuthSession | null>(() => readAuthSession());
+  const [session, setSession] = useState<AuthSession | null>(() =>
+    readAuthSession(),
+  );
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     void ensureUsersStoreReady().finally(() => setIsReady(true));
   }, []);
+
+  useEffect(() => {
+    if (!session?.user?.id) {
+      return;
+    }
+
+    void ensureInventoryPermissionsBootstrapped(session.user.id).catch(
+      () => undefined,
+    );
+  }, [session?.user?.id]);
 
   const user = session?.user ?? null;
   const role = user?.role ?? null;
@@ -38,6 +68,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
     writeAuthSession(nextSession);
     setSession(nextSession);
+    void ensureInventoryPermissionsBootstrapped(nextUser.id).catch(
+      () => undefined,
+    );
     void appendAuditLog({
       user: nextUser,
       action: 'login',
@@ -117,7 +150,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 
   const logAction = useCallback(
-    (input: { action: string; page: string; oldValue?: unknown; newValue?: unknown }) => {
+    (input: {
+      action: string;
+      page: string;
+      oldValue?: unknown;
+      newValue?: unknown;
+    }) => {
       if (!user) {
         return;
       }
@@ -151,9 +189,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
       logAction,
       permissionDeniedMessage: PERMISSION_DENIED,
     }),
-    [assertCan, can, canAccessPath, canManage, canSeeNav, isReady, logAction, login, logout, role, user],
+    [
+      assertCan,
+      can,
+      canAccessPath,
+      canManage,
+      canSeeNav,
+      isReady,
+      logAction,
+      login,
+      logout,
+      role,
+      user,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
-

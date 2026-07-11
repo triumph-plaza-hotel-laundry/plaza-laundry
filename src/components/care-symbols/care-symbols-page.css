@@ -20,7 +20,8 @@
   --care-gold: #d6b76e;
   --care-gold-soft: #e8d5a6;
   --care-input: #050505;
-  --care-font-en: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --care-font-en:
+    Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --care-font-ar: 'Noto Kufi Arabic', 'Segoe UI', Tahoma, sans-serif;
   display: flex;
   width: 100%;
@@ -111,7 +112,9 @@
   color: var(--care-text);
   font-size: 1rem;
   outline: none;
-  box-shadow: 0 8px 32px rgb(0 0 0 / 18%), inset 0 1px 0 rgb(214 183 110 / 8%);
+  box-shadow:
+    0 8px 32px rgb(0 0 0 / 18%),
+    inset 0 1px 0 rgb(214 183 110 / 8%);
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease;
@@ -128,7 +131,9 @@ html[dir='rtl'] .care-catalog__search-input {
 
 .care-catalog__search-input:focus {
   border-color: var(--app-gold);
-  box-shadow: 0 12px 40px rgb(201 164 92 / 12%), inset 0 1px 0 rgb(214 183 110 / 12%);
+  box-shadow:
+    0 12px 40px rgb(201 164 92 / 12%),
+    inset 0 1px 0 rgb(214 183 110 / 12%);
 }
 
 .care-catalog__search-hint-ar,
@@ -236,7 +241,11 @@ html[dir='rtl'] .care-catalog__filter {
   justify-content: center;
   border: 1px solid var(--app-gold-border);
   border-radius: calc(var(--card-radius) - 4px);
-  background: linear-gradient(160deg, rgb(201 164 92 / 6%) 0%, var(--care-bg) 58%);
+  background: linear-gradient(
+    160deg,
+    rgb(201 164 92 / 6%) 0%,
+    var(--care-bg) 58%
+  );
   padding: 1.5rem;
 }
 
@@ -360,7 +369,9 @@ html[dir='rtl'] .care-catalog__filter {
   background: var(--care-surface);
   padding: 1.5rem;
   margin: auto;
-  box-shadow: 0 24px 64px rgb(0 0 0 / 45%), 0 0 0 1px rgb(201 164 92 / 8%);
+  box-shadow:
+    0 24px 64px rgb(0 0 0 / 45%),
+    0 0 0 1px rgb(201 164 92 / 8%);
 }
 
 .care-modal__close {
@@ -406,7 +417,11 @@ html[dir='rtl'] .care-catalog__filter {
   justify-content: center;
   border: 1px solid var(--app-gold-border);
   border-radius: 50%;
-  background: linear-gradient(145deg, rgb(201 164 92 / 12%) 0%, var(--care-bg) 60%);
+  background: linear-gradient(
+    145deg,
+    rgb(201 164 92 / 12%) 0%,
+    var(--care-bg) 60%
+  );
 }
 
 .care-modal__symbol {

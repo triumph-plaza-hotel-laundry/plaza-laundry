@@ -269,7 +269,17 @@ export const laundryEmployees: readonly LaundryEmployee[] = [
     'Chest Ironers',
     'الجندرة',
   ),
-  e('tl-01', 'tailor', 19, 'Mohamed Saeed', 'محمد سعيد', 'Tailor', 'ترزي', 'Tailor', 'الترزي'),
+  e(
+    'tl-01',
+    'tailor',
+    19,
+    'Mohamed Saeed',
+    'محمد سعيد',
+    'Tailor',
+    'ترزي',
+    'Tailor',
+    'الترزي',
+  ),
 ] as const;
 
 export const employeeHierarchy: readonly {

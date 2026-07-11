@@ -22,12 +22,16 @@ export function OrgChartEmployeeCard({
   return (
     <motion.article
       animate={{ opacity: 1, y: 0 }}
-      className={`org-employee-card org-employee-card--${size}${isBirthdayToday ? ' org-employee-card--birthday' : ''}`}
+      className={`org-employee-card org-employee-card--${size}${isBirthdayToday ? 'org-employee-card--birthday' : ''}`}
       initial={{ opacity: 0, y: 14 }}
       transition={{ duration: 0.32, delay: index * 0.04, ease: 'easeOut' }}
     >
       <div className="org-employee-card__avatar-wrap">
-        <User aria-hidden="true" className="org-employee-card__avatar-icon" strokeWidth={1.5} />
+        <User
+          aria-hidden="true"
+          className="org-employee-card__avatar-icon"
+          strokeWidth={1.5}
+        />
         {isBirthdayToday ? (
           <span
             aria-label={t('employees.birthdayToday')}
@@ -48,8 +52,12 @@ export function OrgChartEmployeeCard({
 
       <span className="org-employee-card__status">
         <span className="org-employee-card__status-dot" aria-hidden="true" />
-        <span className="org-employee-card__status-en">{t('employees.org.statusActive')}</span>
-        <span className="org-employee-card__status-ar">{t('employees.org.statusActiveAr')}</span>
+        <span className="org-employee-card__status-en">
+          {t('employees.org.statusActive')}
+        </span>
+        <span className="org-employee-card__status-ar">
+          {t('employees.org.statusActiveAr')}
+        </span>
       </span>
     </motion.article>
   );

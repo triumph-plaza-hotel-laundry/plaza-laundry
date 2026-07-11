@@ -44,7 +44,12 @@ export function StainsPage() {
         return true;
       }
 
-      const haystack = [stain.name.en, stain.name.ar, stain.description.en, stain.description.ar]
+      const haystack = [
+        stain.name.en,
+        stain.name.ar,
+        stain.description.en,
+        stain.description.ar,
+      ]
         .join(' ')
         .toLowerCase();
 
@@ -64,11 +69,17 @@ export function StainsPage() {
           <p className="stains-catalog__subtitle-en">
             Premium reference for Triumph Plaza Hotel laundry operations
           </p>
-          <p className="stains-catalog__subtitle-ar">مرجع فاخر لعمليات غسيل فندق تريومف بلازا</p>
+          <p className="stains-catalog__subtitle-ar">
+            مرجع فاخر لعمليات غسيل فندق تريومف بلازا
+          </p>
         </div>
 
         <label className="stains-catalog__search">
-          <Search aria-hidden="true" className="stains-catalog__search-icon" strokeWidth={1.75} />
+          <Search
+            aria-hidden="true"
+            className="stains-catalog__search-icon"
+            strokeWidth={1.75}
+          />
           <input
             className="stains-catalog__search-input"
             onChange={(event) => setSearchQuery(event.target.value)}
@@ -78,10 +89,14 @@ export function StainsPage() {
           />
         </label>
 
-        <div aria-label={t('stains.catalog.filtersLabel')} className="stains-catalog__filters" role="group">
+        <div
+          aria-label={t('stains.catalog.filtersLabel')}
+          className="stains-catalog__filters"
+          role="group"
+        >
           {stainCatalogFilters.map((filter) => (
             <button
-              className={`stains-catalog__filter${activeFilter === filter ? ' stains-catalog__filter--active' : ''}`}
+              className={`stains-catalog__filter${activeFilter === filter ? 'stains-catalog__filter--active' : ''}`}
               key={filter}
               onClick={() => setActiveFilter(filter)}
               type="button"
@@ -92,24 +107,38 @@ export function StainsPage() {
         </div>
 
         <p className="stains-catalog__count">
-          {t('stains.catalog.count').replace('{count}', String(filteredStains.length))}
+          {t('stains.catalog.count').replace(
+            '{count}',
+            String(filteredStains.length),
+          )}
         </p>
       </header>
 
       {filteredStains.length > 0 ? (
         <div className="stains-catalog__grid">
           {filteredStains.map((stain) => (
-            <StainCard key={stain.id} onSelect={setSelectedStain} stain={stain} />
+            <StainCard
+              key={stain.id}
+              onSelect={setSelectedStain}
+              stain={stain}
+            />
           ))}
         </div>
       ) : (
         <div className="stains-catalog__empty">
-          <p className="stains-catalog__empty-en">{t('stains.catalog.noResults')}</p>
-          <p className="stains-catalog__empty-ar">{t('stains.catalog.noResultsAr')}</p>
+          <p className="stains-catalog__empty-en">
+            {t('stains.catalog.noResults')}
+          </p>
+          <p className="stains-catalog__empty-ar">
+            {t('stains.catalog.noResultsAr')}
+          </p>
         </div>
       )}
 
-      <StainDetailModal onClose={() => setSelectedStain(null)} stain={selectedStain} />
+      <StainDetailModal
+        onClose={() => setSelectedStain(null)}
+        stain={selectedStain}
+      />
     </section>
   );
 }

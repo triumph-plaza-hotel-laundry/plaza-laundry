@@ -50,8 +50,11 @@ function emptyTechnicalRow(): ChemicalTechnicalRow {
 export function AdminChemicalsEditorPage() {
   const { t } = useLanguage();
   const { assertCan, logAction } = useAuth();
-  const { draft, isDirty, setDraft, resetDraft, commitDraft } = useDraftState(chemicalsRepository);
-  const [selectedId, setSelectedId] = useState<number | null>(draft[0]?.id ?? null);
+  const { draft, isDirty, setDraft, resetDraft, commitDraft } =
+    useDraftState(chemicalsRepository);
+  const [selectedId, setSelectedId] = useState<number | null>(
+    draft[0]?.id ?? null,
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [saveNotice, setSaveNotice] = useState<string | null>(null);
   const [saveNoticeIsError, setSaveNoticeIsError] = useState(false);
@@ -67,7 +70,9 @@ export function AdminChemicalsEditorPage() {
     }
 
     setDraft(
-      draft.map((chemical) => (chemical.id === selected.id ? { ...chemical, ...patch } : chemical)),
+      draft.map((chemical) =>
+        chemical.id === selected.id ? { ...chemical, ...patch } : chemical,
+      ),
     );
   };
 
@@ -92,7 +97,10 @@ export function AdminChemicalsEditorPage() {
     updateSelected({ [field]: { ...selected[field], [lang]: value } });
   };
 
-  const updateTechnicalRow = (key: string, patch: Partial<ChemicalTechnicalRow>) => {
+  const updateTechnicalRow = (
+    key: string,
+    patch: Partial<ChemicalTechnicalRow>,
+  ) => {
     if (!selected) {
       return;
     }
@@ -132,11 +140,17 @@ export function AdminChemicalsEditorPage() {
       assertCan('chemicals', 'update');
       await commitDraft(async (value) => {
         await chemicalsRepository.replaceAll(value);
-        logAction({ action: 'chemicals.replaceAll', page: 'admin/chemicals', newValue: value });
+        logAction({
+          action: 'chemicals.replaceAll',
+          page: 'admin/chemicals',
+          newValue: value,
+        });
       });
       setSaveNotice(t('admin.editor.saveSuccess'));
     } catch (error) {
-      setSaveNotice(error instanceof Error ? error.message : t('admin.editor.saveError'));
+      setSaveNotice(
+        error instanceof Error ? error.message : t('admin.editor.saveError'),
+      );
       setSaveNoticeIsError(true);
     } finally {
       setIsSaving(false);
@@ -178,8 +192,13 @@ export function AdminChemicalsEditorPage() {
               disabled={!selected}
               onClick={() => {
                 if (!selected) return;
-                setDraft(draft.filter((chemical) => chemical.id !== selected.id));
-                setSelectedId(draft.find((chemical) => chemical.id !== selected.id)?.id ?? null);
+                setDraft(
+                  draft.filter((chemical) => chemical.id !== selected.id),
+                );
+                setSelectedId(
+                  draft.find((chemical) => chemical.id !== selected.id)?.id ??
+                    null,
+                );
               }}
               type="button"
             >
@@ -210,45 +229,66 @@ export function AdminChemicalsEditorPage() {
             <div className="admin-editor-field">
               <label>productCode</label>
               <input
-                onChange={(event) => updateSelected({ productCode: event.target.value })}
+                onChange={(event) =>
+                  updateSelected({ productCode: event.target.value })
+                }
                 value={selected.productCode}
               />
             </div>
             <div className="admin-editor-field">
               <label>brand</label>
               <input
-                onChange={(event) => updateSelected({ brand: event.target.value })}
+                onChange={(event) =>
+                  updateSelected({ brand: event.target.value })
+                }
                 value={selected.brand}
               />
             </div>
             <div className="admin-editor-field">
               <label>image</label>
               <input
-                onChange={(event) => updateSelected({ image: event.target.value })}
+                onChange={(event) =>
+                  updateSelected({ image: event.target.value })
+                }
                 value={selected.image}
               />
             </div>
-            {(['name', 'category', 'description', 'howItWorks', 'usage', 'dosage', 'safety', 'storage', 'technicalFooterNote'] as const).flatMap(
-              (field) =>
-                (['en', 'ar'] as const).map((lang) => (
-                  <div className="admin-editor-field" key={`${field}-${lang}`}>
-                    <label>
-                      {field} ({lang.toUpperCase()})
-                    </label>
-                    {field === 'name' || field === 'category' ? (
-                      <input
-                        onChange={(event) => updateLocalized(field, lang, event.target.value)}
-                        value={selected[field][lang]}
-                      />
-                    ) : (
-                      <textarea
-                        onChange={(event) => updateLocalized(field, lang, event.target.value)}
-                        rows={3}
-                        value={selected[field][lang]}
-                      />
-                    )}
-                  </div>
-                )),
+            {(
+              [
+                'name',
+                'category',
+                'description',
+                'howItWorks',
+                'usage',
+                'dosage',
+                'safety',
+                'storage',
+                'technicalFooterNote',
+              ] as const
+            ).flatMap((field) =>
+              (['en', 'ar'] as const).map((lang) => (
+                <div className="admin-editor-field" key={`${field}-${lang}`}>
+                  <label>
+                    {field} ({lang.toUpperCase()})
+                  </label>
+                  {field === 'name' || field === 'category' ? (
+                    <input
+                      onChange={(event) =>
+                        updateLocalized(field, lang, event.target.value)
+                      }
+                      value={selected[field][lang]}
+                    />
+                  ) : (
+                    <textarea
+                      onChange={(event) =>
+                        updateLocalized(field, lang, event.target.value)
+                      }
+                      rows={3}
+                      value={selected[field][lang]}
+                    />
+                  )}
+                </div>
+              )),
             )}
             {(['en', 'ar'] as const).map((lang) => (
               <div className="admin-editor-field" key={`features-${lang}`}>
@@ -292,7 +332,10 @@ export function AdminChemicalsEditorPage() {
                   className="admin-editor-btn"
                   onClick={() =>
                     updateSelected({
-                      technicalInfo: [...selected.technicalInfo, emptyTechnicalRow()],
+                      technicalInfo: [
+                        ...selected.technicalInfo,
+                        emptyTechnicalRow(),
+                      ],
                     })
                   }
                   type="button"
@@ -317,7 +360,9 @@ export function AdminChemicalsEditorPage() {
                       <td>
                         <input
                           onChange={(event) =>
-                            updateTechnicalRow(row.key, { key: event.target.value })
+                            updateTechnicalRow(row.key, {
+                              key: event.target.value,
+                            })
                           }
                           value={row.key}
                         />
@@ -325,7 +370,12 @@ export function AdminChemicalsEditorPage() {
                       <td>
                         <input
                           onChange={(event) =>
-                            updateTechnicalLocalized(row.key, 'label', 'en', event.target.value)
+                            updateTechnicalLocalized(
+                              row.key,
+                              'label',
+                              'en',
+                              event.target.value,
+                            )
                           }
                           value={row.label.en}
                         />
@@ -333,7 +383,12 @@ export function AdminChemicalsEditorPage() {
                       <td>
                         <input
                           onChange={(event) =>
-                            updateTechnicalLocalized(row.key, 'label', 'ar', event.target.value)
+                            updateTechnicalLocalized(
+                              row.key,
+                              'label',
+                              'ar',
+                              event.target.value,
+                            )
                           }
                           value={row.label.ar}
                         />
@@ -341,7 +396,12 @@ export function AdminChemicalsEditorPage() {
                       <td>
                         <input
                           onChange={(event) =>
-                            updateTechnicalLocalized(row.key, 'value', 'en', event.target.value)
+                            updateTechnicalLocalized(
+                              row.key,
+                              'value',
+                              'en',
+                              event.target.value,
+                            )
                           }
                           value={row.value.en}
                         />
@@ -349,7 +409,12 @@ export function AdminChemicalsEditorPage() {
                       <td>
                         <input
                           onChange={(event) =>
-                            updateTechnicalLocalized(row.key, 'value', 'ar', event.target.value)
+                            updateTechnicalLocalized(
+                              row.key,
+                              'value',
+                              'ar',
+                              event.target.value,
+                            )
                           }
                           value={row.value.ar}
                         />

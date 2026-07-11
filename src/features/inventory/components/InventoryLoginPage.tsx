@@ -28,7 +28,11 @@ export function InventoryLoginPage({ onLogin }: InventoryLoginPageProps) {
   };
 
   return (
-    <div aria-label={t('inventory.login.title')} className="inventory-login-page" role="main">
+    <div
+      aria-label={t('inventory.login.title')}
+      className="inventory-login-page"
+      role="main"
+    >
       <div aria-hidden="true" className="inventory-login-page__atmosphere" />
       <div className="inventory-login-page__content">
         <img
@@ -38,13 +42,21 @@ export function InventoryLoginPage({ onLogin }: InventoryLoginPageProps) {
           draggable={false}
           src={logoUrl}
         />
-        <p className="inventory-login-page__eyebrow">{t('inventory.login.eyebrow')}</p>
+        <p className="inventory-login-page__eyebrow">
+          {t('inventory.login.eyebrow')}
+        </p>
         <h1 className="inventory-login-page__title">{t('login.hotelName')}</h1>
-        <p className="inventory-login-page__subtitle">{t('inventory.login.subtitle')}</p>
+        <p className="inventory-login-page__subtitle">
+          {t('inventory.login.subtitle')}
+        </p>
 
         <form className="inventory-login-page__form" onSubmit={handleSubmit}>
-          <h2 className="inventory-login-page__form-title">{t('inventory.login.title')}</h2>
-          <p className="inventory-login-page__form-hint">{t('inventory.login.hint')}</p>
+          <h2 className="inventory-login-page__form-title">
+            {t('inventory.login.title')}
+          </h2>
+          <p className="inventory-login-page__form-hint">
+            {t('inventory.login.hint')}
+          </p>
 
           <label className="inventory-login-page__label">
             {t('inventory.login.usernameLabel')}
@@ -74,10 +86,18 @@ export function InventoryLoginPage({ onLogin }: InventoryLoginPageProps) {
             />
           </label>
 
-          {error ? <p className="inventory-login-page__error">{error}</p> : null}
+          {error ? (
+            <p className="inventory-login-page__error">{error}</p>
+          ) : null}
 
-          <button className="inventory-login-page__submit" disabled={isSubmitting} type="submit">
-            {isSubmitting ? t('inventory.login.submitting') : t('inventory.login.submit')}
+          <button
+            className="inventory-login-page__submit"
+            disabled={isSubmitting}
+            type="submit"
+          >
+            {isSubmitting
+              ? t('inventory.login.submitting')
+              : t('inventory.login.submit')}
           </button>
         </form>
       </div>

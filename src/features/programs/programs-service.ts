@@ -97,7 +97,11 @@ export async function fetchAllPrograms(): Promise<WashingProgram[]> {
   const client = requireSupabase();
 
   const [programsResult, paramsResult, stepsResult] = await Promise.all([
-    client.from('washing_programs').select('id, title_en, title_ar, sort_order').order('sort_order').order('id'),
+    client
+      .from('washing_programs')
+      .select('id, title_en, title_ar, sort_order')
+      .order('sort_order')
+      .order('id'),
     client.from('washing_program_parameters').select('*'),
     client
       .from('washing_program_steps')
@@ -117,7 +121,10 @@ export async function fetchAllPrograms(): Promise<WashingProgram[]> {
   }
 
   const paramsByProgram = new Map(
-    (paramsResult.data as ProgramParamsRow[]).map((row) => [row.program_id, row]),
+    (paramsResult.data as ProgramParamsRow[]).map((row) => [
+      row.program_id,
+      row,
+    ]),
   );
   const steps = (stepsResult.data as ProgramStepRow[]) ?? [];
 
@@ -126,12 +133,17 @@ export async function fetchAllPrograms(): Promise<WashingProgram[]> {
   );
 }
 
-export async function replaceAllPrograms(programs: WashingProgram[]): Promise<void> {
+export async function replaceAllPrograms(
+  programs: WashingProgram[],
+): Promise<void> {
   const client = requireSupabase();
   const ids = programs.map((program) => program.id);
 
   if (ids.length === 0) {
-    const { error: programsError } = await client.from('washing_programs').delete().gte('id', 0);
+    const { error: programsError } = await client
+      .from('washing_programs')
+      .delete()
+      .gte('id', 0);
     if (programsError) {
       throw programsError;
     }
@@ -150,7 +162,10 @@ export async function replaceAllPrograms(programs: WashingProgram[]): Promise<vo
     .filter((id) => !ids.includes(id));
 
   if (staleIds.length > 0) {
-    const { error: deleteError } = await client.from('washing_programs').delete().in('id', staleIds);
+    const { error: deleteError } = await client
+      .from('washing_programs')
+      .delete()
+      .in('id', staleIds);
     if (deleteError) {
       throw deleteError;
     }
@@ -160,12 +175,16 @@ export async function replaceAllPrograms(programs: WashingProgram[]): Promise<vo
     const program = programs[index];
     const rows = programToRows(program, index);
 
-    const { error: programError } = await client.from('washing_programs').upsert(rows.program);
+    const { error: programError } = await client
+      .from('washing_programs')
+      .upsert(rows.program);
     if (programError) {
       throw programError;
     }
 
-    const { error: paramsError } = await client.from('washing_program_parameters').upsert(rows.params);
+    const { error: paramsError } = await client
+      .from('washing_program_parameters')
+      .upsert(rows.params);
     if (paramsError) {
       throw paramsError;
     }
@@ -179,7 +198,9 @@ export async function replaceAllPrograms(programs: WashingProgram[]): Promise<vo
     }
 
     if (rows.steps.length > 0) {
-      const { error: stepsError } = await client.from('washing_program_steps').insert(rows.steps);
+      const { error: stepsError } = await client
+        .from('washing_program_steps')
+        .insert(rows.steps);
       if (stepsError) {
         throw stepsError;
       }

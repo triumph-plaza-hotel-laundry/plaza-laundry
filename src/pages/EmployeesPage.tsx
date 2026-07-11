@@ -5,7 +5,10 @@ import { EmployeesOrgChartMobile } from '@/components/employees/EmployeesOrgChar
 import { OrgChartEmployeeCard } from '@/components/employees/OrgChartEmployeeCard';
 import { useEmployees, useLanguage } from '@/hooks';
 import { sortEmployeesForDisplay } from '@/lib/employee-roles';
-import { buildEmployeesOrgChart, orgChartHasMembers } from '@/lib/employees-org-chart';
+import {
+  buildEmployeesOrgChart,
+  orgChartHasMembers,
+} from '@/lib/employees-org-chart';
 import '@/components/employees/employees-page.css';
 
 export function EmployeesPage() {
@@ -42,7 +45,10 @@ export function EmployeesPage() {
     });
   }, [employees, searchQuery]);
 
-  const orgChart = useMemo(() => buildEmployeesOrgChart(filteredEmployees), [filteredEmployees]);
+  const orgChart = useMemo(
+    () => buildEmployeesOrgChart(filteredEmployees),
+    [filteredEmployees],
+  );
   const showOrgChart = !searchQuery.trim() && orgChartHasMembers(orgChart);
 
   return (
@@ -54,12 +60,20 @@ export function EmployeesPage() {
           </span>
           <h1 className="employees-page__title-en">Employees</h1>
           <h1 className="employees-page__title-ar">الموظفون</h1>
-          <p className="employees-page__subtitle-en">{t('employees.subtitle')}</p>
-          <p className="employees-page__subtitle-ar">{t('employees.subtitleAr')}</p>
+          <p className="employees-page__subtitle-en">
+            {t('employees.subtitle')}
+          </p>
+          <p className="employees-page__subtitle-ar">
+            {t('employees.subtitleAr')}
+          </p>
         </div>
 
         <label className="employees-page__search">
-          <Search aria-hidden="true" className="employees-page__search-icon" strokeWidth={1.75} />
+          <Search
+            aria-hidden="true"
+            className="employees-page__search-icon"
+            strokeWidth={1.75}
+          />
           <input
             className="employees-page__search-input"
             onChange={(event) => setSearchQuery(event.target.value)}
@@ -70,12 +84,19 @@ export function EmployeesPage() {
         </label>
 
         <p className="employees-page__count">
-          {t('employees.count').replace('{count}', String(filteredEmployees.length))}
+          {t('employees.count').replace(
+            '{count}',
+            String(filteredEmployees.length),
+          )}
         </p>
       </header>
 
       {isLoading ? (
-        <div aria-busy="true" aria-label={t('employees.loading')} className="employees-page__loading">
+        <div
+          aria-busy="true"
+          aria-label={t('employees.loading')}
+          className="employees-page__loading"
+        >
           {Array.from({ length: 6 }).map((_, index) => (
             <div className="employee-card-skeleton" key={index} />
           ))}
@@ -83,7 +104,9 @@ export function EmployeesPage() {
       ) : filteredEmployees.length === 0 ? (
         <div className="employees-page__empty">
           <p className="employees-page__empty-en">{t('employees.noResults')}</p>
-          <p className="employees-page__empty-ar">{t('employees.noResultsAr')}</p>
+          <p className="employees-page__empty-ar">
+            {t('employees.noResultsAr')}
+          </p>
         </div>
       ) : showOrgChart ? (
         <>
@@ -93,7 +116,12 @@ export function EmployeesPage() {
       ) : (
         <div className="employees-search-results">
           {filteredEmployees.map((employee, index) => (
-            <OrgChartEmployeeCard employee={employee} index={index} key={employee.id} size="compact" />
+            <OrgChartEmployeeCard
+              employee={employee}
+              index={index}
+              key={employee.id}
+              size="compact"
+            />
           ))}
         </div>
       )}

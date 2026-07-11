@@ -32,7 +32,11 @@ function DetailRow({ icon: Icon, labelEn, labelAr, value }: DetailRowProps) {
   return (
     <div className="stain-modal__detail">
       <div className="stain-modal__detail-icon-wrap">
-        <Icon aria-hidden="true" className="stain-modal__detail-icon" strokeWidth={1.75} />
+        <Icon
+          aria-hidden="true"
+          className="stain-modal__detail-icon"
+          strokeWidth={1.75}
+        />
       </div>
       <div className="stain-modal__detail-content">
         <p className="stain-modal__detail-label-en">{labelEn}</p>
@@ -90,14 +94,24 @@ export function StainDetailModal({ stain, onClose }: StainDetailModalProps) {
             aria-labelledby="stain-modal-title-en"
             transition={{ duration: 0.22, ease: 'easeOut' }}
           >
-            <button className="stain-modal__close" onClick={onClose} type="button">
+            <button
+              className="stain-modal__close"
+              onClick={onClose}
+              type="button"
+            >
               <X aria-hidden="true" strokeWidth={1.75} />
-              <span className="sr-only">{dictionaries.en['common.closeMenu']}</span>
+              <span className="sr-only">
+                {dictionaries.en['common.closeMenu']}
+              </span>
             </button>
 
             <div className="stain-modal__hero">
               <div className="stain-modal__icon-frame">
-                <HeroIcon aria-hidden="true" className="stain-modal__hero-icon" strokeWidth={1.35} />
+                <HeroIcon
+                  aria-hidden="true"
+                  className="stain-modal__hero-icon"
+                  strokeWidth={1.35}
+                />
               </div>
               <div className="stain-modal__titles">
                 <p className="stain-modal__name-ar" id="stain-modal-title-ar">
@@ -146,16 +160,29 @@ export function StainDetailModal({ stain, onClose }: StainDetailModalProps) {
 
             <section className="stain-modal__steps">
               <div className="stain-modal__section-head">
-                <ListOrdered aria-hidden="true" className="stain-modal__section-icon" strokeWidth={1.75} />
+                <ListOrdered
+                  aria-hidden="true"
+                  className="stain-modal__section-icon"
+                  strokeWidth={1.75}
+                />
                 <div>
-                  <p className="stain-modal__section-label-en">{dictionaries.en['stains.modal.removalSteps']}</p>
-                  <p className="stain-modal__section-label-ar">{dictionaries.ar['stains.modal.removalSteps']}</p>
+                  <p className="stain-modal__section-label-en">
+                    {dictionaries.en['stains.modal.removalSteps']}
+                  </p>
+                  <p className="stain-modal__section-label-ar">
+                    {dictionaries.ar['stains.modal.removalSteps']}
+                  </p>
                 </div>
               </div>
               <ol className="stain-modal__steps-list">
                 {steps.en.map((step, index) => (
-                  <li className="stain-modal__step" key={`${stain.id}-step-${index}`}>
-                    <span className="stain-modal__step-ar">{steps.ar[index] ?? step}</span>
+                  <li
+                    className="stain-modal__step"
+                    key={`${stain.id}-step-${index}`}
+                  >
+                    <span className="stain-modal__step-ar">
+                      {steps.ar[index] ?? step}
+                    </span>
                     <span className="stain-modal__step-en">{step}</span>
                   </li>
                 ))}
@@ -164,26 +191,50 @@ export function StainDetailModal({ stain, onClose }: StainDetailModalProps) {
 
             <section className="stain-modal__warnings">
               <div className="stain-modal__section-head">
-                <AlertTriangle aria-hidden="true" className="stain-modal__section-icon" strokeWidth={1.75} />
+                <AlertTriangle
+                  aria-hidden="true"
+                  className="stain-modal__section-icon"
+                  strokeWidth={1.75}
+                />
                 <div>
-                  <p className="stain-modal__section-label-en">{dictionaries.en['stains.modal.warnings']}</p>
-                  <p className="stain-modal__section-label-ar">{dictionaries.ar['stains.modal.warnings']}</p>
+                  <p className="stain-modal__section-label-en">
+                    {dictionaries.en['stains.modal.warnings']}
+                  </p>
+                  <p className="stain-modal__section-label-ar">
+                    {dictionaries.ar['stains.modal.warnings']}
+                  </p>
                 </div>
               </div>
-              <p className="stain-modal__warning-text-en">{stain.warnings.en}</p>
-              <p className="stain-modal__warning-text-ar">{stain.warnings.ar}</p>
+              <p className="stain-modal__warning-text-en">
+                {stain.warnings.en}
+              </p>
+              <p className="stain-modal__warning-text-ar">
+                {stain.warnings.ar}
+              </p>
             </section>
 
             <section className="stain-modal__hotel">
               <div className="stain-modal__section-head">
-                <Building2 aria-hidden="true" className="stain-modal__section-icon" strokeWidth={1.75} />
+                <Building2
+                  aria-hidden="true"
+                  className="stain-modal__section-icon"
+                  strokeWidth={1.75}
+                />
                 <div>
-                  <p className="stain-modal__section-label-en">{dictionaries.en['stains.modal.hotelRecommendations']}</p>
-                  <p className="stain-modal__section-label-ar">{dictionaries.ar['stains.modal.hotelRecommendations']}</p>
+                  <p className="stain-modal__section-label-en">
+                    {dictionaries.en['stains.modal.hotelRecommendations']}
+                  </p>
+                  <p className="stain-modal__section-label-ar">
+                    {dictionaries.ar['stains.modal.hotelRecommendations']}
+                  </p>
                 </div>
               </div>
-              <p className="stain-modal__hotel-text-en">{stain.hotelRecommendations.en}</p>
-              <p className="stain-modal__hotel-text-ar">{stain.hotelRecommendations.ar}</p>
+              <p className="stain-modal__hotel-text-en">
+                {stain.hotelRecommendations.en}
+              </p>
+              <p className="stain-modal__hotel-text-ar">
+                {stain.hotelRecommendations.ar}
+              </p>
             </section>
           </motion.div>
         </motion.div>

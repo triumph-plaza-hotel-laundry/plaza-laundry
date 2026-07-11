@@ -26,7 +26,10 @@ const dayLabelKeys: Record<WeekDayId, TranslationKey> = {
   friday: 'shifts.days.friday',
 };
 
-export function AdminShiftsSummaryCard({ selectedDay, daySchedule }: AdminShiftsSummaryCardProps) {
+export function AdminShiftsSummaryCard({
+  selectedDay,
+  daySchedule,
+}: AdminShiftsSummaryCardProps) {
   const { language, t } = useLanguage();
   const today = useCairoToday();
   const employees = useSyncStore(employeesRepository);
@@ -49,31 +52,54 @@ export function AdminShiftsSummaryCard({ selectedDay, daySchedule }: AdminShifts
   const offCount = countOffAssignments(daySchedule);
 
   return (
-    <section aria-label={t('admin.shifts.summary.title')} className="admin-shifts-editor__summary">
+    <section
+      aria-label={t('admin.shifts.summary.title')}
+      className="admin-shifts-editor__summary"
+    >
       <div className="admin-shifts-editor__summary-item">
-        <span className="admin-shifts-editor__summary-label">{t('admin.shifts.summary.currentDay')}</span>
+        <span className="admin-shifts-editor__summary-label">
+          {t('admin.shifts.summary.currentDay')}
+        </span>
         <span className="admin-shifts-editor__summary-value admin-shifts-editor__summary-value--highlight">
           {t(dayLabelKeys[selectedDay])}
         </span>
       </div>
       <div className="admin-shifts-editor__summary-item">
-        <span className="admin-shifts-editor__summary-label">{t('admin.shifts.summary.currentDate')}</span>
-        <span className="admin-shifts-editor__summary-value">{formattedDate}</span>
+        <span className="admin-shifts-editor__summary-label">
+          {t('admin.shifts.summary.currentDate')}
+        </span>
+        <span className="admin-shifts-editor__summary-value">
+          {formattedDate}
+        </span>
       </div>
       <div className="admin-shifts-editor__summary-item">
-        <span className="admin-shifts-editor__summary-label">{t('admin.shifts.summary.totalEmployees')}</span>
-        <span className="admin-shifts-editor__summary-value">{totalEmployees}</span>
+        <span className="admin-shifts-editor__summary-label">
+          {t('admin.shifts.summary.totalEmployees')}
+        </span>
+        <span className="admin-shifts-editor__summary-value">
+          {totalEmployees}
+        </span>
       </div>
       <div className="admin-shifts-editor__summary-item">
-        <span className="admin-shifts-editor__summary-label">{t('admin.shifts.summary.morningCount')}</span>
-        <span className="admin-shifts-editor__summary-value">{morningCount}</span>
+        <span className="admin-shifts-editor__summary-label">
+          {t('admin.shifts.summary.morningCount')}
+        </span>
+        <span className="admin-shifts-editor__summary-value">
+          {morningCount}
+        </span>
       </div>
       <div className="admin-shifts-editor__summary-item">
-        <span className="admin-shifts-editor__summary-label">{t('admin.shifts.summary.eveningCount')}</span>
-        <span className="admin-shifts-editor__summary-value">{eveningCount}</span>
+        <span className="admin-shifts-editor__summary-label">
+          {t('admin.shifts.summary.eveningCount')}
+        </span>
+        <span className="admin-shifts-editor__summary-value">
+          {eveningCount}
+        </span>
       </div>
       <div className="admin-shifts-editor__summary-item">
-        <span className="admin-shifts-editor__summary-label">{t('admin.shifts.summary.offCount')}</span>
+        <span className="admin-shifts-editor__summary-label">
+          {t('admin.shifts.summary.offCount')}
+        </span>
         <span className="admin-shifts-editor__summary-value">{offCount}</span>
       </div>
     </section>

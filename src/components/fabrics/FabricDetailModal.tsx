@@ -42,7 +42,11 @@ function DetailRow({ icon: Icon, labelEn, labelAr, value }: DetailRowProps) {
   return (
     <div className="fabric-modal__detail">
       <div className="fabric-modal__detail-icon-wrap">
-        <Icon aria-hidden="true" className="fabric-modal__detail-icon" strokeWidth={1.75} />
+        <Icon
+          aria-hidden="true"
+          className="fabric-modal__detail-icon"
+          strokeWidth={1.75}
+        />
       </div>
       <div className="fabric-modal__detail-content">
         <p className="fabric-modal__detail-label-en">{labelEn}</p>
@@ -84,10 +88,17 @@ export function FabricDetailModal({
   const relatedFabrics = fabric ? getRelatedFabrics(fabric) : [];
   const hotelUses = fabric ? splitHotelUses(fabric) : { en: [], ar: [] };
   const spinSpeed = fabric ? inferSpinSpeed(fabric) : { en: '', ar: '' };
-  const modalIsFavorite = fabric && isFavoriteFabric ? isFavoriteFabric(fabric.id) : false;
+  const modalIsFavorite =
+    fabric && isFavoriteFabric ? isFavoriteFabric(fabric.id) : false;
 
-  const yes = { en: dictionaries.en['fabrics.yes'], ar: dictionaries.ar['fabrics.yes'] };
-  const no = { en: dictionaries.en['fabrics.no'], ar: dictionaries.ar['fabrics.no'] };
+  const yes = {
+    en: dictionaries.en['fabrics.yes'],
+    ar: dictionaries.ar['fabrics.yes'],
+  };
+  const no = {
+    en: dictionaries.en['fabrics.no'],
+    ar: dictionaries.ar['fabrics.no'],
+  };
 
   return (
     <AnimatePresence>
@@ -111,14 +122,24 @@ export function FabricDetailModal({
             aria-labelledby="fabric-modal-title-en"
             transition={{ duration: 0.22, ease: 'easeOut' }}
           >
-            <button className="fabric-modal__close" onClick={onClose} type="button">
+            <button
+              className="fabric-modal__close"
+              onClick={onClose}
+              type="button"
+            >
               <X aria-hidden="true" strokeWidth={1.75} />
-              <span className="sr-only">{dictionaries.en['common.closeMenu']}</span>
+              <span className="sr-only">
+                {dictionaries.en['common.closeMenu']}
+              </span>
             </button>
 
             <div className="fabric-modal__hero">
               <div className="fabric-modal__image-frame">
-                <FabricImage alt="" className="fabric-modal__fabric-image" src={fabric.image} />
+                <FabricImage
+                  alt=""
+                  className="fabric-modal__fabric-image"
+                  src={fabric.image}
+                />
               </div>
               <div className="fabric-modal__titles">
                 <p className="fabric-modal__name-ar" id="fabric-modal-title-ar">
@@ -129,13 +150,19 @@ export function FabricDetailModal({
                 </p>
                 {onToggleFavorite ? (
                   <button
-                    className={`fabric-modal__favorite${modalIsFavorite ? ' fabric-modal__favorite--active' : ''}`}
+                    className={`fabric-modal__favorite${modalIsFavorite ? 'fabric-modal__favorite--active' : ''}`}
                     onClick={() => onToggleFavorite(fabric.id)}
                     type="button"
                   >
-                    <Star aria-hidden="true" fill={modalIsFavorite ? 'currentColor' : 'none'} strokeWidth={1.75} />
+                    <Star
+                      aria-hidden="true"
+                      fill={modalIsFavorite ? 'currentColor' : 'none'}
+                      strokeWidth={1.75}
+                    />
                     <span className="fabric-modal__favorite-en">
-                      {modalIsFavorite ? 'Saved to favorites' : 'Add to favorites'}
+                      {modalIsFavorite
+                        ? 'Saved to favorites'
+                        : 'Add to favorites'}
                     </span>
                     <span className="fabric-modal__favorite-ar">
                       {modalIsFavorite ? 'محفوظ في المفضلة' : 'أضف إلى المفضلة'}
@@ -156,8 +183,12 @@ export function FabricDetailModal({
               />
               <DetailRow
                 icon={Sparkles}
-                labelAr={dictionaries.ar['fabrics.catalog.modal.recommendedProgram']}
-                labelEn={dictionaries.en['fabrics.catalog.modal.recommendedProgram']}
+                labelAr={
+                  dictionaries.ar['fabrics.catalog.modal.recommendedProgram']
+                }
+                labelEn={
+                  dictionaries.en['fabrics.catalog.modal.recommendedProgram']
+                }
                 value={fabric.washingProgram}
               />
               <DetailRow
@@ -206,16 +237,29 @@ export function FabricDetailModal({
 
             <section className="fabric-modal__uses">
               <div className="fabric-modal__uses-header">
-                <Building2 aria-hidden="true" className="fabric-modal__uses-icon" strokeWidth={1.75} />
+                <Building2
+                  aria-hidden="true"
+                  className="fabric-modal__uses-icon"
+                  strokeWidth={1.75}
+                />
                 <div>
-                  <p className="fabric-modal__uses-label-en">{dictionaries.en['fabrics.fields.hotelUses']}</p>
-                  <p className="fabric-modal__uses-label-ar">{dictionaries.ar['fabrics.fields.hotelUses']}</p>
+                  <p className="fabric-modal__uses-label-en">
+                    {dictionaries.en['fabrics.fields.hotelUses']}
+                  </p>
+                  <p className="fabric-modal__uses-label-ar">
+                    {dictionaries.ar['fabrics.fields.hotelUses']}
+                  </p>
                 </div>
               </div>
               <div className="fabric-modal__uses-chips">
                 {hotelUses.en.map((use, index) => (
-                  <span className="fabric-modal__use-chip" key={`${use}-${index}`}>
-                    <span className="fabric-modal__use-chip-ar">{hotelUses.ar[index] ?? use}</span>
+                  <span
+                    className="fabric-modal__use-chip"
+                    key={`${use}-${index}`}
+                  >
+                    <span className="fabric-modal__use-chip-ar">
+                      {hotelUses.ar[index] ?? use}
+                    </span>
                     <span className="fabric-modal__use-chip-en">{use}</span>
                   </span>
                 ))}

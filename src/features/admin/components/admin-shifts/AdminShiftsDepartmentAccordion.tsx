@@ -1,6 +1,10 @@
 import { ChevronDown } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import type { ShiftPeriod, ShiftRole, WeeklyCellAssignment } from '@/data/laundry-shifts';
+import type {
+  ShiftPeriod,
+  ShiftRole,
+  WeeklyCellAssignment,
+} from '@/data/laundry-shifts';
 import type { AdminShiftDepartmentView } from '@/lib/admin-shift-departments';
 import { isDepartmentDirtyForDay } from '@/lib/admin-shift-validation';
 import { useLanguage } from '@/hooks';
@@ -8,11 +12,36 @@ import type { TranslationKey } from '@/types/language';
 
 type SlotKey = 'morning0' | 'morning1' | 'evening0' | 'evening1';
 
-const slotRows: readonly { key: SlotKey; period: ShiftPeriod; index: 0 | 1; labelKey: TranslationKey }[] = [
-  { key: 'morning0', period: 'morning', index: 0, labelKey: 'admin.shifts.slots.morning1' },
-  { key: 'morning1', period: 'morning', index: 1, labelKey: 'admin.shifts.slots.morning2' },
-  { key: 'evening0', period: 'evening', index: 0, labelKey: 'admin.shifts.slots.evening1' },
-  { key: 'evening1', period: 'evening', index: 1, labelKey: 'admin.shifts.slots.evening2' },
+const slotRows: readonly {
+  key: SlotKey;
+  period: ShiftPeriod;
+  index: 0 | 1;
+  labelKey: TranslationKey;
+}[] = [
+  {
+    key: 'morning0',
+    period: 'morning',
+    index: 0,
+    labelKey: 'admin.shifts.slots.morning1',
+  },
+  {
+    key: 'morning1',
+    period: 'morning',
+    index: 1,
+    labelKey: 'admin.shifts.slots.morning2',
+  },
+  {
+    key: 'evening0',
+    period: 'evening',
+    index: 0,
+    labelKey: 'admin.shifts.slots.evening1',
+  },
+  {
+    key: 'evening1',
+    period: 'evening',
+    index: 1,
+    labelKey: 'admin.shifts.slots.evening2',
+  },
 ];
 
 type AdminShiftsDepartmentAccordionProps = {
@@ -43,7 +72,11 @@ export function AdminShiftsDepartmentAccordion({
   const altTitle = language === 'ar' ? department.titleEn : department.titleAr;
   const role = department.shiftRole;
   const cell = currentDaySchedule[role];
-  const isDepartmentDirty = isDepartmentDirtyForDay(currentDaySchedule, baselineDaySchedule, role);
+  const isDepartmentDirty = isDepartmentDirtyForDay(
+    currentDaySchedule,
+    baselineDaySchedule,
+    role,
+  );
 
   const managerLabel = department.manager
     ? language === 'ar'
@@ -52,14 +85,20 @@ export function AdminShiftsDepartmentAccordion({
     : null;
 
   return (
-    <section className={`admin-shifts-dept${isOpen ? ' admin-shifts-dept--open' : ''}`}>
+    <section
+      className={`admin-shifts-dept${isOpen ? 'admin-shifts-dept--open' : ''}`}
+    >
       <button
         aria-expanded={isOpen}
         className="admin-shifts-dept__trigger"
         onClick={onToggle}
         type="button"
       >
-        <ChevronDown aria-hidden="true" className="admin-shifts-dept__chevron" strokeWidth={1.75} />
+        <ChevronDown
+          aria-hidden="true"
+          className="admin-shifts-dept__chevron"
+          strokeWidth={1.75}
+        />
         <span aria-hidden="true" className="admin-shifts-dept__icon">
           {department.icon}
         </span>
@@ -82,7 +121,9 @@ export function AdminShiftsDepartmentAccordion({
               {managerLabel ? (
                 <p className="admin-shifts-dept__manager">
                   {t('admin.shifts.manager')}:{' '}
-                  <span className="admin-shifts-dept__manager-name">{managerLabel}</span>
+                  <span className="admin-shifts-dept__manager-name">
+                    {managerLabel}
+                  </span>
                 </p>
               ) : null}
 
@@ -97,11 +138,15 @@ export function AdminShiftsDepartmentAccordion({
                   <tbody>
                     {slotRows.map((slot) => (
                       <tr key={slot.key}>
-                        <td className="admin-shifts-dept__slot-label">{t(slot.labelKey)}</td>
+                        <td className="admin-shifts-dept__slot-label">
+                          {t(slot.labelKey)}
+                        </td>
                         <td>
                           <select
                             className="admin-shifts-dept__select"
-                            onChange={(event) => onUpdateSlot(role, slot.key, event.target.value)}
+                            onChange={(event) =>
+                              onUpdateSlot(role, slot.key, event.target.value)
+                            }
                             value={cell[slot.period][slot.index]}
                           >
                             <option value="">—</option>

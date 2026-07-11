@@ -30,12 +30,13 @@ const dayLabelKeys: Record<WeekDayId, TranslationKey> = {
 };
 
 const roleLabelKeys: Record<ShiftRole, TranslationKey> = {
-  washer: 'shifts.roles.washer',
-  valet: 'shifts.roles.valet',
-  ironing: 'shifts.roles.ironing',
-  press: 'shifts.roles.press',
-  linen: 'shifts.roles.linen',
-  off: 'shifts.roles.off',
+  washer: 'shifts.weekly.departments.washing',
+  ghalya: 'shifts.weekly.departments.ghalya',
+  ironing: 'shifts.weekly.departments.ironing',
+  linen: 'shifts.weekly.departments.linen',
+  calendar: 'shifts.weekly.departments.calendar',
+  weeklyLeave: 'shifts.weekly.departments.weeklyLeave',
+  annualLeave: 'shifts.weekly.departments.annualLeave',
 };
 
 function getEmployeeName(id: string, language: 'en' | 'ar'): string {
@@ -60,14 +61,22 @@ function ScheduleCell({
     <div className="weekly-schedule__cell">
       <div className="weekly-schedule__shift-block">
         <p className="weekly-schedule__shift-label">{t('shifts.morning')}</p>
-        <p className="weekly-schedule__employee">{getEmployeeName(assignment.morning[0], language)}</p>
-        <p className="weekly-schedule__employee">{getEmployeeName(assignment.morning[1], language)}</p>
+        <p className="weekly-schedule__employee">
+          {getEmployeeName(assignment.morning[0], language)}
+        </p>
+        <p className="weekly-schedule__employee">
+          {getEmployeeName(assignment.morning[1], language)}
+        </p>
       </div>
       <div className="weekly-schedule__cell-divider" aria-hidden="true" />
       <div className="weekly-schedule__shift-block">
         <p className="weekly-schedule__shift-label">{t('shifts.evening')}</p>
-        <p className="weekly-schedule__employee">{getEmployeeName(assignment.evening[0], language)}</p>
-        <p className="weekly-schedule__employee">{getEmployeeName(assignment.evening[1], language)}</p>
+        <p className="weekly-schedule__employee">
+          {getEmployeeName(assignment.evening[0], language)}
+        </p>
+        <p className="weekly-schedule__employee">
+          {getEmployeeName(assignment.evening[1], language)}
+        </p>
       </div>
     </div>
   );
@@ -131,11 +140,16 @@ export function WeeklySchedulePanel({
           >
             <header className="weekly-schedule__header">
               <div className="weekly-schedule__title-block">
-                <h2 className="weekly-schedule__title-en" id="weekly-schedule-title">
+                <h2
+                  className="weekly-schedule__title-en"
+                  id="weekly-schedule-title"
+                >
                   Weekly Schedule
                 </h2>
                 <h2 className="weekly-schedule__title-ar">الجدول الأسبوعي</h2>
-                <p className="weekly-schedule__subtitle">{t('shifts.weeklySubtitle')}</p>
+                <p className="weekly-schedule__subtitle">
+                  {t('shifts.weeklySubtitle')}
+                </p>
               </div>
               <div className="weekly-schedule__actions">
                 <button
@@ -177,7 +191,7 @@ export function WeeklySchedulePanel({
                   {weekDays.map((day) => (
                     <tr key={day}>
                       <th
-                        className={`weekly-schedule__role-head${day === selectedDay ? ' weekly-schedule__role-head--today' : ''}`}
+                        className={`weekly-schedule__role-head${day === selectedDay ? 'weekly-schedule__role-head--today' : ''}`}
                         scope="row"
                       >
                         {t(dayLabelKeys[day])}

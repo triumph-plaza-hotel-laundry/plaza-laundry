@@ -24,10 +24,11 @@
   width: min(100%, 52rem);
   margin-inline: auto;
   padding: 0 0.5rem 1.5rem;
+  --home-shift-brown: rgb(54 43 33 / 58%);
   --home-shift-gold: #f6d76b;
   --home-shift-gold-hover: #ffe89a;
   --home-shift-glass: rgb(10 10 10 / 45%);
-  --home-shift-border: rgb(246 215 107 / 22%);
+  --home-shift-border: var(--home-shift-brown);
   --shift-bg: rgb(10 10 10 / 45%);
   --shift-surface: rgb(10 10 10 / 45%);
   --shift-glass: rgb(10 10 10 / 32%);
@@ -36,13 +37,16 @@
   --shift-gold: var(--home-shift-gold);
   --shift-gold-soft: var(--home-shift-gold-hover);
   --shift-gold-dim: rgb(246 215 107 / 10%);
-  --shift-border: rgb(246 215 107 / 14%);
-  --shift-font-en: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --shift-border: var(--home-shift-brown);
+  --shift-font-en:
+    Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --shift-font-ar: 'Noto Kufi Arabic', 'Segoe UI', Tahoma, sans-serif;
 }
 
 :root[data-theme='luxury-light'] .home-shift-plan {
+  --home-shift-brown: rgb(92 76 58 / 46%);
   --home-shift-glass: rgb(255 255 255 / 58%);
+  --home-shift-border: var(--home-shift-brown);
   --shift-bg: rgb(255 255 255 / 58%);
   --shift-surface: rgb(255 255 255 / 62%);
   --shift-glass: rgb(255 255 255 / 48%);
@@ -51,7 +55,7 @@
   --shift-gold: #b8923f;
   --shift-gold-soft: #c8a24e;
   --shift-gold-dim: rgb(200 162 78 / 12%);
-  --shift-border: rgb(200 162 78 / 20%);
+  --shift-border: var(--home-shift-brown);
 }
 
 .home-shift-plan__schedule {
@@ -122,11 +126,7 @@
   border: 1px solid var(--home-shift-border);
   border-radius: 22px;
   background:
-    linear-gradient(
-      165deg,
-      rgb(255 255 255 / 5%) 0%,
-      transparent 38%
-    ),
+    linear-gradient(165deg, rgb(255 255 255 / 5%) 0%, transparent 38%),
     var(--home-shift-glass);
   box-shadow:
     0 6px 24px rgb(0 0 0 / 14%),
@@ -176,7 +176,11 @@
   color: var(--home-shift-gold-hover);
 }
 
-:root[data-theme='luxury-light'] .home-shift-plan .shift-today-card__table thead th {
+:root[data-theme='luxury-light']
+  .home-shift-plan
+  .shift-today-card__table
+  thead
+  th {
   background: rgb(255 255 255 / 28%);
   color: var(--shift-gold);
   text-shadow: none;
@@ -204,7 +208,9 @@
   color: var(--home-shift-gold-hover);
 }
 
-:root[data-theme='luxury-light'] .home-shift-plan .shift-today-card__shift-label {
+:root[data-theme='luxury-light']
+  .home-shift-plan
+  .shift-today-card__shift-label {
   text-shadow: none;
 }
 
@@ -225,22 +231,17 @@
 }
 
 .home-shift-plan .shift-today-card__divider {
+  height: 1px;
   margin: 0.55rem 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgb(246 215 107 / 14%),
-    transparent
-  );
+  background: var(--home-shift-brown);
 }
 
 :root[data-theme='luxury-light'] .home-shift-plan .shift-today-card {
-  background:
-    linear-gradient(
-      165deg,
-      rgb(255 255 255 / 78%) 0%,
-      rgb(255 255 255 / 52%) 100%
-    );
+  background: linear-gradient(
+    165deg,
+    rgb(255 255 255 / 78%) 0%,
+    rgb(255 255 255 / 52%) 100%
+  );
   box-shadow:
     0 4px 16px rgb(47 42 37 / 8%),
     inset 0 1px 0 rgb(255 255 255 / 85%);

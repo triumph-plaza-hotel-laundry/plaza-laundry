@@ -50,7 +50,10 @@ export function OfficialPriceListDocument({
   onPriceChange,
 }: OfficialPriceListDocumentProps) {
   return (
-    <article aria-label="Laundry price list form" className="tpl-official-sheet">
+    <article
+      aria-label="Laundry price list form"
+      className="tpl-official-sheet"
+    >
       <OfficialFormHeader
         badgeAr={tabBadge[tab].ar}
         badgeEn={tabBadge[tab].en}
@@ -62,7 +65,9 @@ export function OfficialPriceListDocument({
 
       <div className="tpl-official-sheet__body">
         {priceListCategories.map((category) => {
-          const categoryItems = items.filter((entry) => entry.category === category);
+          const categoryItems = items.filter(
+            (entry) => entry.category === category,
+          );
 
           return (
             <section className="tpl-official-sheet__section" key={category}>
@@ -88,7 +93,11 @@ export function OfficialPriceListDocument({
                         </span>
                       </th>
                       {(['wash', 'dryClean', 'iron'] as const).map((field) => (
-                        <th className="tpl-official-table__price-col" key={field} scope="col">
+                        <th
+                          className="tpl-official-table__price-col"
+                          key={field}
+                          scope="col"
+                        >
                           <span className="tpl-official-table__head-en">
                             {dictionaries.en[columnKeys[field]]}
                           </span>
@@ -101,32 +110,48 @@ export function OfficialPriceListDocument({
                   </thead>
                   <tbody>
                     {categoryItems.map((entry) => {
-                      const rowPrices = prices[entry.id] ?? { wash: '', dryClean: '', iron: '' };
+                      const rowPrices = prices[entry.id] ?? {
+                        wash: '',
+                        dryClean: '',
+                        iron: '',
+                      };
 
                       return (
                         <tr key={entry.id}>
                           <th className="tpl-official-table__item" scope="row">
-                            <span className="tpl-official-table__item-ar">{entry.name.ar}</span>
-                            <span className="tpl-official-table__item-en">{entry.name.en}</span>
+                            <span className="tpl-official-table__item-ar">
+                              {entry.name.ar}
+                            </span>
+                            <span className="tpl-official-table__item-en">
+                              {entry.name.en}
+                            </span>
                           </th>
-                          {(['wash', 'dryClean', 'iron'] as const).map((field) => (
-                            <td key={field}>
-                              {readOnly ? (
-                                <span className="tpl-official-table__input tpl-official-table__input--static">
-                                  {rowPrices[field] || '—'}
-                                </span>
-                              ) : (
-                                <input
-                                  aria-label={`${entry.name.en} ${dictionaries.en[columnKeys[field]]}`}
-                                  className="tpl-official-table__input"
-                                  inputMode="decimal"
-                                  onChange={(event) => onPriceChange?.(entry.id, field, event.target.value)}
-                                  type="text"
-                                  value={rowPrices[field]}
-                                />
-                              )}
-                            </td>
-                          ))}
+                          {(['wash', 'dryClean', 'iron'] as const).map(
+                            (field) => (
+                              <td key={field}>
+                                {readOnly ? (
+                                  <span className="tpl-official-table__input tpl-official-table__input--static">
+                                    {rowPrices[field] || '—'}
+                                  </span>
+                                ) : (
+                                  <input
+                                    aria-label={`${entry.name.en} ${dictionaries.en[columnKeys[field]]}`}
+                                    className="tpl-official-table__input"
+                                    inputMode="decimal"
+                                    onChange={(event) =>
+                                      onPriceChange?.(
+                                        entry.id,
+                                        field,
+                                        event.target.value,
+                                      )
+                                    }
+                                    type="text"
+                                    value={rowPrices[field]}
+                                  />
+                                )}
+                              </td>
+                            ),
+                          )}
                         </tr>
                       );
                     })}
@@ -138,27 +163,52 @@ export function OfficialPriceListDocument({
         })}
 
         <aside className="tpl-official-sheet__note" role="note">
-          <p className="tpl-official-sheet__note-label-ar">{dictionaries.ar['priceList.note.label']}</p>
-          <p className="tpl-official-sheet__note-text-ar">{dictionaries.ar['priceList.note.body']}</p>
-          <p className="tpl-official-sheet__note-label-en">{dictionaries.en['priceList.note.label']}</p>
-          <p className="tpl-official-sheet__note-text-en">{dictionaries.en['priceList.note.body']}</p>
+          <p className="tpl-official-sheet__note-label-ar">
+            {dictionaries.ar['priceList.note.label']}
+          </p>
+          <p className="tpl-official-sheet__note-text-ar">
+            {dictionaries.ar['priceList.note.body']}
+          </p>
+          <p className="tpl-official-sheet__note-label-en">
+            {dictionaries.en['priceList.note.label']}
+          </p>
+          <p className="tpl-official-sheet__note-text-en">
+            {dictionaries.en['priceList.note.body']}
+          </p>
         </aside>
 
         <footer className="tpl-official-sheet__footer">
           <div className="tpl-official-sheet__signature">
-            <p className="tpl-official-sheet__signature-label-ar">توقيع المدير</p>
-            <p className="tpl-official-sheet__signature-label-en">Manager Signature</p>
-            <div aria-hidden="true" className="tpl-official-sheet__signature-line" />
+            <p className="tpl-official-sheet__signature-label-ar">
+              توقيع المدير
+            </p>
+            <p className="tpl-official-sheet__signature-label-en">
+              Manager Signature
+            </p>
+            <div
+              aria-hidden="true"
+              className="tpl-official-sheet__signature-line"
+            />
           </div>
           <div className="tpl-official-sheet__signature">
-            <p className="tpl-official-sheet__signature-label-ar">توقيع المشرف</p>
-            <p className="tpl-official-sheet__signature-label-en">Supervisor Signature</p>
-            <div aria-hidden="true" className="tpl-official-sheet__signature-line" />
+            <p className="tpl-official-sheet__signature-label-ar">
+              توقيع المشرف
+            </p>
+            <p className="tpl-official-sheet__signature-label-en">
+              Supervisor Signature
+            </p>
+            <div
+              aria-hidden="true"
+              className="tpl-official-sheet__signature-line"
+            />
           </div>
           <div className="tpl-official-sheet__signature">
             <p className="tpl-official-sheet__signature-label-ar">التاريخ</p>
             <p className="tpl-official-sheet__signature-label-en">Date</p>
-            <div aria-hidden="true" className="tpl-official-sheet__signature-line" />
+            <div
+              aria-hidden="true"
+              className="tpl-official-sheet__signature-line"
+            />
           </div>
         </footer>
       </div>

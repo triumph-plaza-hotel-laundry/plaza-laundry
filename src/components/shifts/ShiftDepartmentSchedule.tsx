@@ -11,8 +11,14 @@ import {
 import type { LaundryEmployee } from '@/data/laundry-employees';
 import { employeesRepository } from '@/data/repositories';
 import { useLanguage, useSyncStore } from '@/hooks';
-import { groupEmployeesByShiftDepartment, type ShiftDepartmentGroup } from '@/lib/shift-departments';
-import { findEmployeeShiftSlots, formatEmployeeDaySummary } from '@/lib/shift-schedule-utils';
+import {
+  groupEmployeesByShiftDepartment,
+  type ShiftDepartmentGroup,
+} from '@/lib/shift-departments';
+import {
+  findEmployeeShiftSlots,
+  formatEmployeeDaySummary,
+} from '@/lib/shift-schedule-utils';
 import type { TranslationKey } from '@/types/language';
 
 type ShiftDepartmentScheduleProps = {
@@ -31,12 +37,13 @@ const dayLabelKeys: Record<WeekDayId, TranslationKey> = {
 };
 
 const roleLabelKeys: Record<ShiftRole, TranslationKey> = {
-  washer: 'shifts.roles.washer',
-  valet: 'shifts.roles.valet',
-  ironing: 'shifts.roles.ironing',
-  press: 'shifts.roles.press',
-  linen: 'shifts.roles.linen',
-  off: 'shifts.roles.off',
+  washer: 'shifts.weekly.departments.washing',
+  ghalya: 'shifts.weekly.departments.ghalya',
+  ironing: 'shifts.weekly.departments.ironing',
+  linen: 'shifts.weekly.departments.linen',
+  calendar: 'shifts.weekly.departments.calendar',
+  weeklyLeave: 'shifts.weekly.departments.weeklyLeave',
+  annualLeave: 'shifts.weekly.departments.annualLeave',
 };
 
 function ShiftPeriodAccordion({
@@ -54,10 +61,13 @@ function ShiftPeriodAccordion({
 }) {
   const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
-  const periodLabel = period === 'morning' ? t('shifts.morning') : t('shifts.evening');
+  const periodLabel =
+    period === 'morning' ? t('shifts.morning') : t('shifts.evening');
 
   return (
-    <div className={`shift-employee-row__period${isOpen ? ' shift-employee-row__period--open' : ''}`}>
+    <div
+      className={`shift-employee-row__period${isOpen ? 'shift-employee-row__period--open' : ''}`}
+    >
       <button
         aria-expanded={isOpen}
         className="shift-employee-row__period-toggle"
@@ -65,7 +75,11 @@ function ShiftPeriodAccordion({
         type="button"
       >
         <span>{periodLabel}</span>
-        <ChevronDown aria-hidden="true" className="shift-employee-row__period-chevron" strokeWidth={1.75} />
+        <ChevronDown
+          aria-hidden="true"
+          className="shift-employee-row__period-chevron"
+          strokeWidth={1.75}
+        />
       </button>
 
       <AnimatePresence initial={false}>
@@ -83,15 +97,20 @@ function ShiftPeriodAccordion({
                   findEmployeeShiftSlots(employeeId, weeklySchedule[day]),
                   roleLabels,
                 );
-                const value = period === 'morning' ? summary.morning : summary.evening;
+                const value =
+                  period === 'morning' ? summary.morning : summary.evening;
 
                 return (
                   <li
-                    className={`shift-employee-row__day${day === selectedDay ? ' shift-employee-row__day--today' : ''}`}
+                    className={`shift-employee-row__day${day === selectedDay ? 'shift-employee-row__day--today' : ''}`}
                     key={day}
                   >
-                    <span className="shift-employee-row__day-label">{t(dayLabelKeys[day])}</span>
-                    <span className="shift-employee-row__day-value">{value}</span>
+                    <span className="shift-employee-row__day-label">
+                      {t(dayLabelKeys[day])}
+                    </span>
+                    <span className="shift-employee-row__day-value">
+                      {value}
+                    </span>
                   </li>
                 );
               })}
@@ -121,7 +140,9 @@ function ShiftEmployeeRow({
   return (
     <div className="shift-employee-row">
       <p className="shift-employee-row__name">{primaryName}</p>
-      {secondaryName ? <p className="shift-employee-row__name-alt">{secondaryName}</p> : null}
+      {secondaryName ? (
+        <p className="shift-employee-row__name-alt">{secondaryName}</p>
+      ) : null}
 
       <ShiftPeriodAccordion
         employeeId={employee.id}
@@ -160,14 +181,20 @@ function ShiftDepartmentCard({
   const altTitle = language === 'ar' ? department.titleEn : department.titleAr;
 
   return (
-    <section className={`shift-dept-card${isOpen ? ' shift-dept-card--open' : ''}`}>
+    <section
+      className={`shift-dept-card${isOpen ? 'shift-dept-card--open' : ''}`}
+    >
       <button
         aria-expanded={isOpen}
         className="shift-dept-card__header"
         onClick={() => setIsOpen((open) => !open)}
         type="button"
       >
-        <ChevronDown aria-hidden="true" className="shift-dept-card__chevron" strokeWidth={1.75} />
+        <ChevronDown
+          aria-hidden="true"
+          className="shift-dept-card__chevron"
+          strokeWidth={1.75}
+        />
         <span aria-hidden="true" className="shift-dept-card__icon">
           {department.icon}
         </span>
@@ -216,7 +243,10 @@ export function ShiftDepartmentSchedule({
   const roleLabels = useMemo(
     () =>
       Object.fromEntries(
-        (Object.keys(roleLabelKeys) as ShiftRole[]).map((role) => [role, t(roleLabelKeys[role])]),
+        (Object.keys(roleLabelKeys) as ShiftRole[]).map((role) => [
+          role,
+          t(roleLabelKeys[role]),
+        ]),
       ) as Record<ShiftRole, string>,
     [t],
   );
@@ -227,7 +257,10 @@ export function ShiftDepartmentSchedule({
   );
 
   return (
-    <div aria-label={t('shifts.weeklySubtitle')} className="shift-dept-schedule">
+    <div
+      aria-label={t('shifts.weeklySubtitle')}
+      className="shift-dept-schedule"
+    >
       {departments.map((department, index) => (
         <ShiftDepartmentCard
           defaultOpen={index === 0}

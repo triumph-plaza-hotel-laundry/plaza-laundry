@@ -38,13 +38,16 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
       language,
       direction,
       setLanguage,
-      toggleLanguage: () => setLanguage((current) => (current === 'en' ? 'ar' : 'en')),
+      toggleLanguage: () =>
+        setLanguage((current) => (current === 'en' ? 'ar' : 'en')),
       t: (key: TranslationKey) => dictionaries[language][key],
     }),
     [direction, language],
   );
 
   return (
-    <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>
+    <LanguageContext.Provider value={value}>
+      {children}
+    </LanguageContext.Provider>
   );
 }

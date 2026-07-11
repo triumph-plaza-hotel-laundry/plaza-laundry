@@ -58,7 +58,7 @@ export function FabricCatalogCard({
 
   return (
     <div
-      className={`fabric-catalog-card${compact ? ' fabric-catalog-card--compact' : ''}`}
+      className={`fabric-catalog-card${compact ? 'fabric-catalog-card--compact' : ''}`}
       onClick={() => onSelect(fabric)}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
@@ -86,16 +86,22 @@ export function FabricCatalogCard({
 
         {onToggleFavorite ? (
           <button
-            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+            aria-label={
+              isFavorite ? 'Remove from favorites' : 'Add to favorites'
+            }
             aria-pressed={isFavorite}
-            className={`fabric-catalog-card__favorite${isFavorite ? ' fabric-catalog-card__favorite--active' : ''}`}
+            className={`fabric-catalog-card__favorite${isFavorite ? 'fabric-catalog-card__favorite--active' : ''}`}
             onClick={(event) => {
               event.stopPropagation();
               onToggleFavorite(fabric.id);
             }}
             type="button"
           >
-            <Star aria-hidden="true" fill={isFavorite ? 'currentColor' : 'none'} strokeWidth={1.75} />
+            <Star
+              aria-hidden="true"
+              fill={isFavorite ? 'currentColor' : 'none'}
+              strokeWidth={1.75}
+            />
           </button>
         ) : null}
       </div>

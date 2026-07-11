@@ -76,6 +76,32 @@ export type Database = {
         };
         Relationships: [];
       };
+      admin_inventory_permissions: {
+        Row: {
+          user_id: string;
+          permission: string;
+          granted_at: string;
+        };
+        Insert: {
+          user_id: string;
+          permission: string;
+          granted_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          permission?: string;
+          granted_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'admin_inventory_permissions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'admin_users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       audit_log_entries: {
         Row: {
           id: string;
@@ -112,6 +138,107 @@ export type Database = {
         };
         Relationships: [];
       };
+      department_items: {
+        Row: {
+          id: string;
+          department_id: string;
+          item_key: string;
+          item_name: string;
+          variant_key: string;
+          unit: string;
+          sort_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          department_id: string;
+          item_key?: string;
+          item_name: string;
+          variant_key?: string;
+          unit?: string;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          department_id?: string;
+          item_key?: string;
+          item_name?: string;
+          variant_key?: string;
+          unit?: string;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      department_inventory_assignments: {
+        Row: {
+          id: string;
+          department_id: string;
+          item_key: string;
+          inventory_item_id: string;
+          sort_order: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          department_id: string;
+          item_key: string;
+          inventory_item_id: string;
+          sort_order?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          department_id?: string;
+          item_key?: string;
+          inventory_item_id?: string;
+          sort_order?: number;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'department_inventory_assignments_inventory_item_id_fkey';
+            columns: ['inventory_item_id'];
+            isOneToOne: false;
+            referencedRelation: 'inventory_items';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      department_item_categories: {
+        Row: {
+          id: string;
+          department_id: string;
+          item_key: string;
+          category_name: string;
+          sort_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          department_id: string;
+          item_key: string;
+          category_name: string;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          department_id?: string;
+          item_key?: string;
+          category_name?: string;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       inventory_items: {
         Row: {
           id: string;
@@ -132,6 +259,7 @@ export type Database = {
           updated_at: string | null;
           created_at: string;
           deleted_at: string | null;
+          disabled_at: string | null;
         };
         Insert: {
           id?: string;
@@ -152,6 +280,7 @@ export type Database = {
           updated_at?: string | null;
           created_at?: string;
           deleted_at?: string | null;
+          disabled_at?: string | null;
         };
         Update: {
           id?: string;
@@ -172,6 +301,7 @@ export type Database = {
           updated_at?: string | null;
           created_at?: string;
           deleted_at?: string | null;
+          disabled_at?: string | null;
         };
         Relationships: [];
       };

@@ -29,7 +29,11 @@ function DetailRow({ icon: Icon, labelEn, labelAr, value }: DetailRowProps) {
   return (
     <div className="care-modal__detail">
       <div className="care-modal__detail-icon-wrap">
-        <Icon aria-hidden="true" className="care-modal__detail-icon" strokeWidth={1.75} />
+        <Icon
+          aria-hidden="true"
+          className="care-modal__detail-icon"
+          strokeWidth={1.75}
+        />
       </div>
       <div className="care-modal__detail-content">
         <p className="care-modal__detail-label-en">{labelEn}</p>
@@ -41,7 +45,10 @@ function DetailRow({ icon: Icon, labelEn, labelAr, value }: DetailRowProps) {
   );
 }
 
-export function CareSymbolDetailModal({ label, onClose }: CareSymbolDetailModalProps) {
+export function CareSymbolDetailModal({
+  label,
+  onClose,
+}: CareSymbolDetailModalProps) {
   useEffect(() => {
     if (!label) {
       return undefined;
@@ -84,14 +91,23 @@ export function CareSymbolDetailModal({ label, onClose }: CareSymbolDetailModalP
             aria-labelledby="care-modal-title-en"
             transition={{ duration: 0.22, ease: 'easeOut' }}
           >
-            <button className="care-modal__close" onClick={onClose} type="button">
+            <button
+              className="care-modal__close"
+              onClick={onClose}
+              type="button"
+            >
               <X aria-hidden="true" strokeWidth={1.75} />
-              <span className="sr-only">{dictionaries.en['common.closeMenu']}</span>
+              <span className="sr-only">
+                {dictionaries.en['common.closeMenu']}
+              </span>
             </button>
 
             <div className="care-modal__hero">
               <div className="care-modal__symbol-frame">
-                <CareSymbolGraphicView className="care-modal__symbol" graphic={label.graphic} />
+                <CareSymbolGraphicView
+                  className="care-modal__symbol"
+                  graphic={label.graphic}
+                />
               </div>
               <div className="care-modal__titles">
                 <p className="care-modal__name-ar" id="care-modal-title-ar">

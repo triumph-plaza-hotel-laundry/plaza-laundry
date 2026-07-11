@@ -11,7 +11,11 @@ export function usePrograms() {
     (program: WashingProgram) => {
       assertCan('programs', 'create');
       const created = programsRepository.create(program);
-      logAction({ action: 'programs.create', page: 'programs', newValue: created });
+      logAction({
+        action: 'programs.create',
+        page: 'programs',
+        newValue: created,
+      });
       return created;
     },
     [assertCan, logAction],
@@ -22,7 +26,12 @@ export function usePrograms() {
       assertCan('programs', 'update');
       const oldValue = programsRepository.getById(id);
       const updated = programsRepository.update(id, next);
-      logAction({ action: 'programs.update', page: 'programs', oldValue, newValue: updated });
+      logAction({
+        action: 'programs.update',
+        page: 'programs',
+        oldValue,
+        newValue: updated,
+      });
       return updated;
     },
     [assertCan, logAction],

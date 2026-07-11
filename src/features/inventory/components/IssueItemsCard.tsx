@@ -21,7 +21,11 @@ const emptyForm = {
   reason: '',
 };
 
-export function IssueItemsCard({ disabled, items, onSubmit }: IssueItemsCardProps) {
+export function IssueItemsCard({
+  disabled,
+  items,
+  onSubmit,
+}: IssueItemsCardProps) {
   const { t } = useLanguage();
   const [form, setForm] = useState(emptyForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,17 +65,24 @@ export function IssueItemsCard({ disabled, items, onSubmit }: IssueItemsCardProp
     <section className="inv-panel inv-panel--card">
       <header className="inv-panel__header">
         <h2 className="inv-panel__title-en">{t('inventory.v2.issueTitle')}</h2>
-        <h2 className="inv-panel__title-ar">{t('inventory.v2.issueTitleAr')}</h2>
+        <h2 className="inv-panel__title-ar">
+          {t('inventory.v2.issueTitleAr')}
+        </h2>
       </header>
 
       {localError ? <p className="inv-error">{localError}</p> : null}
 
-      <form className="inv-form-grid" onSubmit={(event) => void handleSubmit(event)}>
+      <form
+        className="inv-form-grid"
+        onSubmit={(event) => void handleSubmit(event)}
+      >
         <label className="inv-field">
           <span>{t('inventory.v2.selectItem')}</span>
           <select
             disabled={disabled || isSubmitting}
-            onChange={(event) => setForm((current) => ({ ...current, itemId: event.target.value }))}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, itemId: event.target.value }))
+            }
             required
             value={form.itemId}
           >
@@ -90,7 +101,12 @@ export function IssueItemsCard({ disabled, items, onSubmit }: IssueItemsCardProp
             disabled={disabled || isSubmitting}
             inputMode="numeric"
             min={1}
-            onChange={(event) => setForm((current) => ({ ...current, quantity: event.target.value }))}
+            onChange={(event) =>
+              setForm((current) => ({
+                ...current,
+                quantity: event.target.value,
+              }))
+            }
             required
             type="number"
             value={form.quantity}
@@ -100,7 +116,12 @@ export function IssueItemsCard({ disabled, items, onSubmit }: IssueItemsCardProp
           <span>{t('inventory.v2.employee')}</span>
           <input
             disabled={disabled || isSubmitting}
-            onChange={(event) => setForm((current) => ({ ...current, employee: event.target.value }))}
+            onChange={(event) =>
+              setForm((current) => ({
+                ...current,
+                employee: event.target.value,
+              }))
+            }
             required
             value={form.employee}
           />
@@ -109,14 +130,22 @@ export function IssueItemsCard({ disabled, items, onSubmit }: IssueItemsCardProp
           <span>{t('inventory.v2.issueReason')}</span>
           <input
             disabled={disabled || isSubmitting}
-            onChange={(event) => setForm((current) => ({ ...current, reason: event.target.value }))}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, reason: event.target.value }))
+            }
             required
             value={form.reason}
           />
         </label>
         <div className="inv-form-actions">
-          <button className="inv-btn inv-btn--gold" disabled={disabled || isSubmitting} type="submit">
-            {isSubmitting ? t('admin.editor.saving') : t('inventory.v2.issueButton')}
+          <button
+            className="inv-btn inv-btn--gold"
+            disabled={disabled || isSubmitting}
+            type="submit"
+          >
+            {isSubmitting
+              ? t('admin.editor.saving')
+              : t('inventory.v2.issueButton')}
           </button>
         </div>
       </form>

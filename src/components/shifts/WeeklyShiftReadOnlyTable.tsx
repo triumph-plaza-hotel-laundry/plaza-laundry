@@ -29,7 +29,10 @@ const statusLabelKeys = {
   morning: 'shifts.status.morning',
   evening: 'shifts.status.evening',
   dayOff: 'shifts.status.dayOff',
-} as const satisfies Record<ReturnType<typeof getEmployeeDayShiftStatus>, TranslationKey>;
+} as const satisfies Record<
+  ReturnType<typeof getEmployeeDayShiftStatus>,
+  TranslationKey
+>;
 
 export const WeeklyShiftReadOnlyTable = memo(function WeeklyShiftReadOnlyTable({
   employees,
@@ -57,10 +60,17 @@ export const WeeklyShiftReadOnlyTable = memo(function WeeklyShiftReadOnlyTable({
   const employeeLabel = t('shifts.weeklyTable.employee');
 
   return (
-    <section aria-label={t('shifts.weeklyTable.title')} className="shift-weekly-card">
+    <section
+      aria-label={t('shifts.weeklyTable.title')}
+      className="shift-weekly-card"
+    >
       <header className="shift-weekly-card__header">
-        <h2 className="shift-weekly-card__title">{t('shifts.weeklyTable.title')}</h2>
-        <p className="shift-weekly-card__subtitle">{t('shifts.weeklyTable.subtitle')}</p>
+        <h2 className="shift-weekly-card__title">
+          {t('shifts.weeklyTable.title')}
+        </h2>
+        <p className="shift-weekly-card__subtitle">
+          {t('shifts.weeklyTable.subtitle')}
+        </p>
       </header>
 
       <div className="shift-weekly-card__table-wrap luxury-table-wrap">
@@ -78,7 +88,11 @@ export const WeeklyShiftReadOnlyTable = memo(function WeeklyShiftReadOnlyTable({
           <tbody>
             {rows.map(({ employee, name, statuses }) => (
               <tr key={employee.id}>
-                <th className="shift-weekly-card__employee" data-label={employeeLabel} scope="row">
+                <th
+                  className="shift-weekly-card__employee"
+                  data-label={employeeLabel}
+                  scope="row"
+                >
                   {name}
                 </th>
                 {weekDays.map((day) => {
@@ -86,8 +100,13 @@ export const WeeklyShiftReadOnlyTable = memo(function WeeklyShiftReadOnlyTable({
                   const statusLabel = t(statusLabelKeys[status]);
 
                   return (
-                    <td data-label={t(dayLabelKeys[day])} key={`${employee.id}-${day}`}>
-                      <span className={`shift-weekly-card__status shift-weekly-card__status--${status}`}>
+                    <td
+                      data-label={t(dayLabelKeys[day])}
+                      key={`${employee.id}-${day}`}
+                    >
+                      <span
+                        className={`shift-weekly-card__status shift-weekly-card__status--${status}`}
+                      >
                         {statusLabel}
                       </span>
                     </td>

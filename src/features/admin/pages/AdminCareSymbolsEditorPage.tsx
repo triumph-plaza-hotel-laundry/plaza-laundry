@@ -27,8 +27,12 @@ function emptyCareLabel(): CareLabel {
 export function AdminCareSymbolsEditorPage() {
   const { t } = useLanguage();
   const { assertCan, logAction } = useAuth();
-  const { draft, isDirty, setDraft, resetDraft, commitDraft } = useDraftState(careSymbolsRepository);
-  const [selectedId, setSelectedId] = useState<string | null>(draft[0]?.id ?? null);
+  const { draft, isDirty, setDraft, resetDraft, commitDraft } = useDraftState(
+    careSymbolsRepository,
+  );
+  const [selectedId, setSelectedId] = useState<string | null>(
+    draft[0]?.id ?? null,
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [saveNotice, setSaveNotice] = useState<string | null>(null);
   const [saveNoticeIsError, setSaveNoticeIsError] = useState(false);
@@ -43,13 +47,22 @@ export function AdminCareSymbolsEditorPage() {
       return;
     }
 
-    setDraft(draft.map((label) => (label.id === selected.id ? { ...label, ...patch } : label)));
+    setDraft(
+      draft.map((label) =>
+        label.id === selected.id ? { ...label, ...patch } : label,
+      ),
+    );
   };
 
   const updateLocalized = (
     field: keyof Pick<
       CareLabel,
-      'name' | 'meaning' | 'instructions' | 'recommendedFabrics' | 'warnings' | 'hotelNotes'
+      | 'name'
+      | 'meaning'
+      | 'instructions'
+      | 'recommendedFabrics'
+      | 'warnings'
+      | 'hotelNotes'
     >,
     lang: 'en' | 'ar',
     value: string,
@@ -69,11 +82,17 @@ export function AdminCareSymbolsEditorPage() {
       assertCan('careSymbols', 'update');
       await commitDraft(async (value) => {
         await careSymbolsRepository.replaceAll(value);
-        logAction({ action: 'careSymbols.replaceAll', page: 'admin/care-symbols', newValue: value });
+        logAction({
+          action: 'careSymbols.replaceAll',
+          page: 'admin/care-symbols',
+          newValue: value,
+        });
       });
       setSaveNotice(t('admin.editor.saveSuccess'));
     } catch (error) {
-      setSaveNotice(error instanceof Error ? error.message : t('admin.editor.saveError'));
+      setSaveNotice(
+        error instanceof Error ? error.message : t('admin.editor.saveError'),
+      );
       setSaveNoticeIsError(true);
     } finally {
       setIsSaving(false);
@@ -116,7 +135,9 @@ export function AdminCareSymbolsEditorPage() {
               onClick={() => {
                 if (!selected) return;
                 setDraft(draft.filter((label) => label.id !== selected.id));
-                setSelectedId(draft.find((label) => label.id !== selected.id)?.id ?? null);
+                setSelectedId(
+                  draft.find((label) => label.id !== selected.id)?.id ?? null,
+                );
               }}
               type="button"
             >
@@ -148,12 +169,20 @@ export function AdminCareSymbolsEditorPage() {
               <label>category</label>
               <select
                 onChange={(event) =>
-                  updateSelected({ category: event.target.value as CareSymbolCategory })
+                  updateSelected({
+                    category: event.target.value as CareSymbolCategory,
+                  })
                 }
                 value={selected.category}
               >
                 {(
-                  ['washing', 'bleaching', 'drying', 'ironing', 'dryCleaning'] as CareSymbolCategory[]
+                  [
+                    'washing',
+                    'bleaching',
+                    'drying',
+                    'ironing',
+                    'dryCleaning',
+                  ] as CareSymbolCategory[]
                 ).map((category) => (
                   <option key={category} value={category}>
                     {category}
@@ -161,14 +190,18 @@ export function AdminCareSymbolsEditorPage() {
                 ))}
               </select>
             </div>
-            {(['name', 'meaning', 'instructions', 'recommendedFabrics'] as const).flatMap((field) =>
+            {(
+              ['name', 'meaning', 'instructions', 'recommendedFabrics'] as const
+            ).flatMap((field) =>
               (['en', 'ar'] as const).map((lang) => (
                 <div className="admin-editor-field" key={`${field}-${lang}`}>
                   <label>
                     {field} ({lang.toUpperCase()})
                   </label>
                   <textarea
-                    onChange={(event) => updateLocalized(field, lang, event.target.value)}
+                    onChange={(event) =>
+                      updateLocalized(field, lang, event.target.value)
+                    }
                     rows={3}
                     value={selected[field][lang]}
                   />

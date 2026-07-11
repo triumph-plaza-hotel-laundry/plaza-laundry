@@ -1,9 +1,24 @@
-import type { PermissionAction, PermissionResource, UserRole } from '@/features/auth/types';
+import type {
+  PermissionAction,
+  PermissionResource,
+  UserRole,
+} from '@/features/auth/types';
 
-const ALL_ROLES: UserRole[] = ['OWNER', 'SUPER_ADMIN', 'ADMIN', 'MANAGER', 'EMPLOYEE'];
+const ALL_ROLES: UserRole[] = [
+  'OWNER',
+  'SUPER_ADMIN',
+  'ADMIN',
+  'MANAGER',
+  'EMPLOYEE',
+];
 const ADMIN_ROLES: UserRole[] = ['OWNER', 'SUPER_ADMIN', 'ADMIN'];
 const ELEVATED_ROLES: UserRole[] = ['OWNER', 'SUPER_ADMIN'];
-const ADMIN_PORTAL_ROLES: UserRole[] = ['OWNER', 'SUPER_ADMIN', 'ADMIN', 'MANAGER'];
+const ADMIN_PORTAL_ROLES: UserRole[] = [
+  'OWNER',
+  'SUPER_ADMIN',
+  'ADMIN',
+  'MANAGER',
+];
 
 export function canAccessAdminPortal(role: UserRole | null): boolean {
   if (!role) {
@@ -49,7 +64,10 @@ const routeAccess: Record<PermissionResource, UserRole[]> = {
 
 const writeActions: PermissionAction[] = ['create', 'update', 'delete', 'edit'];
 
-const resourceActions: Record<PermissionResource, Partial<Record<UserRole, PermissionAction[]>>> = {
+const resourceActions: Record<
+  PermissionResource,
+  Partial<Record<UserRole, PermissionAction[]>>
+> = {
   dashboard: {
     OWNER: ['view'],
     SUPER_ADMIN: ['view'],
@@ -172,7 +190,10 @@ export function assertPermission(
   }
 }
 
-export function canManageResource(role: UserRole, resource: PermissionResource): boolean {
+export function canManageResource(
+  role: UserRole,
+  resource: PermissionResource,
+): boolean {
   return writeActions.some((action) => hasPermission(role, resource, action));
 }
 
@@ -192,17 +213,24 @@ const navigationAccess: Record<PermissionResource, UserRole[]> = {
   leaves: ['OWNER', 'SUPER_ADMIN', 'ADMIN', 'MANAGER'],
 };
 
-export function canSeeNavigation(role: UserRole, resource: PermissionResource): boolean {
+export function canSeeNavigation(
+  role: UserRole,
+  resource: PermissionResource,
+): boolean {
   return navigationAccess[resource]?.includes(role) ?? false;
 }
 
-export function getVisibleNavigationResources(role: UserRole): PermissionResource[] {
-  return (Object.keys(navigationAccess) as PermissionResource[]).filter((resource) =>
-    canSeeNavigation(role, resource),
+export function getVisibleNavigationResources(
+  role: UserRole,
+): PermissionResource[] {
+  return (Object.keys(navigationAccess) as PermissionResource[]).filter(
+    (resource) => canSeeNavigation(role, resource),
   );
 }
 
-export function navigationPathForResource(resource: PermissionResource): string {
+export function navigationPathForResource(
+  resource: PermissionResource,
+): string {
   if (resource === 'dashboard') {
     return '/';
   }
@@ -215,6 +243,8 @@ export function navigationPathForResource(resource: PermissionResource): string 
     return '/admin/leaves';
   }
 
-  const entry = Object.entries(routeResourceMap).find(([, value]) => value === resource);
+  const entry = Object.entries(routeResourceMap).find(
+    ([, value]) => value === resource,
+  );
   return entry?.[0] ?? '/';
 }

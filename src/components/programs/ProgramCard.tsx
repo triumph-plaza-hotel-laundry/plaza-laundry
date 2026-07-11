@@ -15,8 +15,12 @@ export function ProgramCard({ program }: ProgramCardProps) {
       <div className="programs-card__header">
         <span className="programs-card__badge">{program.id}</span>
         <div className="programs-card__titles">
-          <h2 className="programs-card__title">{localizedText(program.title, language)}</h2>
-          <p className="programs-card__subtitle">{localizedText(program.title, altLanguage)}</p>
+          <h2 className="programs-card__title">
+            {localizedText(program.title, language)}
+          </h2>
+          <p className="programs-card__subtitle">
+            {localizedText(program.title, altLanguage)}
+          </p>
         </div>
       </div>
 
@@ -28,7 +32,9 @@ export function ProgramCard({ program }: ProgramCardProps) {
           </span>
         </div>
         <div className="programs-chip">
-          <span className="programs-chip__label">{t('programs.temperature')}</span>
+          <span className="programs-chip__label">
+            {t('programs.temperature')}
+          </span>
           <span className="programs-chip__value">
             {localizedText(program.temperatureBadge, language)}
           </span>
@@ -58,7 +64,9 @@ export function ProgramCard({ program }: ProgramCardProps) {
         </table>
       </div>
 
-      <p className="programs-card__footer">{localizedText(program.footerNote, language)}</p>
+      <p className="programs-card__footer">
+        {localizedText(program.footerNote, language)}
+      </p>
     </article>
   );
 }

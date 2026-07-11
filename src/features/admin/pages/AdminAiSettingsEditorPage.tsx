@@ -9,7 +9,8 @@ import '@/features/admin/admin-editor.css';
 export function AdminAiSettingsEditorPage() {
   const { t } = useLanguage();
   const { assertCan, logAction } = useAuth();
-  const { draft, isDirty, setDraft, resetDraft, commitDraft } = useDraftState(aiSettingsRepository);
+  const { draft, isDirty, setDraft, resetDraft, commitDraft } =
+    useDraftState(aiSettingsRepository);
   const [isSaving, setIsSaving] = useState(false);
   const [saveNotice, setSaveNotice] = useState<string | null>(null);
   const [saveNoticeIsError, setSaveNoticeIsError] = useState(false);
@@ -22,11 +23,17 @@ export function AdminAiSettingsEditorPage() {
       assertCan('admin', 'update');
       await commitDraft(async (value) => {
         await aiSettingsRepository.replaceAll(value);
-        logAction({ action: 'aiSettings.replaceAll', page: 'admin/ai', newValue: value });
+        logAction({
+          action: 'aiSettings.replaceAll',
+          page: 'admin/ai',
+          newValue: value,
+        });
       });
       setSaveNotice(t('admin.editor.saveSuccess'));
     } catch (error) {
-      setSaveNotice(error instanceof Error ? error.message : t('admin.editor.saveError'));
+      setSaveNotice(
+        error instanceof Error ? error.message : t('admin.editor.saveError'),
+      );
       setSaveNoticeIsError(true);
     } finally {
       setIsSaving(false);
@@ -54,28 +61,36 @@ export function AdminAiSettingsEditorPage() {
           <label>{t('admin.editor.aiEnabled')}</label>
           <input
             checked={draft.enabled}
-            onChange={(event) => setDraft({ ...draft, enabled: event.target.checked })}
+            onChange={(event) =>
+              setDraft({ ...draft, enabled: event.target.checked })
+            }
             type="checkbox"
           />
         </div>
         <div className="admin-editor-field">
           <label>{t('admin.editor.aiAssistantName')}</label>
           <input
-            onChange={(event) => setDraft({ ...draft, assistantName: event.target.value })}
+            onChange={(event) =>
+              setDraft({ ...draft, assistantName: event.target.value })
+            }
             value={draft.assistantName}
           />
         </div>
         <div className="admin-editor-field">
           <label>{t('admin.editor.aiModel')}</label>
           <input
-            onChange={(event) => setDraft({ ...draft, model: event.target.value })}
+            onChange={(event) =>
+              setDraft({ ...draft, model: event.target.value })
+            }
             value={draft.model}
           />
         </div>
         <div className="admin-editor-field">
           <label>{t('admin.editor.aiSystemPrompt')}</label>
           <textarea
-            onChange={(event) => setDraft({ ...draft, systemPrompt: event.target.value })}
+            onChange={(event) =>
+              setDraft({ ...draft, systemPrompt: event.target.value })
+            }
             rows={8}
             value={draft.systemPrompt}
           />

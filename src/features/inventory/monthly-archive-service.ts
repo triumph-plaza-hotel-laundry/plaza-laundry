@@ -1,6 +1,10 @@
 import { getSupabaseClient } from '@/lib/supabase/client';
 import type { Json } from '@/lib/supabase/types';
-import { mapInventoryItem, type InventoryItem, type InventoryTransaction } from '@/features/inventory/types';
+import {
+  mapInventoryItem,
+  type InventoryItem,
+  type InventoryTransaction,
+} from '@/features/inventory/types';
 import type {
   ArchivedInventoryData,
   ArchivedPlanData,
@@ -12,14 +16,18 @@ import {
   createEmptyPlanDocument,
   getCurrentMonthKey,
   loadPlanDocument,
+  mergePlanRowDrafts,
   nextMonthKey,
   savePlanDocument,
 } from '@/features/inventory/plan-document-service';
-import { createInitialPlanRowDrafts } from '@/features/inventory/inventory-plan-data';
+import { createInitialPlanRowDrafts } from '@/features/inventory/inventory-plan-schema';
+import { ensureDepartmentItemsSeeded } from '@/features/inventory/department-items-service';
+import { listDepartmentItemCategories } from '@/features/inventory/department-item-categories-service';
 
 const ITEMS_SELECT =
   'id, code, name, name_ar, total_quantity, incoming_quantity, quantity, issued_quantity, remaining_quantity, created_at, updated_at, last_updated_at';
-const RECEIPTS_SELECT = 'id, item_id, supplier, receiver, employee, quantity, created_at';
+const RECEIPTS_SELECT =
+  'id, item_id, supplier, receiver, employee, quantity, created_at';
 const ISSUES_SELECT = 'id, item_id, employee, quantity, reason, created_at';
 
 type DbItemRow = {
@@ -66,7 +74,9 @@ type ArchiveRow = {
 function requireClient() {
   const client = getSupabaseClient();
   if (!client) {
-    throw new Error('Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
+    throw new Error(
+      'Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.',
+    );
   }
   return client;
 }
@@ -121,7 +131,8 @@ function mapTransactions(
   });
 
   return [...receiveRows, ...issueRows].sort(
-    (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+    (left, right) =>
+      new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
   );
 }
 
@@ -134,8 +145,14 @@ export async function fetchInventorySnapshotForArchive(): Promise<ArchivedInvent
       .select(ITEMS_SELECT)
       .is('deleted_at', null)
       .order('sort_order', { ascending: true }),
-    client.from('inventory_receipts').select(RECEIPTS_SELECT).order('created_at', { ascending: false }),
-    client.from('inventory_issues').select(ISSUES_SELECT).order('created_at', { ascending: false }),
+    client
+      .from('inventory_receipts')
+      .select(RECEIPTS_SELECT)
+      .order('created_at', { ascending: false }),
+    client
+      .from('inventory_issues')
+      .select(ISSUES_SELECT)
+      .order('created_at', { ascending: false }),
   ]);
 
   if (itemsResult.error) {
@@ -168,7 +185,9 @@ function parseArchivedInventoryData(value: Json): ArchivedInventoryData {
   const record = value as Partial<ArchivedInventoryData>;
   return {
     items: Array.isArray(record.items) ? (record.items as InventoryItem[]) : [],
-    transactions: Array.isArray(record.transactions) ? (record.transactions as InventoryTransaction[]) : [],
+    transactions: Array.isArray(record.transactions)
+      ? (record.transactions as InventoryTransaction[])
+      : [],
     capturedAt: typeof record.capturedAt === 'string' ? record.capturedAt : '',
   };
 }
@@ -207,7 +226,9 @@ export async function listMonthlyArchiveMonths(): Promise<string[]> {
   return (data ?? []).map((row) => row.archive_month);
 }
 
-export async function getMonthlyArchive(monthKey: string): Promise<MonthlyArchiveRecord | null> {
+export async function getMonthlyArchive(
+  monthKey: string,
+): Promise<MonthlyArchiveRecord | null> {
   const client = requireClient();
   const { data, error } = await client
     .from('inventory_monthly_archives')
@@ -250,7 +271,9 @@ export type MonthlyArchiveSyncResult = {
 
 export async function syncMonthlyArchiveTransition(): Promise<MonthlyArchiveSyncResult> {
   const currentMonth = getCurrentMonthKey();
-  let planDocument = await loadPlanDocument();
+  await ensureDepartmentItemsSeeded();
+  const categories = await listDepartmentItemCategories();
+  let planDocument = await loadPlanDocument(categories);
   const archivedMonths = new Set(await listMonthlyArchiveMonths());
 
   while (planDocument.workingMonth < currentMonth) {
@@ -267,7 +290,9 @@ export async function syncMonthlyArchiveTransition(): Promise<MonthlyArchiveSync
         await createMonthlyArchive(monthToArchive, inventoryData, planData);
         archivedMonths.add(monthToArchive);
       } catch (error) {
-        if (!isMissingArchiveTable(error as { code?: string; message?: string })) {
+        if (
+          !isMissingArchiveTable(error as { code?: string; message?: string })
+        ) {
           throw error;
         }
       }
@@ -276,7 +301,7 @@ export async function syncMonthlyArchiveTransition(): Promise<MonthlyArchiveSync
     const nextMonth = nextMonthKey(monthToArchive);
     planDocument = {
       workingMonth: nextMonth,
-      rowDrafts: createInitialPlanRowDrafts(),
+      rowDrafts: mergePlanRowDrafts(createInitialPlanRowDrafts(), categories),
     };
     await savePlanDocument(planDocument);
   }
@@ -287,13 +312,18 @@ export async function syncMonthlyArchiveTransition(): Promise<MonthlyArchiveSync
   }
 
   return {
-    archiveMonths: [...archivedMonths].sort((left, right) => right.localeCompare(left)),
+    archiveMonths: [...archivedMonths].sort((left, right) =>
+      right.localeCompare(left),
+    ),
     planDocument,
     currentMonth,
   };
 }
 
-export function formatArchiveMonthLabel(monthKey: string, language: 'ar' | 'en') {
+export function formatArchiveMonthLabel(
+  monthKey: string,
+  language: 'ar' | 'en',
+) {
   const [year, month] = monthKey.split('-').map(Number);
   const date = new Date(year, month - 1, 1);
   return date.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {

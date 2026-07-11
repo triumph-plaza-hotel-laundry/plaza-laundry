@@ -8,7 +8,10 @@
   --gold-mid: #e8d5a6;
   --champagne-gold: #c9a45c;
   --hero-viewport-h: calc(100dvh - var(--header-height));
-  --hero-showcase-max: min(calc(var(--hero-viewport-h) * 0.368), calc(var(--hero-viewport-h) - 1.25rem));
+  --hero-showcase-max: min(
+    calc(var(--hero-viewport-h) * 0.368),
+    calc(var(--hero-viewport-h) - 1.25rem)
+  );
   --hero-bird-offset-x: -5.5%;
   --bird-gold-highlight: #e8d5a6;
   --bird-gold-mid: #c9a45c;
@@ -181,9 +184,7 @@
   object-fit: contain;
   object-position: center;
   background: transparent;
-  filter:
-    var(--bird-gold-grade)
-    drop-shadow(0 0 18px rgb(246 215 107 / 16%))
+  filter: var(--bird-gold-grade) drop-shadow(0 0 18px rgb(246 215 107 / 16%))
     drop-shadow(0 8px 24px rgb(0 0 0 / 28%));
   image-rendering: auto;
   pointer-events: none;
@@ -216,7 +217,10 @@
 
 @media (max-width: 480px) {
   .home-hero {
-    --hero-showcase-max: min(calc(var(--hero-viewport-h) * 0.343), calc(var(--hero-viewport-h) - 0.85rem));
+    --hero-showcase-max: min(
+      calc(var(--hero-viewport-h) * 0.343),
+      calc(var(--hero-viewport-h) - 0.85rem)
+    );
     --hero-bird-offset-x: -4.5%;
   }
 

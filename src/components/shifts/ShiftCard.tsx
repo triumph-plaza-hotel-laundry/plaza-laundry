@@ -16,17 +16,24 @@ const periodIcons = {
   evening: Moon,
 } as const;
 
-export function ShiftCard({ period, employeeIds, hours: hoursOverride }: ShiftCardProps) {
+export function ShiftCard({
+  period,
+  employeeIds,
+  hours: hoursOverride,
+}: ShiftCardProps) {
   const { language, t } = useLanguage();
   const employees = useSyncStore(employeesRepository);
   const Icon = periodIcons[period];
-  const titleKey = period === 'morning' ? 'shifts.morningShift' : 'shifts.eveningShift';
+  const titleKey =
+    period === 'morning' ? 'shifts.morningShift' : 'shifts.eveningShift';
   const hours =
     hoursOverride ?? SHIFT_HOURS[period][language === 'ar' ? 'ar' : 'en'];
 
   const employeesOnShift = employeeIds
     .map((id) => employees.find((employee) => employee.id === id))
-    .filter((employee): employee is NonNullable<typeof employee> => Boolean(employee));
+    .filter((employee): employee is NonNullable<typeof employee> =>
+      Boolean(employee),
+    );
 
   return (
     <motion.section
@@ -42,7 +49,9 @@ export function ShiftCard({ period, employeeIds, hours: hoursOverride }: ShiftCa
         <div className="shift-card__title-block">
           <h2 className="shift-card__title">{t(titleKey)}</h2>
           <p className="shift-card__hours">
-            <span className="shift-card__hours-label">{t('shifts.workingHours')}</span>
+            <span className="shift-card__hours-label">
+              {t('shifts.workingHours')}
+            </span>
             <span className="shift-card__hours-value">{hours}</span>
           </p>
         </div>
@@ -52,7 +61,11 @@ export function ShiftCard({ period, employeeIds, hours: hoursOverride }: ShiftCa
 
       <div className="shift-card__grid">
         {employeesOnShift.map((employee, index) => (
-          <ShiftEmployeeMiniCard employee={employee} index={index} key={employee.id} />
+          <ShiftEmployeeMiniCard
+            employee={employee}
+            index={index}
+            key={employee.id}
+          />
         ))}
       </div>
     </motion.section>

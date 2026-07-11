@@ -1,4 +1,7 @@
-import type { InventoryItem, InventoryTransaction } from '@/features/inventory/types';
+import type {
+  InventoryItem,
+  InventoryTransaction,
+} from '@/features/inventory/types';
 
 export type PlanRowDraft = {
   day: string;

@@ -60,8 +60,14 @@ export function createLuxuryParticle(
     const direction = pickRandom(DIRECTIONS);
     const travel = randomBetween(minTravel, maxTravel);
     const length = Math.hypot(direction.dx, direction.dy) || 1;
-    endX = start.x + (direction.dx / length) * travel + randomBetween(-width * 0.04, width * 0.04);
-    endY = start.y + (direction.dy / length) * travel + randomBetween(-height * 0.04, height * 0.04);
+    endX =
+      start.x +
+      (direction.dx / length) * travel +
+      randomBetween(-width * 0.04, width * 0.04);
+    endY =
+      start.y +
+      (direction.dy / length) * travel +
+      randomBetween(-height * 0.04, height * 0.04);
     endX = Math.max(-8, Math.min(width + 8, endX));
     endY = Math.max(-8, Math.min(height + 8, endY));
     attempts += 1;

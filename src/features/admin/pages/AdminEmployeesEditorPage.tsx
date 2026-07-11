@@ -4,7 +4,11 @@ import { useMemo, useState } from 'react';
 import { AdminEmployeeModal } from '@/features/admin/components/AdminEmployeeModal';
 import { AdminEmployeesTable } from '@/features/admin/components/AdminEmployeesTable';
 import { AdminPageHeader } from '@/features/admin/components/AdminPageHeader';
-import { employeesRepository, normalizeEmployee, type LaundryEmployee } from '@/data/repositories';
+import {
+  employeesRepository,
+  normalizeEmployee,
+  type LaundryEmployee,
+} from '@/data/repositories';
 import { useAuth, useLanguage, useSyncStore } from '@/hooks';
 import { sortEmployeesForAdminTable } from '@/lib/employee-org-hierarchy';
 import {
@@ -32,76 +36,100 @@ export function AdminEmployeesEditorPage() {
   const [draft, setDraft] = useState<LaundryEmployee | null>(null);
   const [isCreate, setIsCreate] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<LaundryEmployee | null>(null);
-  const [toast, setToast] = useState<{ message: string; tone: 'success' | 'error' } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<LaundryEmployee | null>(
+    null,
+  );
+  const [toast, setToast] = useState<{
+    message: string;
+    tone: 'success' | 'error';
+  } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [positionFilter, setPositionFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [statusFilter, setStatusFilter] = useState<
+    'all' | 'active' | 'inactive'
+  >('all');
 
   const lang = language === 'ar' ? 'ar' : 'en';
 
   const departmentOptions = useMemo(
     () =>
       uniqueSorted(
-        employees.flatMap((employee) => [employee.department.en, employee.department.ar]),
+        employees.flatMap((employee) => [
+          employee.department.en,
+          employee.department.ar,
+        ]),
       ),
     [employees],
   );
 
   const positionOptions = useMemo(
     () =>
-      uniqueSorted(employees.flatMap((employee) => [employee.jobTitle.en, employee.jobTitle.ar])),
+      uniqueSorted(
+        employees.flatMap((employee) => [
+          employee.jobTitle.en,
+          employee.jobTitle.ar,
+        ]),
+      ),
     [employees],
   );
 
   const filteredEmployees = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    const filtered = [...employees]
-      .filter((employee) => {
-        if (departmentFilter !== 'all') {
-          const department = getLocalizedDisplay(employee.department, lang);
-          if (department !== departmentFilter) {
-            return false;
-          }
-        }
-
-        if (positionFilter !== 'all') {
-          const position = getLocalizedDisplay(employee.jobTitle, lang);
-          if (position !== positionFilter) {
-            return false;
-          }
-        }
-
-        if (statusFilter !== 'all' && getEmployeeStatus(employee) !== statusFilter) {
+    const filtered = [...employees].filter((employee) => {
+      if (departmentFilter !== 'all') {
+        const department = getLocalizedDisplay(employee.department, lang);
+        if (department !== departmentFilter) {
           return false;
         }
+      }
 
-        if (!query) {
-          return true;
+      if (positionFilter !== 'all') {
+        const position = getLocalizedDisplay(employee.jobTitle, lang);
+        if (position !== positionFilter) {
+          return false;
         }
+      }
 
-        const haystack = [
-          getEmployeeCode(employee),
-          employee.id,
-          employee.name.en,
-          employee.name.ar,
-          employee.jobTitle.en,
-          employee.jobTitle.ar,
-          employee.department.en,
-          employee.department.ar,
-          employee.phone,
-          employee.shift.en,
-          employee.shift.ar,
-        ]
-          .join(' ')
-          .toLowerCase();
+      if (
+        statusFilter !== 'all' &&
+        getEmployeeStatus(employee) !== statusFilter
+      ) {
+        return false;
+      }
 
-        return haystack.includes(query);
-      });
+      if (!query) {
+        return true;
+      }
+
+      const haystack = [
+        getEmployeeCode(employee),
+        employee.id,
+        employee.name.en,
+        employee.name.ar,
+        employee.jobTitle.en,
+        employee.jobTitle.ar,
+        employee.department.en,
+        employee.department.ar,
+        employee.phone,
+        employee.shift.en,
+        employee.shift.ar,
+      ]
+        .join(' ')
+        .toLowerCase();
+
+      return haystack.includes(query);
+    });
 
     return sortEmployeesForAdminTable(filtered);
-  }, [departmentFilter, employees, lang, positionFilter, searchQuery, statusFilter]);
+  }, [
+    departmentFilter,
+    employees,
+    lang,
+    positionFilter,
+    searchQuery,
+    statusFilter,
+  ]);
 
   const showToast = (message: string, tone: 'success' | 'error') => {
     setToast({ message, tone });
@@ -114,7 +142,11 @@ export function AdminEmployeesEditorPage() {
   };
 
   const handleAdd = () => {
-    const nextSortOrder = employees.reduce((max, employee) => Math.max(max, employee.sortOrder), 0) + 1;
+    const nextSortOrder =
+      employees.reduce(
+        (max, employee) => Math.max(max, employee.sortOrder),
+        0,
+      ) + 1;
     openEmployee(emptyEmployee(nextSortOrder), true);
   };
 
@@ -146,7 +178,10 @@ export function AdminEmployeesEditorPage() {
       setIsCreate(false);
       showToast(t('admin.editor.saveSuccess'), 'success');
     } catch (error) {
-      showToast(error instanceof Error ? error.message : t('admin.editor.saveError'), 'error');
+      showToast(
+        error instanceof Error ? error.message : t('admin.editor.saveError'),
+        'error',
+      );
     } finally {
       setIsSaving(false);
     }
@@ -171,7 +206,10 @@ export function AdminEmployeesEditorPage() {
       setDeleteTarget(null);
       showToast(t('admin.editor.deleteSuccess'), 'success');
     } catch (error) {
-      showToast(error instanceof Error ? error.message : t('admin.editor.saveError'), 'error');
+      showToast(
+        error instanceof Error ? error.message : t('admin.editor.saveError'),
+        'error',
+      );
     } finally {
       setIsSaving(false);
     }
@@ -193,7 +231,11 @@ export function AdminEmployeesEditorPage() {
             <label className="admin-employees-dashboard__filter">
               <span>{t('admin.editor.employeeSearch')}</span>
               <div className="admin-employees-dashboard__search">
-                <Search aria-hidden="true" className="admin-employees-dashboard__search-icon" size={16} />
+                <Search
+                  aria-hidden="true"
+                  className="admin-employees-dashboard__search-icon"
+                  size={16}
+                />
                 <input
                   onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder={t('admin.editor.employeeSearchPlaceholder')}
@@ -205,7 +247,10 @@ export function AdminEmployeesEditorPage() {
 
             <label className="admin-employees-dashboard__filter">
               <span>{t('admin.editor.departmentFilter')}</span>
-              <select onChange={(event) => setDepartmentFilter(event.target.value)} value={departmentFilter}>
+              <select
+                onChange={(event) => setDepartmentFilter(event.target.value)}
+                value={departmentFilter}
+              >
                 <option value="all">{t('admin.editor.allDepartments')}</option>
                 {departmentOptions.map((option) => (
                   <option key={option} value={option}>
@@ -217,7 +262,10 @@ export function AdminEmployeesEditorPage() {
 
             <label className="admin-employees-dashboard__filter">
               <span>{t('admin.editor.positionFilter')}</span>
-              <select onChange={(event) => setPositionFilter(event.target.value)} value={positionFilter}>
+              <select
+                onChange={(event) => setPositionFilter(event.target.value)}
+                value={positionFilter}
+              >
                 <option value="all">{t('admin.editor.allPositions')}</option>
                 {positionOptions.map((option) => (
                   <option key={option} value={option}>
@@ -231,13 +279,17 @@ export function AdminEmployeesEditorPage() {
               <span>{t('admin.editor.statusFilter')}</span>
               <select
                 onChange={(event) =>
-                  setStatusFilter(event.target.value as 'all' | 'active' | 'inactive')
+                  setStatusFilter(
+                    event.target.value as 'all' | 'active' | 'inactive',
+                  )
                 }
                 value={statusFilter}
               >
                 <option value="all">{t('admin.editor.allStatuses')}</option>
                 <option value="active">{t('admin.editor.statusActive')}</option>
-                <option value="inactive">{t('admin.editor.statusInactive')}</option>
+                <option value="inactive">
+                  {t('admin.editor.statusInactive')}
+                </option>
               </select>
             </label>
           </div>
@@ -301,9 +353,14 @@ export function AdminEmployeesEditorPage() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 role="dialog"
               >
-                <h3 className="admin-employees-dashboard__confirm-title">{t('admin.editor.delete')}</h3>
+                <h3 className="admin-employees-dashboard__confirm-title">
+                  {t('admin.editor.delete')}
+                </h3>
                 <p className="admin-employees-dashboard__confirm-text">
-                  {t('admin.editor.deleteConfirm').replace('{name}', getLocalizedDisplay(deleteTarget.name, lang))}
+                  {t('admin.editor.deleteConfirm').replace(
+                    '{name}',
+                    getLocalizedDisplay(deleteTarget.name, lang),
+                  )}
                 </p>
                 <div className="admin-employee-modal__actions admin-employee-modal__actions--save">
                   <button

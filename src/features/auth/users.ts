@@ -15,7 +15,12 @@ export type StoredAuthUser = AuthUser & {
   passwordHash: string;
 };
 
-const ADMIN_PORTAL_ROLES: UserRole[] = ['OWNER', 'SUPER_ADMIN', 'ADMIN', 'MANAGER'];
+const ADMIN_PORTAL_ROLES: UserRole[] = [
+  'OWNER',
+  'SUPER_ADMIN',
+  'ADMIN',
+  'MANAGER',
+];
 
 let usersStoreReady: Promise<void> | null = null;
 
@@ -33,7 +38,9 @@ function requireSupabase() {
   return client;
 }
 
-async function buildPrimaryAdminRecord(passwordHash: string): Promise<StoredAuthUser> {
+async function buildPrimaryAdminRecord(
+  passwordHash: string,
+): Promise<StoredAuthUser> {
   return {
     id: PRIMARY_ADMIN_ID,
     username: PRIMARY_ADMIN_USERNAME,
@@ -73,9 +80,12 @@ function mapRow(row: {
 
 async function fetchAllUsers(): Promise<StoredAuthUser[]> {
   const client = requireSupabase();
-  const { data, error } = await client.from('admin_users').select('*').order('created_at', {
-    ascending: true,
-  });
+  const { data, error } = await client
+    .from('admin_users')
+    .select('*')
+    .order('created_at', {
+      ascending: true,
+    });
 
   if (error) {
     throw error;
@@ -99,7 +109,9 @@ async function upsertUsers(users: StoredAuthUser[]) {
     updated_at: new Date().toISOString(),
   }));
 
-  const { error } = await client.from('admin_users').upsert(rows, { onConflict: 'id' });
+  const { error } = await client
+    .from('admin_users')
+    .upsert(rows, { onConflict: 'id' });
   if (error) {
     throw error;
   }
@@ -111,7 +123,9 @@ async function seedPrimaryAdminIfEmpty() {
     return;
   }
 
-  await upsertUsers([await buildPrimaryAdminRecord(PRIMARY_ADMIN_PASSWORD_HASH)]);
+  await upsertUsers([
+    await buildPrimaryAdminRecord(PRIMARY_ADMIN_PASSWORD_HASH),
+  ]);
 }
 
 function stripSecrets(user: StoredAuthUser): AuthUser {
@@ -131,7 +145,10 @@ export async function ensureUsersStoreReady(): Promise<void> {
   await usersStoreReady;
 }
 
-export async function findUserByCredentials(username: string, password: string): Promise<AuthUser | null> {
+export async function findUserByCredentials(
+  username: string,
+  password: string,
+): Promise<AuthUser | null> {
   await ensureUsersStoreReady();
   const normalized = normalizeUsername(username);
   const users = await fetchAllUsers();
@@ -163,7 +180,9 @@ export async function getStoredUsers(): Promise<AuthUser[]> {
 }
 
 export function getAdminManagedUsers(): AuthUser[] {
-  throw new Error('Use getStoredUsers() asynchronously for Supabase-backed admin users.');
+  throw new Error(
+    'Use getStoredUsers() asynchronously for Supabase-backed admin users.',
+  );
 }
 
 export async function listAdminManagedUsers(): Promise<AuthUser[]> {
@@ -194,12 +213,19 @@ export async function createStoredAdminUser(
     throw new Error('Username is required');
   }
 
-  if (normalizeUsername(username) === normalizeUsername(PRIMARY_ADMIN_USERNAME)) {
+  if (
+    normalizeUsername(username) === normalizeUsername(PRIMARY_ADMIN_USERNAME)
+  ) {
     throw new Error('Username is reserved');
   }
 
   const users = await fetchAllUsers();
-  if (users.some((user) => normalizeUsername(user.username) === normalizeUsername(username))) {
+  if (
+    users.some(
+      (user) =>
+        normalizeUsername(user.username) === normalizeUsername(username),
+    )
+  ) {
     throw new Error('Username already exists');
   }
 
@@ -240,11 +266,17 @@ export async function updateStoredAdminUser(
   }
 
   if (isPrimaryAdminAccount(target)) {
-    if (updates.username && normalizeUsername(updates.username) !== normalizeUsername(target.username)) {
+    if (
+      updates.username &&
+      normalizeUsername(updates.username) !== normalizeUsername(target.username)
+    ) {
       throw new Error('Primary administrator username cannot be changed');
     }
 
-    if (updates.displayName && updates.displayName.trim() !== target.displayName) {
+    if (
+      updates.displayName &&
+      updates.displayName.trim() !== target.displayName
+    ) {
       throw new Error('Primary administrator name cannot be changed');
     }
 
@@ -257,7 +289,9 @@ export async function updateStoredAdminUser(
   if (
     nextUsername &&
     users.some(
-      (user) => user.id !== targetId && normalizeUsername(user.username) === normalizeUsername(nextUsername),
+      (user) =>
+        user.id !== targetId &&
+        normalizeUsername(user.username) === normalizeUsername(nextUsername),
     )
   ) {
     throw new Error('Username already exists');
@@ -269,19 +303,27 @@ export async function updateStoredAdminUser(
         return user;
       }
 
-      const passwordHash = updates.password ? await hashPassword(updates.password) : user.passwordHash;
+      const passwordHash = updates.password
+        ? await hashPassword(updates.password)
+        : user.passwordHash;
 
       return {
         ...user,
         displayName: isPrimaryAdminAccount(user)
           ? PRIMARY_ADMIN_DISPLAY_NAME
           : updates.displayName?.trim() || user.displayName,
-        username: isPrimaryAdminAccount(user) ? PRIMARY_ADMIN_USERNAME : nextUsername,
+        username: isPrimaryAdminAccount(user)
+          ? PRIMARY_ADMIN_USERNAME
+          : nextUsername,
         role: isPrimaryAdminAccount(user) ? 'OWNER' : user.role,
         isOwner: isPrimaryAdminAccount(user) ? true : user.isOwner,
         isProtected: isPrimaryAdminAccount(user) ? true : user.isProtected,
-        adminType: isPrimaryAdminAccount(user) ? 'Admin' : (updates.adminType ?? user.adminType),
-        isActive: isPrimaryAdminAccount(user) ? true : (updates.isActive ?? user.isActive),
+        adminType: isPrimaryAdminAccount(user)
+          ? 'Admin'
+          : (updates.adminType ?? user.adminType),
+        isActive: isPrimaryAdminAccount(user)
+          ? true
+          : (updates.isActive ?? user.isActive),
         passwordHash,
       };
     }),
@@ -292,7 +334,10 @@ export async function updateStoredAdminUser(
   return stripSecrets(updated);
 }
 
-export async function deleteStoredUser(actor: AuthUser, targetId: string): Promise<void> {
+export async function deleteStoredUser(
+  actor: AuthUser,
+  targetId: string,
+): Promise<void> {
   await ensureUsersStoreReady();
   assertCanManageAdmins(actor);
 
@@ -304,7 +349,10 @@ export async function deleteStoredUser(actor: AuthUser, targetId: string): Promi
 
   assertPrimaryAdminProtected(target);
   const client = requireSupabase();
-  const { error } = await client.from('admin_users').delete().eq('id', targetId);
+  const { error } = await client
+    .from('admin_users')
+    .delete()
+    .eq('id', targetId);
   if (error) {
     throw error;
   }
@@ -330,7 +378,10 @@ export async function changeStoredOwnPassword(
     throw new Error('User not found');
   }
 
-  const valid = await verifyPassword(currentPassword.trim(), target.passwordHash);
+  const valid = await verifyPassword(
+    currentPassword.trim(),
+    target.passwordHash,
+  );
   if (!valid) {
     throw new Error('Current password is incorrect');
   }
@@ -349,11 +400,16 @@ export async function changeStoredOwnPassword(
   await upsertUsers(nextUsers);
 }
 
-export async function resetForgottenAdminPassword(username: string, nextPassword: string): Promise<AuthUser> {
+export async function resetForgottenAdminPassword(
+  username: string,
+  nextPassword: string,
+): Promise<AuthUser> {
   await ensureUsersStoreReady();
   const normalized = normalizeUsername(username);
   const users = await fetchAllUsers();
-  const target = users.find((user) => normalizeUsername(user.username) === normalized);
+  const target = users.find(
+    (user) => normalizeUsername(user.username) === normalized,
+  );
 
   if (!target || !target.isActive) {
     throw new Error('Invalid credentials');

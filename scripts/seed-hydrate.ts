@@ -21,11 +21,13 @@ const { initAllRepositories } = await import('@/data/repositories/repository-uti
 const { syncMissingSeedEmployees } = await import('@/data/repositories/employees-repository');
 const { ensureUsersStoreReady } = await import('@/features/auth/users');
 const { seedOfficialInventoryItems } = await import('@/features/inventory/service');
+const { ensureDepartmentItemsSeeded } = await import('@/features/inventory/department-items-service');
 
 await initAllRepositories();
 await syncMissingSeedEmployees();
 await ensureUsersStoreReady();
 await seedOfficialInventoryItems();
+await ensureDepartmentItemsSeeded();
 
 const { getSupabaseClient } = await import('@/lib/supabase/client');
 const client = getSupabaseClient();

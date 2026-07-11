@@ -460,7 +460,11 @@
 
 .admin-shifts-dept__btn--primary {
   border-color: var(--app-gold-border, #ae8625);
-  background: linear-gradient(180deg, rgb(201 164 92 / 18%), rgb(201 164 92 / 6%));
+  background: linear-gradient(
+    180deg,
+    rgb(201 164 92 / 18%),
+    rgb(201 164 92 / 6%)
+  );
 }
 
 .admin-shifts-editor__warning {
@@ -487,7 +491,11 @@
   padding: 0.75rem 1.5rem;
   border: 1px solid var(--app-gold-border, #ae8625);
   border-radius: 999px;
-  background: linear-gradient(180deg, rgb(201 164 92 / 22%), rgb(201 164 92 / 8%));
+  background: linear-gradient(
+    180deg,
+    rgb(201 164 92 / 22%),
+    rgb(201 164 92 / 8%)
+  );
   color: var(--app-gold-soft, #e8d5a6);
   font-size: 0.9375rem;
   font-weight: 700;

@@ -31,7 +31,9 @@ export function AdminPageHeader({
         </span>
         <h1 className="admin-page-header__title-en">{titleEn}</h1>
         <h1 className="admin-page-header__title-ar">{titleAr}</h1>
-        {subtitle ? <p className="admin-page-header__subtitle">{subtitle}</p> : null}
+        {subtitle ? (
+          <p className="admin-page-header__subtitle">{subtitle}</p>
+        ) : null}
       </div>
       {children}
     </header>

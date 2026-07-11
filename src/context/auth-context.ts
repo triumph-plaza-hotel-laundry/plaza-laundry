@@ -1,12 +1,19 @@
 import { createContext, useContext } from 'react';
-import type { AuthUser, PermissionAction, PermissionResource, UserRole } from '@/features/auth/types';
+import type {
+  AuthUser,
+  PermissionAction,
+  PermissionResource,
+  UserRole,
+} from '@/features/auth/types';
 
 export type AuthContextValue = {
   user: AuthUser | null;
   role: UserRole | null;
   isAuthenticated: boolean;
   isReady: boolean;
-  login: (credentials: import('@/features/auth/login').LoginCredentials) => Promise<AuthUser>;
+  login: (
+    credentials: import('@/features/auth/login').LoginCredentials,
+  ) => Promise<AuthUser>;
   logout: () => void;
   can: (resource: PermissionResource, action: PermissionAction) => boolean;
   canManage: (resource: PermissionResource) => boolean;

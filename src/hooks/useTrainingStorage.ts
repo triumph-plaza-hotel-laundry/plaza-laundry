@@ -15,7 +15,11 @@ export function useTrainingStorage() {
     (lesson: TrainingLesson) => {
       assertCan('training', 'create');
       trainingRepository.addLesson(lesson);
-      logAction({ action: 'training.createLesson', page: 'training', newValue: lesson });
+      logAction({
+        action: 'training.createLesson',
+        page: 'training',
+        newValue: lesson,
+      });
     },
     [assertCan, logAction],
   );
@@ -24,7 +28,12 @@ export function useTrainingStorage() {
     (lessonId: string, next: TrainingLesson) => {
       assertCan('training', 'update');
       const oldValue = trainingRepository.updateLesson(lessonId, next);
-      logAction({ action: 'training.updateLesson', page: 'training', oldValue, newValue: next });
+      logAction({
+        action: 'training.updateLesson',
+        page: 'training',
+        oldValue,
+        newValue: next,
+      });
     },
     [assertCan, logAction],
   );
@@ -33,7 +42,11 @@ export function useTrainingStorage() {
     (lessonId: string) => {
       assertCan('training', 'delete');
       const oldValue = trainingRepository.deleteLesson(lessonId);
-      logAction({ action: 'training.deleteLesson', page: 'training', oldValue });
+      logAction({
+        action: 'training.deleteLesson',
+        page: 'training',
+        oldValue,
+      });
     },
     [assertCan, logAction],
   );
@@ -42,7 +55,11 @@ export function useTrainingStorage() {
     (video: TrainingVideo) => {
       assertCan('training', 'create');
       trainingRepository.addVideo(video);
-      logAction({ action: 'training.createVideo', page: 'training', newValue: video });
+      logAction({
+        action: 'training.createVideo',
+        page: 'training',
+        newValue: video,
+      });
     },
     [assertCan, logAction],
   );
@@ -51,7 +68,12 @@ export function useTrainingStorage() {
     (videoId: string, next: TrainingVideo) => {
       assertCan('training', 'update');
       const oldValue = trainingRepository.updateVideo(videoId, next);
-      logAction({ action: 'training.updateVideo', page: 'training', oldValue, newValue: next });
+      logAction({
+        action: 'training.updateVideo',
+        page: 'training',
+        oldValue,
+        newValue: next,
+      });
     },
     [assertCan, logAction],
   );

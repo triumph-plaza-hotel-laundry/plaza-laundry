@@ -11,7 +11,11 @@ export function useChemicals() {
     (chemical: LaundryChemical) => {
       assertCan('chemicals', 'create');
       const created = chemicalsRepository.create(chemical);
-      logAction({ action: 'chemicals.create', page: 'chemicals', newValue: created });
+      logAction({
+        action: 'chemicals.create',
+        page: 'chemicals',
+        newValue: created,
+      });
       return created;
     },
     [assertCan, logAction],
@@ -22,7 +26,12 @@ export function useChemicals() {
       assertCan('chemicals', 'update');
       const oldValue = chemicalsRepository.getById(id);
       const updated = chemicalsRepository.update(id, next);
-      logAction({ action: 'chemicals.update', page: 'chemicals', oldValue, newValue: updated });
+      logAction({
+        action: 'chemicals.update',
+        page: 'chemicals',
+        oldValue,
+        newValue: updated,
+      });
       return updated;
     },
     [assertCan, logAction],

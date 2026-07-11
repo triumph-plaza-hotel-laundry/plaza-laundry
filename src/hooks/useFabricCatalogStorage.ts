@@ -11,7 +11,9 @@ function readFavorites(): string[] {
       return [];
     }
     const parsed = JSON.parse(raw) as unknown;
-    return Array.isArray(parsed) ? parsed.filter((id) => typeof id === 'string') : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((id) => typeof id === 'string')
+      : [];
   } catch {
     return [];
   }
@@ -24,7 +26,9 @@ function readRecent(): string[] {
       return [];
     }
     const parsed = JSON.parse(raw) as unknown;
-    return Array.isArray(parsed) ? parsed.filter((id) => typeof id === 'string') : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((id) => typeof id === 'string')
+      : [];
   } catch {
     return [];
   }
@@ -86,10 +90,17 @@ export function useFabricFavorites() {
 }
 
 export function useRecentlyViewedFabrics() {
-  const recentIds = useSyncExternalStore(subscribeRecent, () => recentSnapshot, () => recentSnapshot);
+  const recentIds = useSyncExternalStore(
+    subscribeRecent,
+    () => recentSnapshot,
+    () => recentSnapshot,
+  );
 
   const trackView = useCallback((fabricId: string) => {
-    const next = [fabricId, ...recentSnapshot.filter((id) => id !== fabricId)].slice(0, MAX_RECENT);
+    const next = [
+      fabricId,
+      ...recentSnapshot.filter((id) => id !== fabricId),
+    ].slice(0, MAX_RECENT);
     recentSnapshot = next;
     writeRecent(next);
     emitRecent();

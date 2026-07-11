@@ -8,7 +8,8 @@
   --shift-gold-soft: #e8d5a6;
   --shift-gold-dim: rgb(214 183 110 / 22%);
   --shift-border: rgb(214 183 110 / 28%);
-  --shift-font-en: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --shift-font-en:
+    Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --shift-font-ar: 'Noto Kufi Arabic', 'Segoe UI', Tahoma, sans-serif;
   display: flex;
   width: 100%;

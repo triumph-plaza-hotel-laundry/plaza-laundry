@@ -1,6 +1,12 @@
 import type { LaundryEmployee } from '@/data/laundry-employees';
 
-export type ShiftDepartmentId = 'laundry' | 'valet' | 'linen' | 'iron' | 'chest' | 'tailor';
+export type ShiftDepartmentId =
+  | 'laundry'
+  | 'valet'
+  | 'linen'
+  | 'iron'
+  | 'chest'
+  | 'tailor';
 
 export type ShiftDepartmentDefinition = {
   id: ShiftDepartmentId;

@@ -219,7 +219,10 @@ export const laundryChemicals: readonly LaundryChemical[] = [
     brand: 'CLAX',
     name: { en: 'Build Lite', ar: 'Build Lite' },
     image: '/chemicals/product.svg',
-    category: { en: 'Alkali builder and water softener', ar: 'منشط قلوي وملين مياه' },
+    category: {
+      en: 'Alkali builder and water softener',
+      ar: 'منشط قلوي وملين مياه',
+    },
     description: {
       en: 'Clax Build Lite is a liquid alkaline builder that softens water. It contains alkalis and mineral-sequestering agents. Suitable for areas with medium or low water hardness.',
       ar: 'Clax Build Lite منشط قلوي سائل يلين المياه. يحتوي على قلويات ومواد تمسك الأملاح المعدنية. يصلح للمناطق التي تحتوي على مياه متوسطة أو قليلة العسر.',
@@ -251,8 +254,12 @@ export const laundryChemicals: readonly LaundryChemical[] = [
       ar: 'إزالة الدهون تكون أفضل على درجة حرارة 60-70 درجة. في مصانع الأغذية، الشطف لازم يكون بمياه صالحة للشرب لأي قطعة تلامس الطعام.',
     },
     warnings: {
-      en: ['In food factories, rinsing must be with potable water for any item that contacts food.'],
-      ar: ['في مصانع الأغذية، الشطف لازم يكون بمياه صالحة للشرب لأي قطعة تلامس الطعام.'],
+      en: [
+        'In food factories, rinsing must be with potable water for any item that contacts food.',
+      ],
+      ar: [
+        'في مصانع الأغذية، الشطف لازم يكون بمياه صالحة للشرب لأي قطعة تلامس الطعام.',
+      ],
     },
     safety: {
       en: 'Corrosive — causes serious eye damage. Full PPE mandatory. Never mix with acids.',
@@ -270,7 +277,10 @@ export const laundryChemicals: readonly LaundryChemical[] = [
       },
       {
         key: 'alkalinity',
-        label: { en: 'Total Alkalinity (% Na2O)', ar: 'القلوية الكلية (% Na2O)' },
+        label: {
+          en: 'Total Alkalinity (% Na2O)',
+          ar: 'القلوية الكلية (% Na2O)',
+        },
         value: { en: '13.5', ar: '13.5' },
       },
       {
@@ -292,7 +302,10 @@ export const laundryChemicals: readonly LaundryChemical[] = [
     brand: 'CLAX',
     name: { en: 'Sonril Ultra', ar: 'Sonril Ultra' },
     image: '/chemicals/product.svg',
-    category: { en: 'High-temperature oxygen bleach', ar: 'مبيض أكسجين للحرارة العالية' },
+    category: {
+      en: 'High-temperature oxygen bleach',
+      ar: 'مبيض أكسجين للحرارة العالية',
+    },
     description: {
       en: 'Clax Sonril Ultra is a concentrated stain remover for large laundries and hospitals. Suitable for all types of laundry (except nylon) and is added in the main wash at a temperature between 70 and 90 degrees.',
       ar: 'Clax Sonril Ultra مزيل بقع مركز للمغاسل الكبيرة والمستشفيات. يصلح لجميع أنواع الغسيل (ما عدا النايلون) ويُضاف في الغسلة الرئيسية على حرارة بين 70 و90 درجة.',
@@ -370,7 +383,10 @@ export const laundryChemicals: readonly LaundryChemical[] = [
     brand: 'CLAX',
     name: { en: 'Neutrapur', ar: 'Neutrapur' },
     image: '/chemicals/product.svg',
-    category: { en: 'Laundry acidity neutralizer (Sour)', ar: 'محايد حموضة للغسيل' },
+    category: {
+      en: 'Laundry acidity neutralizer (Sour)',
+      ar: 'محايد حموضة للغسيل',
+    },
     description: {
       en: 'Clax Neutrapur neutralizes excess alkalinity remaining on the laundry after washing. It is added in the final rinse of any wash program.',
       ar: 'Clax Neutrapur يحيد القلوية الزائدة التي تتبقى على الغسيل بعد الغسلة. يُضاف في آخر شطفة في أي برنامج غسيل.',
@@ -380,8 +396,16 @@ export const laundryChemicals: readonly LaundryChemical[] = [
       ar: 'يعتمد على حمض عضوي قوي يتفاعل مع أي قلوية زيادة على الغسيل. ولا يترك أي رائحة غير مستحبة على القماش بعد الاستخدام. يصلح مع جميع منتجات دايفرسي وجميع أنواع الغسيل.',
     },
     features: {
-      en: ['Effective organic acid', 'Leaves no odor on the laundry', 'Suitable for all types of laundry'],
-      ar: ['حمض عضوي فعال', 'لا يترك رائحة على الغسيل', 'يصلح مع جميع أنواع الغسيل'],
+      en: [
+        'Effective organic acid',
+        'Leaves no odor on the laundry',
+        'Suitable for all types of laundry',
+      ],
+      ar: [
+        'حمض عضوي فعال',
+        'لا يترك رائحة على الغسيل',
+        'يصلح مع جميع أنواع الغسيل',
+      ],
     },
     usage: {
       en: 'Added in the final rinse using a standard dosing machine. Required pH in laundry at end: approximately 6.5.',
@@ -631,8 +655,12 @@ export const laundryChemicals: readonly LaundryChemical[] = [
       ar: 'خفيفة: 1.5-3.0 مل/كجم؛ متوسطة: 3.0-6.0 مل/كجم؛ شديدة: 5.0-12.0 مل/كجم.',
     },
     warnings: {
-      en: ['To preserve colors, avoid unnecessary high heat and chlorine on colored fabrics.'],
-      ar: ['للحفاظ على الألوان، تجنب الحرارة العالية غير الضرورية والكلور على الأقمشة الملونة.'],
+      en: [
+        'To preserve colors, avoid unnecessary high heat and chlorine on colored fabrics.',
+      ],
+      ar: [
+        'للحفاظ على الألوان، تجنب الحرارة العالية غير الضرورية والكلور على الأقمشة الملونة.',
+      ],
     },
     safety: {
       en: 'Wear gloves and eye protection when handling concentrate.',

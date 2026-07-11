@@ -11,7 +11,22 @@ export type WeekDayId =
 
 export type ShiftPeriod = 'morning' | 'evening';
 
-export type ShiftRole = 'washer' | 'valet' | 'ironing' | 'press' | 'linen' | 'off';
+export type ShiftRole =
+  | 'washer'
+  | 'ghalya'
+  | 'ironing'
+  | 'linen'
+  | 'calendar'
+  | 'weeklyLeave'
+  | 'annualLeave';
+
+export type LegacyShiftRole =
+  | 'washer'
+  | 'valet'
+  | 'ironing'
+  | 'press'
+  | 'linen'
+  | 'off';
 
 export type ShiftPair = readonly [string, string];
 
@@ -51,12 +66,22 @@ export const weekDays: readonly WeekDayId[] = [
 
 export const shiftRoles: readonly ShiftRole[] = [
   'washer',
-  'valet',
+  'ghalya',
   'ironing',
-  'press',
   'linen',
-  'off',
+  'calendar',
+  'weeklyLeave',
+  'annualLeave',
 ] as const;
+
+export const LEAVE_SHIFT_ROLES: readonly ShiftRole[] = [
+  'weeklyLeave',
+  'annualLeave',
+] as const;
+
+export const WORKING_SHIFT_ROLES = shiftRoles.filter(
+  (role) => !LEAVE_SHIFT_ROLES.includes(role),
+) as readonly ShiftRole[];
 
 const WORKER_IDS = [
   'lw-01',
@@ -92,20 +117,87 @@ function rotateWorkers(start: number, count: number): string[] {
 }
 
 function pairAt(start: number): ShiftPair {
-  return [WORKER_IDS[start % WORKER_IDS.length], WORKER_IDS[(start + 1) % WORKER_IDS.length]];
+  return [
+    WORKER_IDS[start % WORKER_IDS.length],
+    WORKER_IDS[(start + 1) % WORKER_IDS.length],
+  ];
 }
 
-function buildWeeklyDay(dayIndex: number): Record<ShiftRole, WeeklyCellAssignment> {
+function buildWeeklyDay(
+  dayIndex: number,
+): Record<ShiftRole, WeeklyCellAssignment> {
   const base = dayIndex * 2;
 
   return {
     washer: { morning: pairAt(base), evening: pairAt(base + 8) },
-    valet: { morning: pairAt(base + 2), evening: pairAt(base + 10) },
+    ghalya: { morning: pairAt(base + 2), evening: pairAt(base + 10) },
     ironing: { morning: pairAt(base + 4), evening: pairAt(base + 12) },
-    press: { morning: pairAt(base + 6), evening: pairAt(base + 14) },
     linen: { morning: pairAt(base + 1), evening: pairAt(base + 9) },
-    off: { morning: pairAt(base + 3), evening: pairAt(base + 11) },
+    calendar: { morning: pairAt(base + 6), evening: pairAt(base + 14) },
+    weeklyLeave: { morning: pairAt(base + 3), evening: pairAt(base + 11) },
+    annualLeave: { morning: pairAt(base + 5), evening: pairAt(base + 13) },
   };
+}
+
+export function migrateWeeklyDaySchedule(
+  daySchedule: unknown,
+  seedDay: Record<ShiftRole, WeeklyCellAssignment>,
+): Record<ShiftRole, WeeklyCellAssignment> {
+  if (!daySchedule || typeof daySchedule !== 'object') {
+    return structuredClone(seedDay);
+  }
+
+  const legacy = daySchedule as Partial<
+    Record<LegacyShiftRole | ShiftRole, WeeklyCellAssignment>
+  >;
+
+  if (
+    legacy.ghalya ||
+    legacy.calendar ||
+    legacy.weeklyLeave ||
+    legacy.annualLeave
+  ) {
+    const next = structuredClone(seedDay);
+    shiftRoles.forEach((role) => {
+      if (legacy[role]) {
+        next[role] = {
+          morning: [...legacy[role]!.morning] as ShiftPair,
+          evening: [...legacy[role]!.evening] as ShiftPair,
+        };
+      }
+    });
+    return next;
+  }
+
+  return {
+    washer: legacy.washer ?? seedDay.washer,
+    ghalya: legacy.press ?? seedDay.ghalya,
+    ironing: legacy.ironing ?? seedDay.ironing,
+    linen: legacy.linen ?? seedDay.linen,
+    calendar: legacy.valet ?? seedDay.calendar,
+    weeklyLeave: legacy.off ?? seedDay.weeklyLeave,
+    annualLeave: seedDay.annualLeave,
+  };
+}
+
+export function migrateWeeklySchedule(
+  weeklySchedule: unknown,
+  seed: ShiftsState,
+): Record<WeekDayId, Record<ShiftRole, WeeklyCellAssignment>> {
+  const partial = (weeklySchedule ?? {}) as Partial<
+    Record<WeekDayId, Record<ShiftRole, WeeklyCellAssignment>>
+  >;
+
+  return weekDays.reduce(
+    (accumulator, day) => {
+      accumulator[day] = migrateWeeklyDaySchedule(
+        partial[day],
+        seed.weeklySchedule[day],
+      );
+      return accumulator;
+    },
+    {} as Record<WeekDayId, Record<ShiftRole, WeeklyCellAssignment>>,
+  );
 }
 
 function buildDailyRoster(dayIndex: number): DailyRoster {
@@ -126,7 +218,10 @@ function buildWorkingHours(): DayWorkingHours {
 
 export function createDefaultShiftsState(): ShiftsState {
   const dailyRosters = {} as Record<WeekDayId, DailyRoster>;
-  const weeklySchedule = {} as Record<WeekDayId, Record<ShiftRole, WeeklyCellAssignment>>;
+  const weeklySchedule = {} as Record<
+    WeekDayId,
+    Record<ShiftRole, WeeklyCellAssignment>
+  >;
   const workingHours = {} as Record<WeekDayId, DayWorkingHours>;
 
   weekDays.forEach((day, index) => {
@@ -164,22 +259,28 @@ function uniqueIds(ids: readonly string[]): string[] {
 export function deriveDailyViewFromWeekly(
   weeklySchedule: Record<ShiftRole, WeeklyCellAssignment>,
 ): DerivedDailyView {
-  const workingRoles = shiftRoles.filter((role) => role !== 'off');
-
   const morning = uniqueIds(
-    workingRoles.flatMap((role) => [weeklySchedule[role].morning[0], weeklySchedule[role].morning[1]]),
+    WORKING_SHIFT_ROLES.flatMap((role) => [
+      weeklySchedule[role].morning[0],
+      weeklySchedule[role].morning[1],
+    ]),
   ).slice(0, 8);
 
   const evening = uniqueIds(
-    workingRoles.flatMap((role) => [weeklySchedule[role].evening[0], weeklySchedule[role].evening[1]]),
+    WORKING_SHIFT_ROLES.flatMap((role) => [
+      weeklySchedule[role].evening[0],
+      weeklySchedule[role].evening[1],
+    ]),
   ).slice(0, 8);
 
-  const offToday = uniqueIds([
-    weeklySchedule.off.morning[0],
-    weeklySchedule.off.morning[1],
-    weeklySchedule.off.evening[0],
-    weeklySchedule.off.evening[1],
-  ]);
+  const offToday = uniqueIds(
+    LEAVE_SHIFT_ROLES.flatMap((role) => [
+      weeklySchedule[role].morning[0],
+      weeklySchedule[role].morning[1],
+      weeklySchedule[role].evening[0],
+      weeklySchedule[role].evening[1],
+    ]),
+  );
 
   return { morning, evening, offToday };
 }

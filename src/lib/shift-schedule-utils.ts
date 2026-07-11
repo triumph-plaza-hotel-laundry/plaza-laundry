@@ -23,11 +23,11 @@ export const TODAYS_SCHEDULE_COLUMNS: ReadonlyArray<{
   role: ShiftRole;
   labelKey: TranslationKey;
 }> = [
-  { role: 'washer', labelKey: 'shifts.roles.washer' },
-  { role: 'valet', labelKey: 'shifts.roles.valet' },
-  { role: 'ironing', labelKey: 'shifts.roles.ironing' },
-  { role: 'linen', labelKey: 'shifts.roles.linen' },
-  { role: 'off', labelKey: 'shifts.roles.calendar' },
+  { role: 'washer', labelKey: 'shifts.weekly.departments.washing' },
+  { role: 'ghalya', labelKey: 'shifts.weekly.departments.ghalya' },
+  { role: 'ironing', labelKey: 'shifts.weekly.departments.ironing' },
+  { role: 'linen', labelKey: 'shifts.weekly.departments.linen' },
+  { role: 'calendar', labelKey: 'shifts.weekly.departments.calendar' },
 ];
 
 export function findEmployeeShiftSlots(
@@ -115,7 +115,11 @@ export function getEmployeeDayShiftStatus(
     return 'dayOff';
   }
 
-  if (slots.some((slot) => slot.role === 'off')) {
+  if (
+    slots.some(
+      (slot) => slot.role === 'weeklyLeave' || slot.role === 'annualLeave',
+    )
+  ) {
     return 'dayOff';
   }
 
@@ -145,8 +149,14 @@ export function stripRemovedEmployeeIds(
     shiftRoles.forEach((role) => {
       const cell = schedule[day][role];
       next[day][role] = {
-        morning: cell.morning.map((id) => (removed.has(id) ? '' : id)) as [string, string],
-        evening: cell.evening.map((id) => (removed.has(id) ? '' : id)) as [string, string],
+        morning: cell.morning.map((id) => (removed.has(id) ? '' : id)) as [
+          string,
+          string,
+        ],
+        evening: cell.evening.map((id) => (removed.has(id) ? '' : id)) as [
+          string,
+          string,
+        ],
       };
     });
   });

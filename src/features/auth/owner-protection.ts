@@ -24,11 +24,14 @@ export function isPrimaryAdminAccount(
 }
 
 /** @deprecated Use isPrimaryAdminAccount */
-export function isOwnerAccount(user: Pick<AuthUser, 'id' | 'username' | 'isOwner' | 'isProtected'>): boolean {
+export function isOwnerAccount(
+  user: Pick<AuthUser, 'id' | 'username' | 'isOwner' | 'isProtected'>,
+): boolean {
   return isPrimaryAdminAccount(user);
 }
 
-export const PRIMARY_ADMIN_PROTECTED_MESSAGE = 'Primary administrator account is permanently protected';
+export const PRIMARY_ADMIN_PROTECTED_MESSAGE =
+  'Primary administrator account is permanently protected';
 
 /** @deprecated Use PRIMARY_ADMIN_PROTECTED_MESSAGE */
 export const OWNER_PROTECTED_MESSAGE = PRIMARY_ADMIN_PROTECTED_MESSAGE;

@@ -10,7 +10,8 @@
   --price-input: #050505;
   --price-header: #0c0c0c;
   --price-row-border: rgb(201 164 92 / 12%);
-  --price-font-en: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --price-font-en:
+    Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --price-font-ar: 'Noto Kufi Arabic', 'Segoe UI', Tahoma, sans-serif;
   display: flex;
   width: 100%;
@@ -137,7 +138,8 @@
   color: #e8d5a6;
 }
 
-.price-list-page__tab--outsideGuest.price-list-page__tab--active .price-list-page__tab-icon {
+.price-list-page__tab--outsideGuest.price-list-page__tab--active
+  .price-list-page__tab-icon {
   color: #e8d5a6;
 }
 
@@ -193,7 +195,12 @@ html[dir='rtl'] .price-list-page__tab {
 
 .price-tab-hero--outsideGuest {
   border: 1px solid rgb(139 115 85 / 38%);
-  background: linear-gradient(135deg, #1a1612 0%, #2c2418 42%, var(--price-surface) 100%);
+  background: linear-gradient(
+    135deg,
+    #1a1612 0%,
+    #2c2418 42%,
+    var(--price-surface) 100%
+  );
 }
 
 :root[data-theme='luxury-light'] .price-tab-hero--guest {
@@ -206,7 +213,12 @@ html[dir='rtl'] .price-list-page__tab {
 }
 
 :root[data-theme='luxury-light'] .price-tab-hero--outsideGuest {
-  background: linear-gradient(135deg, #ece8e2 0%, #ddd6cb 38%, var(--price-surface) 100%);
+  background: linear-gradient(
+    135deg,
+    #ece8e2 0%,
+    #ddd6cb 38%,
+    var(--price-surface) 100%
+  );
   border-color: rgb(139 115 85 / 28%);
 }
 
@@ -322,7 +334,11 @@ html[dir='rtl'] .price-list-page__tab {
 }
 
 .price-tab-panel--outsideGuest .price-section__header {
-  background: linear-gradient(180deg, rgb(139 115 85 / 10%) 0%, transparent 100%);
+  background: linear-gradient(
+    180deg,
+    rgb(139 115 85 / 10%) 0%,
+    transparent 100%
+  );
 }
 
 .price-tab-panel--outsideGuest .price-section__title-en,
@@ -334,7 +350,9 @@ html[dir='rtl'] .price-list-page__tab {
   border: 1px solid var(--app-gold-border);
   border-radius: var(--card-radius);
   background: var(--price-surface);
-  box-shadow: 0 10px 32px rgb(0 0 0 / 22%), 0 0 0 1px rgb(201 164 92 / 6%);
+  box-shadow:
+    0 10px 32px rgb(0 0 0 / 22%),
+    0 0 0 1px rgb(201 164 92 / 6%);
   overflow: hidden;
   transition:
     border-color 180ms ease,
@@ -350,7 +368,11 @@ html[dir='rtl'] .price-list-page__tab {
 .price-section__header {
   padding: 1.125rem 1.25rem 0.875rem;
   border-bottom: 1px solid var(--price-row-border);
-  background: linear-gradient(180deg, rgb(201 164 92 / 6%) 0%, transparent 100%);
+  background: linear-gradient(
+    180deg,
+    rgb(201 164 92 / 6%) 0%,
+    transparent 100%
+  );
 }
 
 .price-section__title-en {
@@ -504,7 +526,11 @@ html[dir='rtl'] .price-section__table thead th {
 .price-notice {
   border: 1px solid var(--app-gold-border);
   border-radius: var(--card-radius);
-  background: linear-gradient(135deg, rgb(201 164 92 / 10%) 0%, var(--price-surface) 48%);
+  background: linear-gradient(
+    135deg,
+    rgb(201 164 92 / 10%) 0%,
+    var(--price-surface) 48%
+  );
   padding: 1.25rem 1.5rem;
   box-shadow: 0 8px 28px rgb(201 164 92 / 8%);
 }
@@ -625,7 +651,11 @@ html[dir='rtl'] .price-section__table thead th {
 
 .price-notice--outsideGuest {
   border-color: rgb(139 115 85 / 32%);
-  background: linear-gradient(135deg, rgb(139 115 85 / 12%) 0%, var(--price-surface) 48%);
+  background: linear-gradient(
+    135deg,
+    rgb(139 115 85 / 12%) 0%,
+    var(--price-surface) 48%
+  );
 }
 
 @media (prefers-reduced-motion: reduce) {

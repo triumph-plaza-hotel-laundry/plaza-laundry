@@ -8,7 +8,13 @@ import {
   type CatalogFilter,
 } from '@/components/fabrics/fabric-catalog-utils';
 import type { LaundryFabric } from '@/data/repositories';
-import { useFabricFavorites, useFabrics, useHomeContent, useLanguage, useRecentlyViewedFabrics } from '@/hooks';
+import {
+  useFabricFavorites,
+  useFabrics,
+  useHomeContent,
+  useLanguage,
+  useRecentlyViewedFabrics,
+} from '@/hooks';
 import { dictionaries } from '@/i18n/dictionaries';
 import '@/components/fabrics/fabrics-page.css';
 import type { TranslationKey } from '@/types/language';
@@ -31,7 +37,9 @@ export function FabricsPage() {
   const { recentIds, trackView } = useRecentlyViewedFabrics();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<CatalogFilter>('all');
-  const [selectedFabric, setSelectedFabric] = useState<LaundryFabric | null>(null);
+  const [selectedFabric, setSelectedFabric] = useState<LaundryFabric | null>(
+    null,
+  );
 
   const handleSelectFabric = useCallback(
     (fabric: LaundryFabric) => {
@@ -72,7 +80,8 @@ export function FabricsPage() {
   );
 
   const mostUsedFabrics = useMemo(
-    () => fabrics.filter((fabric) => content.featuredFabricIds.includes(fabric.id)),
+    () =>
+      fabrics.filter((fabric) => content.featuredFabricIds.includes(fabric.id)),
     [content.featuredFabricIds, fabrics],
   );
 
@@ -95,7 +104,11 @@ export function FabricsPage() {
         </div>
 
         <label className="fabrics-catalog__search">
-          <Search aria-hidden="true" className="fabrics-catalog__search-icon" strokeWidth={1.75} />
+          <Search
+            aria-hidden="true"
+            className="fabrics-catalog__search-icon"
+            strokeWidth={1.75}
+          />
           <input
             className="fabrics-catalog__search-input"
             onChange={(event) => setSearchQuery(event.target.value)}
@@ -105,10 +118,14 @@ export function FabricsPage() {
           />
         </label>
 
-        <div aria-label={t('fabrics.filters.label')} className="fabrics-catalog__filters" role="group">
+        <div
+          aria-label={t('fabrics.filters.label')}
+          className="fabrics-catalog__filters"
+          role="group"
+        >
           {catalogFilters.map((filter) => (
             <button
-              className={`fabrics-catalog__filter${activeFilter === filter ? ' fabrics-catalog__filter--active' : ''}`}
+              className={`fabrics-catalog__filter${activeFilter === filter ? 'fabrics-catalog__filter--active' : ''}`}
               key={filter}
               onClick={() => setActiveFilter(filter)}
               type="button"
@@ -120,9 +137,15 @@ export function FabricsPage() {
       </header>
 
       {favoriteFabrics.length > 0 && showSpotlightSections ? (
-        <section aria-labelledby="fabrics-favorites-title" className="fabrics-catalog__section">
+        <section
+          aria-labelledby="fabrics-favorites-title"
+          className="fabrics-catalog__section"
+        >
           <div className="fabrics-catalog__section-head">
-            <h2 className="fabrics-catalog__section-title-en" id="fabrics-favorites-title">
+            <h2
+              className="fabrics-catalog__section-title-en"
+              id="fabrics-favorites-title"
+            >
               {dictionaries.en['fabrics.catalog.sections.favorites']}
             </h2>
             <h2 className="fabrics-catalog__section-title-ar">
@@ -159,14 +182,22 @@ export function FabricsPage() {
       ) : (
         <div className="fabrics-catalog__empty">
           <p className="fabrics-catalog__empty-en">{t('fabrics.noResults')}</p>
-          <p className="fabrics-catalog__empty-ar">{t('fabrics.catalog.noResultsAr')}</p>
+          <p className="fabrics-catalog__empty-ar">
+            {t('fabrics.catalog.noResultsAr')}
+          </p>
         </div>
       )}
 
       {showSpotlightSections && recentlyViewedFabrics.length > 0 ? (
-        <section aria-labelledby="fabrics-recent-title" className="fabrics-catalog__section">
+        <section
+          aria-labelledby="fabrics-recent-title"
+          className="fabrics-catalog__section"
+        >
           <div className="fabrics-catalog__section-head">
-            <h2 className="fabrics-catalog__section-title-en" id="fabrics-recent-title">
+            <h2
+              className="fabrics-catalog__section-title-en"
+              id="fabrics-recent-title"
+            >
               {dictionaries.en['fabrics.catalog.sections.recentlyViewed']}
             </h2>
             <h2 className="fabrics-catalog__section-title-ar">
@@ -189,9 +220,15 @@ export function FabricsPage() {
       ) : null}
 
       {showSpotlightSections ? (
-        <section aria-labelledby="fabrics-most-used-title" className="fabrics-catalog__section">
+        <section
+          aria-labelledby="fabrics-most-used-title"
+          className="fabrics-catalog__section"
+        >
           <div className="fabrics-catalog__section-head">
-            <h2 className="fabrics-catalog__section-title-en" id="fabrics-most-used-title">
+            <h2
+              className="fabrics-catalog__section-title-en"
+              id="fabrics-most-used-title"
+            >
               {dictionaries.en['fabrics.catalog.sections.mostUsedInHotel']}
             </h2>
             <h2 className="fabrics-catalog__section-title-ar">

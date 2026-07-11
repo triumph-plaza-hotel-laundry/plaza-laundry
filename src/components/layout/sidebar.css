@@ -172,6 +172,9 @@
   inset-block: 0;
   inset-inline-start: 0;
   z-index: 30;
+  transition:
+    transform 200ms ease,
+    opacity 200ms ease;
 }
 
 .luxury-sidebar-shell--drawer {

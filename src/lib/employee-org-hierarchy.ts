@@ -66,7 +66,10 @@ function departmentMatches(employee: LaundryEmployee, ...keywords: string[]) {
 
 function isShiftLeader(employee: LaundryEmployee) {
   const title = jobTitleEn(employee);
-  return title.startsWith('shift leader') || employee.tier === 'washingTeamSupervisor';
+  return (
+    title.startsWith('shift leader') ||
+    employee.tier === 'washingTeamSupervisor'
+  );
 }
 
 function isLeadSupervisor(employee: LaundryEmployee) {
@@ -76,7 +79,11 @@ function isLeadSupervisor(employee: LaundryEmployee) {
 
 function isSupervisor(employee: LaundryEmployee) {
   const title = jobTitleEn(employee);
-  return title.includes('supervisor') && !isShiftLeader(employee) && !isLeadSupervisor(employee);
+  return (
+    title.includes('supervisor') &&
+    !isShiftLeader(employee) &&
+    !isLeadSupervisor(employee)
+  );
 }
 
 export const ORG_SECTION_DEFINITIONS: readonly OrgSectionDefinition[] = [
@@ -87,7 +94,8 @@ export const ORG_SECTION_DEFINITIONS: readonly OrgSectionDefinition[] = [
     labelArKey: 'employees.org.directorAr',
     hideWhenEmpty: false,
     matches: (employee) =>
-      employee.tier === 'generalManager' || jobTitleEn(employee) === 'director manager',
+      employee.tier === 'generalManager' ||
+      jobTitleEn(employee) === 'director manager',
   },
   {
     id: 'laundryManagers',
@@ -127,7 +135,8 @@ export const ORG_SECTION_DEFINITIONS: readonly OrgSectionDefinition[] = [
     labelKey: 'employees.org.tailorEn',
     labelArKey: 'employees.org.tailorAr',
     hideWhenEmpty: true,
-    matches: (employee) => employee.tier === 'tailor' || jobTitleEn(employee) === 'tailor',
+    matches: (employee) =>
+      employee.tier === 'tailor' || jobTitleEn(employee) === 'tailor',
   },
   {
     id: 'shiftLeaders',
@@ -154,7 +163,8 @@ export const STAFF_DEPARTMENT_MATCHERS: readonly StaffDepartmentMatcher[] = [
     titleEn: 'Linen Room',
     titleAr: 'غرفة اللينين',
     matches: (employee) =>
-      jobTitleEn(employee) === 'linen room attendant' || departmentMatches(employee, 'linen', 'لينين'),
+      jobTitleEn(employee) === 'linen room attendant' ||
+      departmentMatches(employee, 'linen', 'لينين'),
   },
   {
     id: 'laundry',
@@ -211,7 +221,8 @@ export const STAFF_DEPARTMENT_MATCHERS: readonly StaffDepartmentMatcher[] = [
     titleEn: 'Folding',
     titleAr: 'الطي',
     matches: (employee) =>
-      jobTitleEn(employee) === 'folder' || departmentMatches(employee, 'fold', 'طي'),
+      jobTitleEn(employee) === 'folder' ||
+      departmentMatches(employee, 'fold', 'طي'),
   },
   {
     id: 'general-worker',
@@ -242,16 +253,24 @@ const ADMIN_TABLE_HIERARCHY_MATCHERS: readonly {
   {
     rank: 0,
     matches: (employee) =>
-      employee.tier === 'generalManager' || jobTitleEn(employee) === 'director manager',
+      employee.tier === 'generalManager' ||
+      jobTitleEn(employee) === 'director manager',
   },
-  { rank: 1, matches: (employee) => jobTitleEn(employee) === 'laundry manager' },
-  { rank: 2, matches: (employee) => jobTitleEn(employee) === 'assistant manager' },
+  {
+    rank: 1,
+    matches: (employee) => jobTitleEn(employee) === 'laundry manager',
+  },
+  {
+    rank: 2,
+    matches: (employee) => jobTitleEn(employee) === 'assistant manager',
+  },
   { rank: 3, matches: (employee) => isSupervisor(employee) },
   { rank: 4, matches: (employee) => isLeadSupervisor(employee) },
   { rank: 5, matches: (employee) => isShiftLeader(employee) },
   {
     rank: 6,
-    matches: (employee) => employee.tier === 'tailor' || jobTitleEn(employee) === 'tailor',
+    matches: (employee) =>
+      employee.tier === 'tailor' || jobTitleEn(employee) === 'tailor',
   },
   {
     rank: 7,
@@ -268,7 +287,8 @@ const ADMIN_TABLE_HIERARCHY_MATCHERS: readonly {
   {
     rank: 9,
     matches: (employee) =>
-      jobTitleEn(employee) === 'washer' || departmentMatches(employee, 'laundry', 'مغسلة'),
+      jobTitleEn(employee) === 'washer' ||
+      departmentMatches(employee, 'laundry', 'مغسلة'),
   },
   {
     rank: 10,
@@ -277,7 +297,15 @@ const ADMIN_TABLE_HIERARCHY_MATCHERS: readonly {
       jobTitleEn(employee) === 'ironer' ||
       jobTitleEn(employee) === 'presser' ||
       jobTitleEn(employee) === 'chest ironers attendant' ||
-      departmentMatches(employee, 'iron room', 'مكواة', 'chest ironers', 'جندرة', 'pressing', 'كي'),
+      departmentMatches(
+        employee,
+        'iron room',
+        'مكواة',
+        'chest ironers',
+        'جندرة',
+        'pressing',
+        'كي',
+      ),
   },
   {
     rank: 11,
@@ -305,7 +333,9 @@ const ADMIN_TABLE_PINNED_NAME_KEYS: readonly string[][] = [
   ['abdallahahmed'],
 ] as const;
 
-const SECTION_PRIORITY = [...ORG_SECTION_DEFINITIONS].sort((left, right) => left.sortOrder - right.sortOrder);
+const SECTION_PRIORITY = [...ORG_SECTION_DEFINITIONS].sort(
+  (left, right) => left.sortOrder - right.sortOrder,
+);
 
 function slugify(value: string) {
   return value
@@ -336,7 +366,9 @@ function pluralizeSectionTitle(titleEn: string) {
   return `${trimmed}s`;
 }
 
-export function resolveEmployeeOrgSection(employee: LaundryEmployee): OrgSectionId {
+export function resolveEmployeeOrgSection(
+  employee: LaundryEmployee,
+): OrgSectionId {
   const match = SECTION_PRIORITY.find(
     (section) => section.id !== 'staff' && section.matches(employee),
   );
@@ -344,7 +376,10 @@ export function resolveEmployeeOrgSection(employee: LaundryEmployee): OrgSection
   return match?.id ?? 'staff';
 }
 
-export function inferEmployeeTierFromPosition(jobTitleEn: string, currentTier?: EmployeeTier): EmployeeTier {
+export function inferEmployeeTierFromPosition(
+  jobTitleEn: string,
+  currentTier?: EmployeeTier,
+): EmployeeTier {
   const title = normalizeJobTitle(jobTitleEn);
 
   if (!title) {
@@ -367,7 +402,10 @@ export function inferEmployeeTierFromPosition(jobTitleEn: string, currentTier?: 
     return 'washingTeamSupervisor';
   }
 
-  if (title === 'senior valet supervisor' || title === 'senior linen supervisor') {
+  if (
+    title === 'senior valet supervisor' ||
+    title === 'senior linen supervisor'
+  ) {
     return 'departmentManager';
   }
 
@@ -388,17 +426,18 @@ export function getEmployeeSortCode(employee: LaundryEmployee): string {
 }
 
 function normalizeAdminTablePinnedNameKey(name: string): string {
-  return name
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, '');
+  return name.trim().toLowerCase().replace(/\s+/g, '');
 }
 
-export function getAdminTablePinnedRank(employee: LaundryEmployee): number | null {
+export function getAdminTablePinnedRank(
+  employee: LaundryEmployee,
+): number | null {
   const nameKey = normalizeAdminTablePinnedNameKey(employee.name.en);
 
   for (let index = 0; index < ADMIN_TABLE_PINNED_NAME_KEYS.length; index += 1) {
-    if (ADMIN_TABLE_PINNED_NAME_KEYS[index].some((alias) => alias === nameKey)) {
+    if (
+      ADMIN_TABLE_PINNED_NAME_KEYS[index].some((alias) => alias === nameKey)
+    ) {
       return index;
     }
   }
@@ -407,7 +446,9 @@ export function getAdminTablePinnedRank(employee: LaundryEmployee): number | nul
 }
 
 export function getAdminTableHierarchyRank(employee: LaundryEmployee): number {
-  const match = ADMIN_TABLE_HIERARCHY_MATCHERS.find((entry) => entry.matches(employee));
+  const match = ADMIN_TABLE_HIERARCHY_MATCHERS.find((entry) =>
+    entry.matches(employee),
+  );
   return match?.rank ?? UNKNOWN_ADMIN_TABLE_RANK;
 }
 
@@ -439,10 +480,14 @@ export function compareEmployeesForAdminTable(
     return leftRank - rightRank;
   }
 
-  return getEmployeeSortCode(left).localeCompare(getEmployeeSortCode(right), undefined, {
-    numeric: true,
-    sensitivity: 'base',
-  });
+  return getEmployeeSortCode(left).localeCompare(
+    getEmployeeSortCode(right),
+    undefined,
+    {
+      numeric: true,
+      sensitivity: 'base',
+    },
+  );
 }
 
 export function sortEmployeesForAdminTable(
@@ -456,13 +501,17 @@ export function getAdminTableSectionRank(employee: LaundryEmployee): number {
   return ADMIN_TABLE_SECTION_RANK[section];
 }
 
-export function resolveStaffDepartmentSortRank(employee: LaundryEmployee): number {
+export function resolveStaffDepartmentSortRank(
+  employee: LaundryEmployee,
+): number {
   const section = resolveEmployeeOrgSection(employee);
   if (section !== 'staff' && section !== 'tailor') {
     return -1;
   }
 
-  const matcher = STAFF_DEPARTMENT_MATCHERS.find((entry) => entry.matches(employee));
+  const matcher = STAFF_DEPARTMENT_MATCHERS.find((entry) =>
+    entry.matches(employee),
+  );
   return matcher?.sortOrder ?? UNKNOWN_STAFF_DEPARTMENT_RANK;
 }
 
@@ -482,13 +531,19 @@ export function compareEmployeesByHierarchy(
     return leftStaffRank - rightStaffRank;
   }
 
-  return getEmployeeSortCode(left).localeCompare(getEmployeeSortCode(right), undefined, {
-    numeric: true,
-    sensitivity: 'base',
-  });
+  return getEmployeeSortCode(left).localeCompare(
+    getEmployeeSortCode(right),
+    undefined,
+    {
+      numeric: true,
+      sensitivity: 'base',
+    },
+  );
 }
 
-export function sortEmployeesByHierarchy(employees: readonly LaundryEmployee[]): LaundryEmployee[] {
+export function sortEmployeesByHierarchy(
+  employees: readonly LaundryEmployee[],
+): LaundryEmployee[] {
   return [...employees].sort(compareEmployeesByHierarchy);
 }
 
@@ -509,10 +564,14 @@ export function assignEmployeesToOrgSections(employees: LaundryEmployee[]) {
 
 function sortBucketByEmployeeCode(employees: LaundryEmployee[]) {
   return [...employees].sort((left, right) =>
-    getEmployeeSortCode(left).localeCompare(getEmployeeSortCode(right), undefined, {
-      numeric: true,
-      sensitivity: 'base',
-    }),
+    getEmployeeSortCode(left).localeCompare(
+      getEmployeeSortCode(right),
+      undefined,
+      {
+        numeric: true,
+        sensitivity: 'base',
+      },
+    ),
   );
 }
 

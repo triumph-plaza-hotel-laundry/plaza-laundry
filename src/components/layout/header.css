@@ -4,7 +4,7 @@
   z-index: 50;
   height: var(--header-height);
   flex-shrink: 0;
-  overflow: hidden;
+  overflow: visible;
   border-bottom: 1px solid var(--header-divider, var(--app-gold-border));
   background: var(--header-bg);
   box-shadow: var(--header-shadow, none);
@@ -17,8 +17,16 @@
   pointer-events: none;
   background-color: var(--header-bg);
   background-image:
-    radial-gradient(ellipse 90% 70% at 18% 42%, rgb(255 255 255 / 2.5%), transparent 55%),
-    radial-gradient(ellipse 70% 55% at 76% 58%, rgb(255 255 255 / 1.8%), transparent 50%),
+    radial-gradient(
+      ellipse 90% 70% at 18% 42%,
+      rgb(255 255 255 / 2.5%),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 70% 55% at 76% 58%,
+      rgb(255 255 255 / 1.8%),
+      transparent 50%
+    ),
     linear-gradient(
       118deg,
       transparent 0 38%,
@@ -66,7 +74,7 @@
   flex-wrap: nowrap;
   gap: var(--header-gap, 12px);
   padding-inline: clamp(6px, 2vw, 24px);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .luxury-header__control {
@@ -131,10 +139,6 @@ time.luxury-header__control {
 @media (min-width: 1024px) {
   .luxury-header__inner {
     gap: clamp(10px, 1.2vw, 16px);
-  }
-
-  .luxury-header__menu {
-    display: none;
   }
 
   .luxury-header__inner > .header-logo {

@@ -6,7 +6,11 @@
   height: 100%;
   overflow: hidden;
   pointer-events: none;
-  transform: translate3d(calc(var(--parallax-x, 0) * 1px), calc(var(--parallax-y, 0) * 1px), 0);
+  transform: translate3d(
+    calc(var(--parallax-x, 0) * 1px),
+    calc(var(--parallax-y, 0) * 1px),
+    0
+  );
 }
 
 .home-luxury-particle {
@@ -19,13 +23,22 @@
   background: rgb(201 164 92 / 72%);
   box-shadow: 0 0 2px rgb(201 164 92 / 18%);
   opacity: 0;
-  transform: translate3d(calc(var(--x0) - var(--half)), calc(var(--y0) - var(--half)), 0);
-  animation: home-luxury-particle-drift var(--duration) linear var(--delay) forwards;
+  transform: translate3d(
+    calc(var(--x0) - var(--half)),
+    calc(var(--y0) - var(--half)),
+    0
+  );
+  animation: home-luxury-particle-drift var(--duration) linear var(--delay)
+    forwards;
 }
 
 @keyframes home-luxury-particle-drift {
   0% {
-    transform: translate3d(calc(var(--x0) - var(--half)), calc(var(--y0) - var(--half)), 0);
+    transform: translate3d(
+      calc(var(--x0) - var(--half)),
+      calc(var(--y0) - var(--half)),
+      0
+    );
     opacity: 0;
   }
 
@@ -38,7 +51,11 @@
   }
 
   100% {
-    transform: translate3d(calc(var(--x1) - var(--half)), calc(var(--y1) - var(--half)), 0);
+    transform: translate3d(
+      calc(var(--x1) - var(--half)),
+      calc(var(--y1) - var(--half)),
+      0
+    );
     opacity: 0;
   }
 }

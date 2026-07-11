@@ -15,13 +15,16 @@ export const ADMIN_SHIFT_DEPARTMENT_ORDER: readonly ShiftDepartmentId[] = [
   'tailor',
 ] as const;
 
-export const ADMIN_DEPARTMENT_SHIFT_ROLES: Record<ShiftDepartmentId, ShiftRole> = {
+export const ADMIN_DEPARTMENT_SHIFT_ROLES: Record<
+  ShiftDepartmentId,
+  ShiftRole
+> = {
   laundry: 'washer',
-  valet: 'valet',
+  valet: 'calendar',
   iron: 'ironing',
-  chest: 'press',
+  chest: 'ghalya',
   linen: 'linen',
-  tailor: 'off',
+  tailor: 'annualLeave',
 };
 
 export type AdminShiftDepartmentView = ShiftDepartmentDefinition & {
@@ -30,9 +33,13 @@ export type AdminShiftDepartmentView = ShiftDepartmentDefinition & {
   manager: LaundryEmployee | null;
 };
 
-export function getAdminShiftDepartments(employees: LaundryEmployee[]): AdminShiftDepartmentView[] {
+export function getAdminShiftDepartments(
+  employees: LaundryEmployee[],
+): AdminShiftDepartmentView[] {
   const byId = new Map(employees.map((employee) => [employee.id, employee]));
-  const departmentById = new Map(SHIFT_DEPARTMENTS.map((department) => [department.id, department]));
+  const departmentById = new Map(
+    SHIFT_DEPARTMENTS.map((department) => [department.id, department]),
+  );
   const result: AdminShiftDepartmentView[] = [];
 
   ADMIN_SHIFT_DEPARTMENT_ORDER.forEach((departmentId) => {
@@ -47,7 +54,9 @@ export function getAdminShiftDepartments(employees: LaundryEmployee[]): AdminShi
 
     const manager =
       departmentEmployees.find((employee) =>
-        /supervisor|manager|مشرف|مدير/i.test(`${employee.jobTitle.en} ${employee.jobTitle.ar}`),
+        /supervisor|manager|مشرف|مدير/i.test(
+          `${employee.jobTitle.en} ${employee.jobTitle.ar}`,
+        ),
       ) ??
       departmentEmployees[0] ??
       null;

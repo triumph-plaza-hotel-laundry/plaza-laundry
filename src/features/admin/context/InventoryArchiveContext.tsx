@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import type { InventoryPlanDocument } from '@/features/inventory/monthly-archive-types';
 import {
   InventoryArchiveContext,
@@ -12,16 +18,20 @@ import {
 import { savePlanDocument } from '@/features/inventory/plan-document-service';
 import { useLanguage } from '@/hooks';
 
-export function InventoryArchiveProvider({ children }: { children: ReactNode }) {
+export function InventoryArchiveProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const { language } = useLanguage();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [archiveMonths, setArchiveMonths] = useState<string[]>([]);
   const [currentMonth, setCurrentMonth] = useState('');
-  const [planDocument, setPlanDocument] = useState<InventoryPlanDocument | null>(null);
+  const [planDocument, setPlanDocument] =
+    useState<InventoryPlanDocument | null>(null);
   const [viewingMonth, setViewingMonth] = useState<string | null>(null);
-  const [viewingArchive, setViewingArchive] = useState<
-    InventoryArchiveContextValue['viewingArchive']
-  >(null);
+  const [viewingArchive, setViewingArchive] =
+    useState<InventoryArchiveContextValue['viewingArchive']>(null);
   const [isReady, setIsReady] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
 
@@ -42,7 +52,11 @@ export function InventoryArchiveProvider({ children }: { children: ReactNode }) 
         setPlanDocument(result.planDocument);
       } catch (error) {
         if (active) {
-          setSyncError(error instanceof Error ? error.message : 'Failed to sync monthly archives.');
+          setSyncError(
+            error instanceof Error
+              ? error.message
+              : 'Failed to sync monthly archives.',
+          );
         }
       } finally {
         if (active) {
@@ -135,5 +149,9 @@ export function InventoryArchiveProvider({ children }: { children: ReactNode }) 
     ],
   );
 
-  return <InventoryArchiveContext.Provider value={value}>{children}</InventoryArchiveContext.Provider>;
+  return (
+    <InventoryArchiveContext.Provider value={value}>
+      {children}
+    </InventoryArchiveContext.Provider>
+  );
 }

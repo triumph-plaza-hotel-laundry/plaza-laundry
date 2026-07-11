@@ -2,7 +2,11 @@ import { useState } from 'react';
 import { AdminEditToolbar } from '@/features/admin/components/AdminEditToolbar';
 import { AdminPageHeader } from '@/features/admin/components/AdminPageHeader';
 import { useDraftState } from '@/features/admin/hooks/useDraftState';
-import { trainingRepository, type TrainingLesson, type TrainingVideo } from '@/data/repositories';
+import {
+  trainingRepository,
+  type TrainingLesson,
+  type TrainingVideo,
+} from '@/data/repositories';
 import { useAuth, useLanguage } from '@/hooks';
 import '@/features/admin/admin-editor.css';
 
@@ -28,15 +32,20 @@ function emptyVideo(): TrainingVideo {
 export function AdminTrainingEditorPage() {
   const { t } = useLanguage();
   const { assertCan, logAction } = useAuth();
-  const { draft, isDirty, setDraft, resetDraft, commitDraft } = useDraftState(trainingRepository);
-  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(draft.lessons[0]?.id ?? null);
+  const { draft, isDirty, setDraft, resetDraft, commitDraft } =
+    useDraftState(trainingRepository);
+  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(
+    draft.lessons[0]?.id ?? null,
+  );
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveNotice, setSaveNotice] = useState<string | null>(null);
   const [saveNoticeIsError, setSaveNoticeIsError] = useState(false);
 
-  const selectedLesson = draft.lessons.find((lesson) => lesson.id === selectedLessonId) ?? null;
-  const selectedVideo = draft.videos.find((video) => video.id === selectedVideoId) ?? null;
+  const selectedLesson =
+    draft.lessons.find((lesson) => lesson.id === selectedLessonId) ?? null;
+  const selectedVideo =
+    draft.videos.find((video) => video.id === selectedVideoId) ?? null;
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -46,11 +55,17 @@ export function AdminTrainingEditorPage() {
       assertCan('training', 'update');
       await commitDraft(async (value) => {
         await trainingRepository.replaceAll(value);
-        logAction({ action: 'training.replaceAll', page: 'admin/training', newValue: value });
+        logAction({
+          action: 'training.replaceAll',
+          page: 'admin/training',
+          newValue: value,
+        });
       });
       setSaveNotice(t('admin.editor.saveSuccess'));
     } catch (error) {
-      setSaveNotice(error instanceof Error ? error.message : t('admin.editor.saveError'));
+      setSaveNotice(
+        error instanceof Error ? error.message : t('admin.editor.saveError'),
+      );
       setSaveNoticeIsError(true);
     } finally {
       setIsSaving(false);
@@ -121,9 +136,14 @@ export function AdminTrainingEditorPage() {
                 if (!selectedLesson) return;
                 setDraft({
                   ...draft,
-                  lessons: draft.lessons.filter((lesson) => lesson.id !== selectedLesson.id),
+                  lessons: draft.lessons.filter(
+                    (lesson) => lesson.id !== selectedLesson.id,
+                  ),
                 });
-                setSelectedLessonId(draft.lessons.find((l) => l.id !== selectedLesson.id)?.id ?? null);
+                setSelectedLessonId(
+                  draft.lessons.find((l) => l.id !== selectedLesson.id)?.id ??
+                    null,
+                );
               }}
               type="button"
             >
@@ -156,13 +176,21 @@ export function AdminTrainingEditorPage() {
           <div className="admin-editor-panel admin-editor-grid">
             {(['title', 'description'] as const).flatMap((field) =>
               (['en', 'ar'] as const).map((lang) => (
-                <div className="admin-editor-field" key={`lesson-${field}-${lang}`}>
+                <div
+                  className="admin-editor-field"
+                  key={`lesson-${field}-${lang}`}
+                >
                   <label>
                     {field} ({lang.toUpperCase()})
                   </label>
                   <input
                     onChange={(event) =>
-                      updateLesson({ [field]: { ...selectedLesson[field], [lang]: event.target.value } })
+                      updateLesson({
+                        [field]: {
+                          ...selectedLesson[field],
+                          [lang]: event.target.value,
+                        },
+                      })
                     }
                     value={selectedLesson[field][lang]}
                   />
@@ -175,7 +203,10 @@ export function AdminTrainingEditorPage() {
                 <textarea
                   onChange={(event) =>
                     updateLesson({
-                      contentHtml: { ...selectedLesson.contentHtml, [lang]: event.target.value },
+                      contentHtml: {
+                        ...selectedLesson.contentHtml,
+                        [lang]: event.target.value,
+                      },
                     })
                   }
                   rows={4}
@@ -210,9 +241,14 @@ export function AdminTrainingEditorPage() {
                 if (!selectedVideo) return;
                 setDraft({
                   ...draft,
-                  videos: draft.videos.filter((video) => video.id !== selectedVideo.id),
+                  videos: draft.videos.filter(
+                    (video) => video.id !== selectedVideo.id,
+                  ),
                 });
-                setSelectedVideoId(draft.videos.find((v) => v.id !== selectedVideo.id)?.id ?? null);
+                setSelectedVideoId(
+                  draft.videos.find((v) => v.id !== selectedVideo.id)?.id ??
+                    null,
+                );
               }}
               type="button"
             >
@@ -246,14 +282,18 @@ export function AdminTrainingEditorPage() {
             <div className="admin-editor-field">
               <label>YouTube URL</label>
               <input
-                onChange={(event) => updateVideo({ youtubeUrl: event.target.value })}
+                onChange={(event) =>
+                  updateVideo({ youtubeUrl: event.target.value })
+                }
                 value={selectedVideo.youtubeUrl}
               />
             </div>
             <div className="admin-editor-field">
               <label>{t('training.fieldDuration')}</label>
               <input
-                onChange={(event) => updateVideo({ duration: event.target.value })}
+                onChange={(event) =>
+                  updateVideo({ duration: event.target.value })
+                }
                 value={selectedVideo.duration}
               />
             </div>
@@ -263,7 +303,10 @@ export function AdminTrainingEditorPage() {
                 <textarea
                   onChange={(event) =>
                     updateVideo({
-                      description: { ...selectedVideo.description, [lang]: event.target.value },
+                      description: {
+                        ...selectedVideo.description,
+                        [lang]: event.target.value,
+                      },
                     })
                   }
                   rows={3}

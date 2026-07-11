@@ -69,7 +69,9 @@
   padding: 1.15rem;
   background: linear-gradient(165deg, var(--tr-surface), var(--tr-glass));
   cursor: pointer;
-  transition: transform 180ms ease, border-color 180ms ease;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease;
 }
 
 .training-overview-card:hover {

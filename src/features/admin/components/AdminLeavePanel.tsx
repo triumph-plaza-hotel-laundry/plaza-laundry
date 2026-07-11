@@ -101,7 +101,9 @@ function saveLeaveToDraft(
   };
 
   return {
-    slots: draft.slots.map((slot) => (slot.slotId === input.slotId ? { ...slot, entry } : slot)),
+    slots: draft.slots.map((slot) =>
+      slot.slotId === input.slotId ? { ...slot, entry } : slot,
+    ),
   };
 }
 
@@ -125,24 +127,37 @@ function setLeaveStatusInDraft(
   };
 
   return {
-    slots: draft.slots.map((item) => (item.slotId === slotId ? { ...item, entry } : item)),
+    slots: draft.slots.map((item) =>
+      item.slotId === slotId ? { ...item, entry } : item,
+    ),
   };
 }
 
 function deleteLeaveFromDraft(draft: LeavesState, slotId: string): LeavesState {
   return {
-    slots: draft.slots.map((item) => (item.slotId === slotId ? { ...item, entry: null } : item)),
+    slots: draft.slots.map((item) =>
+      item.slotId === slotId ? { ...item, entry: null } : item,
+    ),
   };
 }
 
-export function AdminLeavePanel({ draft, onDraftChange, actorName, actorId }: AdminLeavePanelProps) {
+export function AdminLeavePanel({
+  draft,
+  onDraftChange,
+  actorName,
+  actorId,
+}: AdminLeavePanelProps) {
   const { language, t } = useLanguage();
   const canManage = usePermissions().forResource('leaves').canManage;
   const [activeSlotId, setActiveSlotId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const displaySlots = useMemo(() => draft.slots.slice(0, LEAVE_SLOT_COUNT), [draft.slots]);
-  const activeSlot = draft.slots.find((slot) => slot.slotId === activeSlotId) ?? null;
+  const displaySlots = useMemo(
+    () => draft.slots.slice(0, LEAVE_SLOT_COUNT),
+    [draft.slots],
+  );
+  const activeSlot =
+    draft.slots.find((slot) => slot.slotId === activeSlotId) ?? null;
   const actor = { id: actorId, displayName: actorName, username: actorName };
 
   const openAdd = (slotId: string) => {
@@ -176,13 +191,23 @@ export function AdminLeavePanel({ draft, onDraftChange, actorName, actorId }: Ad
   };
 
   return (
-    <section aria-label={t('admin.leaves.title')} className="leave-panel admin-leaves">
+    <section
+      aria-label={t('admin.leaves.title')}
+      className="leave-panel admin-leaves"
+    >
       <header className="leave-panel__header">
         <div className="leave-panel__title-wrap">
-          <CalendarOff aria-hidden="true" className="leave-panel__icon" size={20} strokeWidth={1.5} />
+          <CalendarOff
+            aria-hidden="true"
+            className="leave-panel__icon"
+            size={20}
+            strokeWidth={1.5}
+          />
           <div>
             <h2 className="leave-panel__title-en">{t('admin.leaves.title')}</h2>
-            <p className="leave-panel__subtitle">{t('admin.leaves.subtitle')}</p>
+            <p className="leave-panel__subtitle">
+              {t('admin.leaves.subtitle')}
+            </p>
           </div>
         </div>
         <span className="leave-panel__count">
@@ -273,7 +298,9 @@ function AdminLeaveCard({
         <p className="leave-card__slot-label">
           {t('shifts.leaves.slot')} {index + 1}
         </p>
-        <span className={`leave-card__status leave-card__status--${entry.status}`}>
+        <span
+          className={`leave-card__status leave-card__status--${entry.status}`}
+        >
           {t(statusKeys[entry.status])}
         </span>
       </div>
@@ -323,16 +350,28 @@ function AdminLeaveCard({
             <Pencil size={14} />
             {t('shifts.leaves.edit')}
           </button>
-          <button className="leave-card__action leave-card__action--danger" onClick={onDelete} type="button">
+          <button
+            className="leave-card__action leave-card__action--danger"
+            onClick={onDelete}
+            type="button"
+          >
             <Trash2 size={14} />
             {t('shifts.leaves.delete')}
           </button>
           {entry.status === 'pending' ? (
             <>
-              <button className="leave-card__action leave-card__action--approve" onClick={onApprove} type="button">
+              <button
+                className="leave-card__action leave-card__action--approve"
+                onClick={onApprove}
+                type="button"
+              >
                 {t('shifts.leaves.approve')}
               </button>
-              <button className="leave-card__action leave-card__action--reject" onClick={onReject} type="button">
+              <button
+                className="leave-card__action leave-card__action--reject"
+                onClick={onReject}
+                type="button"
+              >
                 {t('shifts.leaves.reject')}
               </button>
             </>

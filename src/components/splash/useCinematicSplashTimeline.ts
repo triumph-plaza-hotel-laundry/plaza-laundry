@@ -18,7 +18,11 @@ export function useCinematicSplashTimeline() {
   useEffect(() => {
     const timers: number[] = [];
 
-    const schedule = (delay: number, nextPhase: CinematicSplashPhase, onFire?: () => void) => {
+    const schedule = (
+      delay: number,
+      nextPhase: CinematicSplashPhase,
+      onFire?: () => void,
+    ) => {
       timers.push(
         window.setTimeout(() => {
           setPhase(nextPhase);
@@ -29,7 +33,9 @@ export function useCinematicSplashTimeline() {
 
     schedule(splashPhases.introEnd, 'flight');
     schedule(splashPhases.flightEnd, 'land');
-    schedule(splashPhases.landEnd, 'explosion', () => setBurstKey((value) => value + 1));
+    schedule(splashPhases.landEnd, 'explosion', () =>
+      setBurstKey((value) => value + 1),
+    );
     schedule(splashPhases.landEnd + 420, 'smoke');
     schedule(splashPhases.explosionEnd, 'reveal');
     schedule(splashPhases.revealEnd, 'logo');

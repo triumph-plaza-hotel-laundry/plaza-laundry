@@ -1,6 +1,7 @@
 import {
   CalendarClock,
   CalendarOff,
+  ClipboardList,
   Droplets,
   FlaskConical,
   GraduationCap,
@@ -30,6 +31,12 @@ export const adminDashboardModules: AdminDashboardModule[] = [
     labelKey: 'admin.dashboard.inventory',
     path: '/admin/inventory',
     descriptionKey: 'admin.dashboard.inventoryDesc',
+  },
+  {
+    icon: ClipboardList,
+    labelKey: 'admin.dashboard.departmentItems',
+    path: '/admin/department-items',
+    descriptionKey: 'admin.dashboard.departmentItemsDesc',
   },
   {
     icon: Users,

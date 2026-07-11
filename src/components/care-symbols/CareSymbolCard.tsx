@@ -24,7 +24,10 @@ export function CareSymbolCard({ label, onSelect }: CareSymbolCardProps) {
       tabIndex={0}
     >
       <div className="care-card__symbol-wrap">
-        <CareSymbolGraphicView className="care-card__symbol" graphic={label.graphic} />
+        <CareSymbolGraphicView
+          className="care-card__symbol"
+          graphic={label.graphic}
+        />
       </div>
 
       <div className="care-card__body">

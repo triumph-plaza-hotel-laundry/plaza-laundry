@@ -1,5 +1,9 @@
 import { memo, useMemo } from 'react';
-import type { ShiftRole, WeekDayId, WeeklyCellAssignment } from '@/data/laundry-shifts';
+import type {
+  ShiftRole,
+  WeekDayId,
+  WeeklyCellAssignment,
+} from '@/data/laundry-shifts';
 import type { LaundryEmployee } from '@/data/laundry-employees';
 import { useLanguage } from '@/hooks';
 import {
@@ -67,12 +71,16 @@ export const TodaysScheduleCard = memo(function TodaysScheduleCard({
         <header className="shift-today-card__header">
           <p className="shift-today-card__meta">
             <span aria-hidden="true">📅</span>
-            <span className="shift-today-card__meta-label">{t('shifts.todaysSchedule.todayLabel')}</span>
+            <span className="shift-today-card__meta-label">
+              {t('shifts.todaysSchedule.todayLabel')}
+            </span>
             <strong>{t(dayLabelKey)}</strong>
           </p>
           <p className="shift-today-card__meta">
             <span aria-hidden="true">📆</span>
-            <span className="shift-today-card__meta-label">{t('shifts.todaysSchedule.dateLabel')}</span>
+            <span className="shift-today-card__meta-label">
+              {t('shifts.todaysSchedule.dateLabel')}
+            </span>
             <strong>{formattedDate}</strong>
           </p>
         </header>
@@ -94,16 +102,23 @@ export const TodaysScheduleCard = memo(function TodaysScheduleCard({
               {columns.map((column) => (
                 <td data-label={column.label} key={column.role}>
                   <div className="shift-today-card__shift-block">
-                    <p className="shift-today-card__shift-label">{t('shifts.morningShift')}</p>
+                    <p className="shift-today-card__shift-label">
+                      {t('shifts.morningShift')}
+                    </p>
                     <ShiftNames
                       employeeIds={column.assignment.morning}
                       employees={employees}
                       language={language}
                     />
                   </div>
-                  <div aria-hidden="true" className="shift-today-card__divider" />
+                  <div
+                    aria-hidden="true"
+                    className="shift-today-card__divider"
+                  />
                   <div className="shift-today-card__shift-block">
-                    <p className="shift-today-card__shift-label">{t('shifts.eveningShift')}</p>
+                    <p className="shift-today-card__shift-label">
+                      {t('shifts.eveningShift')}
+                    </p>
                     <ShiftNames
                       employeeIds={column.assignment.evening}
                       employees={employees}

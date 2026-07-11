@@ -94,15 +94,22 @@ export const priceListCategories: readonly PriceListCategory[] = [
   'bedding',
 ] as const;
 
-export function getItemsByCategory(category: PriceListCategory): PriceListItem[] {
+export function getItemsByCategory(
+  category: PriceListCategory,
+): PriceListItem[] {
   return priceListItems.filter((entry) => entry.category === category);
 }
 
 export function createEmptyPriceMap(): Record<string, ItemPrices> {
-  return Object.fromEntries(priceListItems.map((entry) => [entry.id, emptyPrices()]));
+  return Object.fromEntries(
+    priceListItems.map((entry) => [entry.id, emptyPrices()]),
+  );
 }
 
-export function createDefaultPriceState(): Record<PriceListTab, Record<string, ItemPrices>> {
+export function createDefaultPriceState(): Record<
+  PriceListTab,
+  Record<string, ItemPrices>
+> {
   return {
     guest: createEmptyPriceMap(),
     outsideGuest: createEmptyPriceMap(),

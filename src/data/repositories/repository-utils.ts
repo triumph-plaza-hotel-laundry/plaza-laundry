@@ -21,7 +21,8 @@ export function createCatalogRepository<T extends CatalogEntity>(config: {
       },
     });
 
-  const getById = (id: T['id']) => store.getSnapshot().find((item) => item.id === id);
+  const getById = (id: T['id']) =>
+    store.getSnapshot().find((item) => item.id === id);
 
   return {
     store,
@@ -77,7 +78,10 @@ const repositoryRegistry: Array<{
   hydrate: () => Promise<void>;
 }> = [];
 
-export function registerRepository(key: string, store: Pick<LocalStore<unknown>, 'reloadFromStorage' | 'hydrate'>) {
+export function registerRepository(
+  key: string,
+  store: Pick<LocalStore<unknown>, 'reloadFromStorage' | 'hydrate'>,
+) {
   if (!repositoryRegistry.some((entry) => entry.key === key)) {
     repositoryRegistry.push({
       key,

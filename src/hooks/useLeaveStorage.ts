@@ -37,7 +37,12 @@ export function useLeaveStorage() {
     (slotId: string) => {
       assertCan('leaves', 'delete');
       const oldValue = leavesRepository.deleteLeave(slotId);
-      logAction({ action: 'leaves.delete', page: 'admin/leaves', oldValue, newValue: null });
+      logAction({
+        action: 'leaves.delete',
+        page: 'admin/leaves',
+        oldValue,
+        newValue: null,
+      });
     },
     [assertCan, logAction],
   );

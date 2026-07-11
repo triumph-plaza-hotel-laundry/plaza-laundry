@@ -24,7 +24,11 @@ const emptyForm = {
   notes: '',
 };
 
-export function ReceiveItemsCard({ disabled, items, onSubmit }: ReceiveItemsCardProps) {
+export function ReceiveItemsCard({
+  disabled,
+  items,
+  onSubmit,
+}: ReceiveItemsCardProps) {
   const { t } = useLanguage();
   const [form, setForm] = useState(emptyForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,16 +54,28 @@ export function ReceiveItemsCard({ disabled, items, onSubmit }: ReceiveItemsCard
   return (
     <section className="inv-panel inv-panel--card">
       <header className="inv-panel__header">
-        <h2 className="inv-panel__title-en">{t('inventory.v2.receiveTitle')}</h2>
-        <h2 className="inv-panel__title-ar">{t('inventory.v2.receiveTitleAr')}</h2>
+        <h2 className="inv-panel__title-en">
+          {t('inventory.v2.receiveTitle')}
+        </h2>
+        <h2 className="inv-panel__title-ar">
+          {t('inventory.v2.receiveTitleAr')}
+        </h2>
       </header>
 
-      <form className="inv-form-grid" onSubmit={(event) => void handleSubmit(event)}>
+      <form
+        className="inv-form-grid"
+        onSubmit={(event) => void handleSubmit(event)}
+      >
         <label className="inv-field">
           <span>{t('inventory.stockEntry.supplier')}</span>
           <input
             disabled={disabled || isSubmitting}
-            onChange={(event) => setForm((current) => ({ ...current, supplier: event.target.value }))}
+            onChange={(event) =>
+              setForm((current) => ({
+                ...current,
+                supplier: event.target.value,
+              }))
+            }
             required
             value={form.supplier}
           />
@@ -68,7 +84,12 @@ export function ReceiveItemsCard({ disabled, items, onSubmit }: ReceiveItemsCard
           <span>{t('inventory.v2.receiver')}</span>
           <input
             disabled={disabled || isSubmitting}
-            onChange={(event) => setForm((current) => ({ ...current, receiver: event.target.value }))}
+            onChange={(event) =>
+              setForm((current) => ({
+                ...current,
+                receiver: event.target.value,
+              }))
+            }
             required
             value={form.receiver}
           />
@@ -77,7 +98,12 @@ export function ReceiveItemsCard({ disabled, items, onSubmit }: ReceiveItemsCard
           <span>{t('inventory.v2.employee')}</span>
           <input
             disabled={disabled || isSubmitting}
-            onChange={(event) => setForm((current) => ({ ...current, employee: event.target.value }))}
+            onChange={(event) =>
+              setForm((current) => ({
+                ...current,
+                employee: event.target.value,
+              }))
+            }
             required
             value={form.employee}
           />
@@ -86,7 +112,9 @@ export function ReceiveItemsCard({ disabled, items, onSubmit }: ReceiveItemsCard
           <span>{t('inventory.v2.selectItem')}</span>
           <select
             disabled={disabled || isSubmitting}
-            onChange={(event) => setForm((current) => ({ ...current, itemId: event.target.value }))}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, itemId: event.target.value }))
+            }
             required
             value={form.itemId}
           >
@@ -105,7 +133,12 @@ export function ReceiveItemsCard({ disabled, items, onSubmit }: ReceiveItemsCard
             disabled={disabled || isSubmitting}
             inputMode="numeric"
             min={1}
-            onChange={(event) => setForm((current) => ({ ...current, quantity: event.target.value }))}
+            onChange={(event) =>
+              setForm((current) => ({
+                ...current,
+                quantity: event.target.value,
+              }))
+            }
             required
             type="number"
             value={form.quantity}
@@ -115,13 +148,19 @@ export function ReceiveItemsCard({ disabled, items, onSubmit }: ReceiveItemsCard
           <span>{t('inventory.v2.notes')}</span>
           <textarea
             disabled={disabled || isSubmitting}
-            onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, notes: event.target.value }))
+            }
             rows={3}
             value={form.notes}
           />
         </label>
         <div className="inv-form-actions">
-          <button className="inv-btn inv-btn--gold" disabled={disabled || isSubmitting} type="submit">
+          <button
+            className="inv-btn inv-btn--gold"
+            disabled={disabled || isSubmitting}
+            type="submit"
+          >
             {isSubmitting ? t('admin.editor.saving') : t('admin.editor.save')}
           </button>
         </div>

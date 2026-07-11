@@ -1,4 +1,10 @@
-import type { ItemPrices, PriceField, PriceListCategory, PriceListItem, PriceListTab } from '@/data/laundry-price-list';
+import type {
+  ItemPrices,
+  PriceField,
+  PriceListCategory,
+  PriceListItem,
+  PriceListTab,
+} from '@/data/laundry-price-list';
 import { dictionaries } from '@/i18n/dictionaries';
 import { useLanguage } from '@/hooks';
 import type { TranslationKey } from '@/types/language';
@@ -44,8 +50,12 @@ export function PriceListSection({
   return (
     <section className={`price-section price-section--${variant}`}>
       <header className="price-section__header">
-        <h2 className="price-section__title-en">{dictionaries.en[sectionTitleKeys[category]]}</h2>
-        <h2 className="price-section__title-ar">{dictionaries.ar[sectionTitleKeys[category]]}</h2>
+        <h2 className="price-section__title-en">
+          {dictionaries.en[sectionTitleKeys[category]]}
+        </h2>
+        <h2 className="price-section__title-ar">
+          {dictionaries.ar[sectionTitleKeys[category]]}
+        </h2>
       </header>
 
       <div className="price-section__table-wrap">
@@ -60,14 +70,26 @@ export function PriceListSection({
           </thead>
           <tbody>
             {items.map((entry) => {
-              const rowPrices = prices[entry.id] ?? { wash: '', dryClean: '', iron: '' };
+              const rowPrices = prices[entry.id] ?? {
+                wash: '',
+                dryClean: '',
+                iron: '',
+              };
 
               return (
                 <tr key={entry.id}>
-                  <th className="price-section__item-name" data-label={labels.item} scope="row">
+                  <th
+                    className="price-section__item-name"
+                    data-label={labels.item}
+                    scope="row"
+                  >
                     <div className="price-section__item-lines">
-                      <span className="price-section__item-line price-section__item-line--ar">{entry.name.ar}</span>
-                      <span className="price-section__item-line price-section__item-line--en">{entry.name.en}</span>
+                      <span className="price-section__item-line price-section__item-line--ar">
+                        {entry.name.ar}
+                      </span>
+                      <span className="price-section__item-line price-section__item-line--en">
+                        {entry.name.en}
+                      </span>
                     </div>
                   </th>
                   {(['wash', 'dryClean', 'iron'] as const).map((field) => (

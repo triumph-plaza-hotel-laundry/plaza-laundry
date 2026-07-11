@@ -18,7 +18,10 @@ const dayLabelKeys: Record<WeekDayId, TranslationKey> = {
   friday: 'shifts.days.friday',
 };
 
-export function AdminShiftsDaySelector({ selectedDay, onSelectDay }: AdminShiftsDaySelectorProps) {
+export function AdminShiftsDaySelector({
+  selectedDay,
+  onSelectDay,
+}: AdminShiftsDaySelectorProps) {
   const { t } = useLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Partial<Record<WeekDayId, HTMLButtonElement>>>({});
@@ -48,7 +51,7 @@ export function AdminShiftsDaySelector({ selectedDay, onSelectDay }: AdminShifts
         {weekDays.map((day) => (
           <button
             aria-selected={selectedDay === day}
-            className={`admin-shifts-editor__day-btn${selectedDay === day ? ' admin-shifts-editor__day-btn--active' : ''}`}
+            className={`admin-shifts-editor__day-btn${selectedDay === day ? 'admin-shifts-editor__day-btn--active' : ''}`}
             key={day}
             onClick={() => onSelectDay(day)}
             ref={(element) => {

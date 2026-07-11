@@ -15,8 +15,18 @@ export function usePriceListStorage() {
   const updatePrice = useCallback(
     (tab: PriceListTab, itemId: string, field: PriceField, value: string) => {
       assertCan('priceList', 'update');
-      const { oldValue, newValue } = priceListRepository.updatePrice(tab, itemId, field, value);
-      logAction({ action: 'priceList.update', page: 'price-list', oldValue, newValue });
+      const { oldValue, newValue } = priceListRepository.updatePrice(
+        tab,
+        itemId,
+        field,
+        value,
+      );
+      logAction({
+        action: 'priceList.update',
+        page: 'price-list',
+        oldValue,
+        newValue,
+      });
     },
     [assertCan, logAction],
   );
@@ -25,7 +35,11 @@ export function usePriceListStorage() {
     (item: PriceListItem) => {
       assertCan('priceList', 'create');
       priceListRepository.createItem(item);
-      logAction({ action: 'priceList.createItem', page: 'price-list', newValue: item });
+      logAction({
+        action: 'priceList.createItem',
+        page: 'price-list',
+        newValue: item,
+      });
     },
     [assertCan, logAction],
   );
@@ -34,7 +48,11 @@ export function usePriceListStorage() {
     (id: string, next: PriceListItem) => {
       assertCan('priceList', 'update');
       priceListRepository.updateItem(id, next);
-      logAction({ action: 'priceList.updateItem', page: 'price-list', newValue: next });
+      logAction({
+        action: 'priceList.updateItem',
+        page: 'price-list',
+        newValue: next,
+      });
     },
     [assertCan, logAction],
   );
@@ -43,7 +61,11 @@ export function usePriceListStorage() {
     (id: string) => {
       assertCan('priceList', 'delete');
       priceListRepository.removeItem(id);
-      logAction({ action: 'priceList.deleteItem', page: 'price-list', oldValue: { id } });
+      logAction({
+        action: 'priceList.deleteItem',
+        page: 'price-list',
+        oldValue: { id },
+      });
     },
     [assertCan, logAction],
   );

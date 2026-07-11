@@ -29,7 +29,9 @@ function requireSupabase() {
   return client;
 }
 
-export function createLocalStore<T>(options: CreateLocalStoreOptions<T>): LocalStore<T> {
+export function createLocalStore<T>(
+  options: CreateLocalStoreOptions<T>,
+): LocalStore<T> {
   const listeners = new Set<() => void>();
   let snapshot = options.seed();
   let hydrated = false;
@@ -59,7 +61,9 @@ export function createLocalStore<T>(options: CreateLocalStoreOptions<T>): LocalS
       return seed;
     }
 
-    return options.normalize ? options.normalize(data.data, seed) : (data.data as T);
+    return options.normalize
+      ? options.normalize(data.data, seed)
+      : (data.data as T);
   }
 
   async function persistRemote(next: T) {

@@ -14,7 +14,10 @@ export function InventoryHistoryButton() {
       onClick={openDrawer}
       type="button"
     >
-      <span aria-hidden="true" className="admin-inventory-history__trigger-icon">
+      <span
+        aria-hidden="true"
+        className="admin-inventory-history__trigger-icon"
+      >
         📒
       </span>
     </button>
@@ -23,8 +26,13 @@ export function InventoryHistoryButton() {
 
 export function InventoryHistoryDrawer() {
   const { t } = useLanguage();
-  const { archiveMonths, closeDrawer, drawerOpen, formatMonthLabel, selectArchiveMonth } =
-    useInventoryArchive();
+  const {
+    archiveMonths,
+    closeDrawer,
+    drawerOpen,
+    formatMonthLabel,
+    selectArchiveMonth,
+  } = useInventoryArchive();
 
   return (
     <AnimatePresence>
@@ -48,7 +56,9 @@ export function InventoryHistoryDrawer() {
             transition={{ duration: 0.28, ease: 'easeOut' }}
           >
             <div className="admin-inventory-history__drawer-header">
-              <h2 className="admin-inventory-history__drawer-title">{t('admin.inventory.history.title')}</h2>
+              <h2 className="admin-inventory-history__drawer-title">
+                {t('admin.inventory.history.title')}
+              </h2>
               <button
                 aria-label={t('admin.inventory.history.close')}
                 className="admin-inventory-history__close"
@@ -61,7 +71,9 @@ export function InventoryHistoryDrawer() {
 
             <div className="admin-inventory-history__drawer-body">
               {archiveMonths.length === 0 ? (
-                <p className="admin-inventory-history__empty">{t('admin.inventory.history.empty')}</p>
+                <p className="admin-inventory-history__empty">
+                  {t('admin.inventory.history.empty')}
+                </p>
               ) : (
                 <ul className="admin-inventory-history__list">
                   {archiveMonths.map((monthKey) => (
@@ -71,7 +83,10 @@ export function InventoryHistoryDrawer() {
                         onClick={() => void selectArchiveMonth(monthKey)}
                         type="button"
                       >
-                        <span aria-hidden="true" className="admin-inventory-history__month-icon">
+                        <span
+                          aria-hidden="true"
+                          className="admin-inventory-history__month-icon"
+                        >
                           📒
                         </span>
                         <span className="admin-inventory-history__month-label">
@@ -92,7 +107,8 @@ export function InventoryHistoryDrawer() {
 
 export function InventoryArchiveBanner() {
   const { t } = useLanguage();
-  const { exitArchiveView, formatMonthLabel, isArchiveView, viewingMonth } = useInventoryArchive();
+  const { exitArchiveView, formatMonthLabel, isArchiveView, viewingMonth } =
+    useInventoryArchive();
 
   if (!isArchiveView || !viewingMonth) {
     return null;
@@ -101,9 +117,14 @@ export function InventoryArchiveBanner() {
   return (
     <div className="admin-inventory-history__banner" role="status">
       <p className="admin-inventory-history__banner-text">
-        {formatMonthLabel(viewingMonth)} — {t('admin.inventory.history.readOnly')}
+        {formatMonthLabel(viewingMonth)} —{' '}
+        {t('admin.inventory.history.readOnly')}
       </p>
-      <button className="admin-inventory-history__banner-exit" onClick={exitArchiveView} type="button">
+      <button
+        className="admin-inventory-history__banner-exit"
+        onClick={exitArchiveView}
+        type="button"
+      >
         {t('admin.inventory.history.exit')}
       </button>
     </div>

@@ -13,7 +13,10 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: var(--login-atmosphere, radial-gradient(circle at 50% 0%, rgb(214 183 110 / 12%), transparent 55%));
+  background: var(
+    --login-atmosphere,
+    radial-gradient(circle at 50% 0%, rgb(214 183 110 / 12%), transparent 55%)
+  );
 }
 
 .admin-login-page__content {
@@ -72,7 +75,11 @@
 }
 
 :root[data-theme='luxury-light'] .admin-login-page__form {
-  background: linear-gradient(160deg, rgb(214 204 190 / 88%), rgb(207 195 178 / 76%));
+  background: linear-gradient(
+    160deg,
+    rgb(214 204 190 / 88%),
+    rgb(207 195 178 / 76%)
+  );
 }
 
 .admin-login-page__form-title {
@@ -126,7 +133,11 @@
   font-size: 0.875rem;
   font-weight: 700;
   color: #0a0a0a;
-  background: linear-gradient(135deg, var(--app-gold), var(--app-gold-soft, #e8d5a6));
+  background: linear-gradient(
+    135deg,
+    var(--app-gold),
+    var(--app-gold-soft, #e8d5a6)
+  );
   cursor: pointer;
 }
 

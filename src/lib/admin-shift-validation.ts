@@ -1,4 +1,9 @@
-import { shiftRoles, type ShiftRole, type WeeklyCellAssignment } from '@/data/laundry-shifts';
+import {
+  LEAVE_SHIFT_ROLES,
+  shiftRoles,
+  type ShiftRole,
+  type WeeklyCellAssignment,
+} from '@/data/laundry-shifts';
 
 export type ShiftSlotAssignment = {
   role: ShiftRole;
@@ -47,7 +52,9 @@ export function countMorningAssignments(
   daySchedule: Record<ShiftRole, WeeklyCellAssignment>,
 ): number {
   return new Set(
-    shiftRoles.flatMap((role) => daySchedule[role].morning.filter((employeeId) => employeeId.trim())),
+    shiftRoles.flatMap((role) =>
+      daySchedule[role].morning.filter((employeeId) => employeeId.trim()),
+    ),
   ).size;
 }
 
@@ -55,7 +62,9 @@ export function countEveningAssignments(
   daySchedule: Record<ShiftRole, WeeklyCellAssignment>,
 ): number {
   return new Set(
-    shiftRoles.flatMap((role) => daySchedule[role].evening.filter((employeeId) => employeeId.trim())),
+    shiftRoles.flatMap((role) =>
+      daySchedule[role].evening.filter((employeeId) => employeeId.trim()),
+    ),
   ).size;
 }
 
@@ -63,9 +72,10 @@ export function countOffAssignments(
   daySchedule: Record<ShiftRole, WeeklyCellAssignment>,
 ): number {
   return new Set(
-    daySchedule.off.morning
-      .concat(daySchedule.off.evening)
-      .filter((employeeId) => employeeId.trim()),
+    LEAVE_SHIFT_ROLES.flatMap((role) => [
+      ...daySchedule[role].morning,
+      ...daySchedule[role].evening,
+    ]).filter((employeeId) => employeeId.trim()),
   ).size;
 }
 

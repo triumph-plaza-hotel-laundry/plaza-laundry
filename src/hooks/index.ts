@@ -4,8 +4,10 @@ export { useAuth, usePermissions } from '@/hooks/useAuth';
 export { useCairoTime } from '@/hooks/useCairoTime';
 export { useCairoToday } from '@/hooks/useCairoToday';
 export { useCairoWeekDay } from '@/hooks/useCairoWeekDay';
-export { useHomeParallax } from '@/hooks/useHomeParallax';
-export { useFabricFavorites, useRecentlyViewedFabrics } from '@/hooks/useFabricCatalogStorage';
+export {
+  useFabricFavorites,
+  useRecentlyViewedFabrics,
+} from '@/hooks/useFabricCatalogStorage';
 export { useEmployees } from '@/hooks/useEmployees';
 export { useFabrics } from '@/hooks/useFabrics';
 export { useChemicals } from '@/hooks/useChemicals';
@@ -20,6 +22,8 @@ export { useTrainingStorage } from '@/hooks/useTrainingStorage';
 export { useAiSettings } from '@/hooks/useAiSettings';
 export { useInventoryManagement } from '@/hooks/useInventoryManagement';
 export type { InventoryToastState } from '@/hooks/useInventoryManagement';
+export { useInventoryPermissions } from '@/hooks/useInventoryPermissions';
+export type { InventoryPermissionFlags } from '@/hooks/useInventoryPermissions';
 export { useInventoryAuth } from '@/hooks/useInventoryAuth';
 export { useSyncStore } from '@/hooks/useSyncStore';
 export { useHomeShiftPlan } from '@/hooks/useHomeShiftPlan';

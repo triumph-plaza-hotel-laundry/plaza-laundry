@@ -15,9 +15,13 @@ export function HomeShiftPlanSection() {
   const selectedDay = useCairoWeekDay();
   const { shifts, employees, isReady, error } = useHomeShiftPlan();
 
-  const hasSavedAssignments = useMemo(() => shiftsHasSavedAssignments(shifts), [shifts]);
+  const hasSavedAssignments = useMemo(
+    () => shiftsHasSavedAssignments(shifts),
+    [shifts],
+  );
 
-  const daySchedule = shifts.weeklySchedule[selectedDay] ?? defaultDaySchedules[selectedDay];
+  const daySchedule =
+    shifts.weeklySchedule[selectedDay] ?? defaultDaySchedules[selectedDay];
   const columns = useMemo(
     () =>
       TODAYS_SCHEDULE_COLUMNS.map(({ role, labelKey }) => ({
@@ -29,11 +33,16 @@ export function HomeShiftPlanSection() {
   );
 
   return (
-    <section aria-label={t('home.shiftPlan.region')} className="home-shift-plan">
+    <section
+      aria-label={t('home.shiftPlan.region')}
+      className="home-shift-plan"
+    >
       {error ? <p className="home-shift-plan__error">{error}</p> : null}
 
       {!isReady ? (
-        <p className="home-shift-plan__loading">{t('home.shiftPlan.loading')}</p>
+        <p className="home-shift-plan__loading">
+          {t('home.shiftPlan.loading')}
+        </p>
       ) : error ? null : !hasSavedAssignments ? (
         <p className="home-shift-plan__empty">{t('home.shiftPlan.empty')}</p>
       ) : (
@@ -55,21 +64,46 @@ export function HomeShiftPlanSection() {
                     {columns.map((column) => (
                       <td data-label={column.label} key={column.role}>
                         <div className="shift-today-card__shift-block">
-                          <p className="shift-today-card__shift-label">{t('shifts.morningShift')}</p>
-                          {column.assignment.morning.map((employeeId, index) => (
-                            <p className="shift-today-card__name" key={`${employeeId}-${index}`}>
-                              {resolveEmployeeDisplayName(employeeId, employees, language)}
-                            </p>
-                          ))}
+                          <p className="shift-today-card__shift-label">
+                            {t('shifts.morningShift')}
+                          </p>
+                          {column.assignment.morning.map(
+                            (employeeId, index) => (
+                              <p
+                                className="shift-today-card__name"
+                                key={`${employeeId}-${index}`}
+                              >
+                                {resolveEmployeeDisplayName(
+                                  employeeId,
+                                  employees,
+                                  language,
+                                )}
+                              </p>
+                            ),
+                          )}
                         </div>
-                        <div aria-hidden="true" className="shift-today-card__divider" />
+                        <div
+                          aria-hidden="true"
+                          className="shift-today-card__divider"
+                        />
                         <div className="shift-today-card__shift-block">
-                          <p className="shift-today-card__shift-label">{t('shifts.eveningShift')}</p>
-                          {column.assignment.evening.map((employeeId, index) => (
-                            <p className="shift-today-card__name" key={`${employeeId}-${index}`}>
-                              {resolveEmployeeDisplayName(employeeId, employees, language)}
-                            </p>
-                          ))}
+                          <p className="shift-today-card__shift-label">
+                            {t('shifts.eveningShift')}
+                          </p>
+                          {column.assignment.evening.map(
+                            (employeeId, index) => (
+                              <p
+                                className="shift-today-card__name"
+                                key={`${employeeId}-${index}`}
+                              >
+                                {resolveEmployeeDisplayName(
+                                  employeeId,
+                                  employees,
+                                  language,
+                                )}
+                              </p>
+                            ),
+                          )}
                         </div>
                       </td>
                     ))}

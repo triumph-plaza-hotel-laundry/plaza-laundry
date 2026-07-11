@@ -27,6 +27,11 @@ export function clearInventorySession() {
   sessionStorage.removeItem(INVENTORY_SESSION_KEY);
 }
 
-export function validateInventoryCredentials(username: string, password: string) {
-  return username.trim() === INVENTORY_USERNAME && password === INVENTORY_PASSWORD;
+export function validateInventoryCredentials(
+  username: string,
+  password: string,
+) {
+  return (
+    username.trim() === INVENTORY_USERNAME && password === INVENTORY_PASSWORD
+  );
 }

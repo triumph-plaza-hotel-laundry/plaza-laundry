@@ -98,7 +98,10 @@ export function createRelationalCatalogStore<T>(
       emit();
     } catch (error) {
       if (import.meta.env.DEV) {
-        console.error(`Failed to reload relational store ${options.key}:`, error);
+        console.error(
+          `Failed to reload relational store ${options.key}:`,
+          error,
+        );
       }
     }
   }
@@ -116,7 +119,10 @@ export function createRelationalCatalogStore<T>(
         emit();
       })().catch((error) => {
         if (import.meta.env.DEV) {
-          console.error(`Failed to hydrate relational store ${options.key}:`, error);
+          console.error(
+            `Failed to hydrate relational store ${options.key}:`,
+            error,
+          );
         }
         snapshot = options.seed();
         hydrated = true;
@@ -147,7 +153,9 @@ export function createRelationalCatalogStore<T>(
         .then(() => persistRemote(next))
         .catch(async (error) => {
           await reloadFromStorage();
-          throw error instanceof Error ? error : new Error('Failed to save data to Supabase');
+          throw error instanceof Error
+            ? error
+            : new Error('Failed to save data to Supabase');
         });
     },
     updateState(updater) {
@@ -158,7 +166,9 @@ export function createRelationalCatalogStore<T>(
         .then(() => persistRemote(next))
         .catch(async (error) => {
           await reloadFromStorage();
-          throw error instanceof Error ? error : new Error('Failed to save data to Supabase');
+          throw error instanceof Error
+            ? error
+            : new Error('Failed to save data to Supabase');
         });
     },
     reloadFromStorage,

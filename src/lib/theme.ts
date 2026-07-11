@@ -21,7 +21,9 @@ function readStoredTheme(): Theme {
 }
 
 function updateThemeColor(theme: Theme) {
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColors[theme]);
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute('content', themeColors[theme]);
 }
 
 function notifyThemeListeners() {

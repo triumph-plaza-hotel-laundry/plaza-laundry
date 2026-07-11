@@ -20,8 +20,17 @@ type OfficialWeeklyScheduleDocumentProps = {
   >;
   selectedDay: WeekDayId;
   readOnly: boolean;
-  onCellChange?: (day: WeekDayId, role: ShiftRole, assignment: WeeklyCellAssignment) => void;
-  onHoursChange?: (day: WeekDayId, period: ShiftPeriod, lang: 'en' | 'ar', value: string) => void;
+  onCellChange?: (
+    day: WeekDayId,
+    role: ShiftRole,
+    assignment: WeeklyCellAssignment,
+  ) => void;
+  onHoursChange?: (
+    day: WeekDayId,
+    period: ShiftPeriod,
+    lang: 'en' | 'ar',
+    value: string,
+  ) => void;
 };
 
 const dayLabelKeys: Record<WeekDayId, TranslationKey> = {
@@ -35,12 +44,13 @@ const dayLabelKeys: Record<WeekDayId, TranslationKey> = {
 };
 
 const roleLabelKeys: Record<ShiftRole, TranslationKey> = {
-  washer: 'shifts.roles.washer',
-  valet: 'shifts.roles.valet',
-  ironing: 'shifts.roles.ironing',
-  press: 'shifts.roles.press',
-  linen: 'shifts.roles.linen',
-  off: 'shifts.roles.off',
+  washer: 'shifts.weekly.departments.washing',
+  ghalya: 'shifts.weekly.departments.ghalya',
+  ironing: 'shifts.weekly.departments.ironing',
+  linen: 'shifts.weekly.departments.linen',
+  calendar: 'shifts.weekly.departments.calendar',
+  weeklyLeave: 'shifts.weekly.departments.weeklyLeave',
+  annualLeave: 'shifts.weekly.departments.annualLeave',
 };
 
 type SlotKey = 'morning0' | 'morning1' | 'evening0' | 'evening1';
@@ -63,7 +73,11 @@ function ScheduleCell({
   day: WeekDayId;
   role: ShiftRole;
   readOnly: boolean;
-  onCellChange?: (day: WeekDayId, role: ShiftRole, assignment: WeeklyCellAssignment) => void;
+  onCellChange?: (
+    day: WeekDayId,
+    role: ShiftRole,
+    assignment: WeeklyCellAssignment,
+  ) => void;
 }) {
   const { language, t } = useLanguage();
   const employees = useSyncStore(employeesRepository);
@@ -97,7 +111,9 @@ function ScheduleCell({
     const value = assignment[period][index];
 
     if (readOnly) {
-      return <p className="tpl-official-table__employee">{getEmployeeName(value)}</p>;
+      return (
+        <p className="tpl-official-table__employee">{getEmployeeName(value)}</p>
+      );
     }
 
     return (
@@ -156,7 +172,9 @@ export function OfficialWeeklyScheduleDocument({
       <div className="tpl-official-sheet__body">
         <div className="tpl-official-sheet__hours">
           <div className="tpl-official-sheet__hours-block">
-            <p className="tpl-official-sheet__hours-title-en">{t('shifts.morningShift')}</p>
+            <p className="tpl-official-sheet__hours-title-en">
+              {t('shifts.morningShift')}
+            </p>
             <p className="tpl-official-sheet__hours-title-ar">الشيفت الصباحي</p>
             {readOnly ? (
               <p className="tpl-official-sheet__hours-value tpl-official-sheet__hours-value--readonly">
@@ -167,7 +185,12 @@ export function OfficialWeeklyScheduleDocument({
                 aria-label={t('shifts.morningShift')}
                 className="tpl-official-sheet__hours-value"
                 onChange={(event) =>
-                  onHoursChange?.(hoursDay, 'morning', language === 'ar' ? 'ar' : 'en', event.target.value)
+                  onHoursChange?.(
+                    hoursDay,
+                    'morning',
+                    language === 'ar' ? 'ar' : 'en',
+                    event.target.value,
+                  )
                 }
                 type="text"
                 value={dayHours.morning[language === 'ar' ? 'ar' : 'en']}
@@ -175,7 +198,9 @@ export function OfficialWeeklyScheduleDocument({
             )}
           </div>
           <div className="tpl-official-sheet__hours-block">
-            <p className="tpl-official-sheet__hours-title-en">{t('shifts.eveningShift')}</p>
+            <p className="tpl-official-sheet__hours-title-en">
+              {t('shifts.eveningShift')}
+            </p>
             <p className="tpl-official-sheet__hours-title-ar">الشيفت المسائي</p>
             {readOnly ? (
               <p className="tpl-official-sheet__hours-value tpl-official-sheet__hours-value--readonly">
@@ -186,7 +211,12 @@ export function OfficialWeeklyScheduleDocument({
                 aria-label={t('shifts.eveningShift')}
                 className="tpl-official-sheet__hours-value"
                 onChange={(event) =>
-                  onHoursChange?.(hoursDay, 'evening', language === 'ar' ? 'ar' : 'en', event.target.value)
+                  onHoursChange?.(
+                    hoursDay,
+                    'evening',
+                    language === 'ar' ? 'ar' : 'en',
+                    event.target.value,
+                  )
                 }
                 type="text"
                 value={dayHours.evening[language === 'ar' ? 'ar' : 'en']}
@@ -199,9 +229,16 @@ export function OfficialWeeklyScheduleDocument({
           <table className="tpl-official-table">
             <thead>
               <tr>
-                <th className="tpl-official-table__item tpl-official-table__day-col" scope="col" />
+                <th
+                  className="tpl-official-table__item tpl-official-table__day-col"
+                  scope="col"
+                />
                 {shiftRoles.map((role) => (
-                  <th className="tpl-official-table__role-col" key={role} scope="col">
+                  <th
+                    className="tpl-official-table__role-col"
+                    key={role}
+                    scope="col"
+                  >
                     <span className="tpl-official-table__head-en">
                       {dictionaries.en[roleLabelKeys[role]]}
                     </span>
@@ -215,18 +252,29 @@ export function OfficialWeeklyScheduleDocument({
             <tbody>
               {weekDays.map((day) => (
                 <tr
-                  className={day === selectedDay ? 'tpl-official-table__day-row--today' : undefined}
+                  className={
+                    day === selectedDay
+                      ? 'tpl-official-table__day-row--today'
+                      : undefined
+                  }
                   key={day}
                 >
                   <th
-                    className={`tpl-official-table__item tpl-official-table__day-col${day === selectedDay ? ' tpl-official-sheet__role-head--today' : ''}`}
+                    className={`tpl-official-table__item tpl-official-table__day-col${day === selectedDay ? 'tpl-official-sheet__role-head--today' : ''}`}
                     scope="row"
                   >
-                    <span className="tpl-official-table__head-en">{dictionaries.en[dayLabelKeys[day]]}</span>
-                    <span className="tpl-official-table__head-ar">{dictionaries.ar[dayLabelKeys[day]]}</span>
+                    <span className="tpl-official-table__head-en">
+                      {dictionaries.en[dayLabelKeys[day]]}
+                    </span>
+                    <span className="tpl-official-table__head-ar">
+                      {dictionaries.ar[dayLabelKeys[day]]}
+                    </span>
                   </th>
                   {shiftRoles.map((role) => (
-                    <td className="tpl-official-table__role-col" key={`${day}-${role}`}>
+                    <td
+                      className="tpl-official-table__role-col"
+                      key={`${day}-${role}`}
+                    >
                       <ScheduleCell
                         assignment={weeklySchedule[day][role]}
                         day={day}
@@ -245,18 +293,31 @@ export function OfficialWeeklyScheduleDocument({
         <footer className="tpl-official-sheet__footer">
           <div className="tpl-official-sheet__signature">
             <p className="tpl-official-sheet__signature-label-ar">أعدّه</p>
-            <p className="tpl-official-sheet__signature-label-en">Prepared By</p>
-            <div aria-hidden="true" className="tpl-official-sheet__signature-line" />
+            <p className="tpl-official-sheet__signature-label-en">
+              Prepared By
+            </p>
+            <div
+              aria-hidden="true"
+              className="tpl-official-sheet__signature-line"
+            />
           </div>
           <div className="tpl-official-sheet__signature">
             <p className="tpl-official-sheet__signature-label-ar">اعتمد</p>
-            <p className="tpl-official-sheet__signature-label-en">Approved By</p>
-            <div aria-hidden="true" className="tpl-official-sheet__signature-line" />
+            <p className="tpl-official-sheet__signature-label-en">
+              Approved By
+            </p>
+            <div
+              aria-hidden="true"
+              className="tpl-official-sheet__signature-line"
+            />
           </div>
           <div className="tpl-official-sheet__signature">
             <p className="tpl-official-sheet__signature-label-ar">التاريخ</p>
             <p className="tpl-official-sheet__signature-label-en">Date</p>
-            <div aria-hidden="true" className="tpl-official-sheet__signature-line" />
+            <div
+              aria-hidden="true"
+              className="tpl-official-sheet__signature-line"
+            />
           </div>
         </footer>
       </div>

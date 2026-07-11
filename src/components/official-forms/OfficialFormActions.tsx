@@ -25,23 +25,37 @@ export function OfficialFormActions({
         <div className="tpl-form-page__sync">
           {saveStatus === 'saving' ? (
             <>
-              <Loader2 aria-hidden="true" className="tpl-form-page__sync-icon tpl-form-page__sync-icon--spin" />
+              <Loader2
+                aria-hidden="true"
+                className="tpl-form-page__sync-icon tpl-form-page__sync-icon--spin"
+              />
               <span>{language === 'ar' ? 'جاري الحفظ…' : 'Saving…'}</span>
             </>
           ) : saveStatus === 'saved' ? (
             <>
               <Cloud aria-hidden="true" className="tpl-form-page__sync-icon" />
-              <span>{language === 'ar' ? 'تم الحفظ — مزامنة مباشرة' : 'Saved — live sync active'}</span>
+              <span>
+                {language === 'ar'
+                  ? 'تم الحفظ — مزامنة مباشرة'
+                  : 'Saved — live sync active'}
+              </span>
             </>
           ) : saveStatus === 'error' ? (
             <>
-              <CloudOff aria-hidden="true" className="tpl-form-page__sync-icon" />
+              <CloudOff
+                aria-hidden="true"
+                className="tpl-form-page__sync-icon"
+              />
               <span>{language === 'ar' ? 'تعذر الحفظ' : 'Save failed'}</span>
             </>
           ) : (
             <>
               <Cloud aria-hidden="true" className="tpl-form-page__sync-icon" />
-              <span>{language === 'ar' ? 'مزامنة تلقائية مباشرة' : 'Auto-save & live sync'}</span>
+              <span>
+                {language === 'ar'
+                  ? 'مزامنة تلقائية مباشرة'
+                  : 'Auto-save & live sync'}
+              </span>
             </>
           )}
         </div>

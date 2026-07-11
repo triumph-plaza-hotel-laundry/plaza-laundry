@@ -82,8 +82,13 @@ export function AdminEmployeeModal({
               role="dialog"
             >
               <header className="admin-employee-modal__header">
-                <h2 className="admin-employee-modal__title" id="admin-employee-modal-title">
-                  {isCreate ? t('admin.editor.addEmployee') : t('admin.editor.editEmployee')}
+                <h2
+                  className="admin-employee-modal__title"
+                  id="admin-employee-modal-title"
+                >
+                  {isCreate
+                    ? t('admin.editor.addEmployee')
+                    : t('admin.editor.editEmployee')}
                 </h2>
                 <button
                   aria-label={t('admin.editor.cancel')}
@@ -99,7 +104,9 @@ export function AdminEmployeeModal({
                 <div className="admin-editor-field">
                   <label>{t('admin.editor.employeeCode')}</label>
                   <input
-                    onChange={(event) => onChange({ ...employee, employeeId: event.target.value })}
+                    onChange={(event) =>
+                      onChange({ ...employee, employeeId: event.target.value })
+                    }
                     value={employee.employeeId}
                   />
                 </div>
@@ -107,19 +114,29 @@ export function AdminEmployeeModal({
                   <label>{t('admin.editor.status')}</label>
                   <select
                     onChange={(event) =>
-                      onChange({ ...employee, status: event.target.value as EmployeeStatus })
+                      onChange({
+                        ...employee,
+                        status: event.target.value as EmployeeStatus,
+                      })
                     }
                     value={employee.status}
                   >
-                    <option value="active">{t('admin.editor.statusActive')}</option>
-                    <option value="inactive">{t('admin.editor.statusInactive')}</option>
+                    <option value="active">
+                      {t('admin.editor.statusActive')}
+                    </option>
+                    <option value="inactive">
+                      {t('admin.editor.statusInactive')}
+                    </option>
                   </select>
                 </div>
                 <div className="admin-editor-field">
                   <label>{t('admin.editor.nameAr')}</label>
                   <input
                     onChange={(event) =>
-                      onChange({ ...employee, name: { ...employee.name, ar: event.target.value } })
+                      onChange({
+                        ...employee,
+                        name: { ...employee.name, ar: event.target.value },
+                      })
                     }
                     value={employee.name.ar}
                   />
@@ -128,7 +145,10 @@ export function AdminEmployeeModal({
                   <label>{t('admin.editor.nameEn')}</label>
                   <input
                     onChange={(event) =>
-                      onChange({ ...employee, name: { ...employee.name, en: event.target.value } })
+                      onChange({
+                        ...employee,
+                        name: { ...employee.name, en: event.target.value },
+                      })
                     }
                     value={employee.name.en}
                   />
@@ -139,7 +159,10 @@ export function AdminEmployeeModal({
                     onChange={(event) =>
                       onChange({
                         ...employee,
-                        department: { ...employee.department, en: event.target.value },
+                        department: {
+                          ...employee.department,
+                          en: event.target.value,
+                        },
                       })
                     }
                     value={employee.department.en}
@@ -151,7 +174,10 @@ export function AdminEmployeeModal({
                     onChange={(event) =>
                       onChange({
                         ...employee,
-                        department: { ...employee.department, ar: event.target.value },
+                        department: {
+                          ...employee.department,
+                          ar: event.target.value,
+                        },
                       })
                     }
                     value={employee.department.ar}
@@ -159,7 +185,10 @@ export function AdminEmployeeModal({
                 </div>
                 <div className="admin-editor-field">
                   <label>{t('admin.editor.position')} (EN)</label>
-                  <input onChange={(event) => updatePositionEn(event.target.value)} value={employee.jobTitle.en} />
+                  <input
+                    onChange={(event) => updatePositionEn(event.target.value)}
+                    value={employee.jobTitle.en}
+                  />
                 </div>
                 <div className="admin-editor-field">
                   <label>{t('admin.editor.position')} (AR)</label>
@@ -167,7 +196,10 @@ export function AdminEmployeeModal({
                     onChange={(event) =>
                       onChange({
                         ...employee,
-                        jobTitle: { ...employee.jobTitle, ar: event.target.value },
+                        jobTitle: {
+                          ...employee.jobTitle,
+                          ar: event.target.value,
+                        },
                       })
                     }
                     value={employee.jobTitle.ar}
@@ -176,7 +208,9 @@ export function AdminEmployeeModal({
                 <div className="admin-editor-field">
                   <label>{t('admin.editor.phone')}</label>
                   <input
-                    onChange={(event) => onChange({ ...employee, phone: event.target.value })}
+                    onChange={(event) =>
+                      onChange({ ...employee, phone: event.target.value })
+                    }
                     type="tel"
                     value={employee.phone}
                   />
@@ -208,7 +242,12 @@ export function AdminEmployeeModal({
               </div>
 
               <footer className="admin-employee-modal__actions admin-employee-modal__actions--save">
-                <button className="admin-editor-btn" disabled={isSaving} onClick={onCancel} type="button">
+                <button
+                  className="admin-editor-btn"
+                  disabled={isSaving}
+                  onClick={onCancel}
+                  type="button"
+                >
                   {t('admin.editor.cancel')}
                 </button>
                 <button
@@ -217,7 +256,9 @@ export function AdminEmployeeModal({
                   onClick={onSave}
                   type="button"
                 >
-                  {isSaving ? t('admin.editor.saving') : t('admin.editor.saveChanges')}
+                  {isSaving
+                    ? t('admin.editor.saving')
+                    : t('admin.editor.saveChanges')}
                 </button>
               </footer>
             </motion.div>

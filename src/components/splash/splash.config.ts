@@ -1,6 +1,6 @@
 export const splashTiming = {
-  loadBarMs: 5000,
-  fadeOutMs: 700,
+  loadBarMs: 2800,
+  fadeOutMs: 500,
   logoIntroMs: 1200,
   shimmerMs: 1400,
 } as const;

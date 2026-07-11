@@ -54,7 +54,14 @@ function formatDateTime(value: string, language: string) {
   }).format(new Date(value));
 }
 
-export function LeaveModal({ isOpen, slotId, entry, canManage, onClose, onSave }: LeaveModalProps) {
+export function LeaveModal({
+  isOpen,
+  slotId,
+  entry,
+  canManage,
+  onClose,
+  onSave,
+}: LeaveModalProps) {
   const { language, t } = useLanguage();
   const { employees } = useEmployees();
   const [employeeId, setEmployeeId] = useState('');
@@ -102,7 +109,8 @@ export function LeaveModal({ isOpen, slotId, entry, canManage, onClose, onSave }
       return;
     }
 
-    const employeeName = language === 'ar' ? employee.name.ar : employee.name.en;
+    const employeeName =
+      language === 'ar' ? employee.name.ar : employee.name.en;
     onSave({
       slotId,
       employeeId: employee.id,
@@ -119,7 +127,11 @@ export function LeaveModal({ isOpen, slotId, entry, canManage, onClose, onSave }
   };
 
   return (
-    <div className="leave-modal__backdrop" onClick={onClose} role="presentation">
+    <div
+      className="leave-modal__backdrop"
+      onClick={onClose}
+      role="presentation"
+    >
       <div
         aria-labelledby="leave-modal-title"
         aria-modal="true"
@@ -128,8 +140,15 @@ export function LeaveModal({ isOpen, slotId, entry, canManage, onClose, onSave }
         role="dialog"
       >
         <header className="leave-modal__header">
-          <h2 id="leave-modal-title">{entry ? t('shifts.leaves.editLeave') : t('shifts.leaves.addLeave')}</h2>
-          <button aria-label={t('shifts.closeSchedule')} className="leave-modal__close" onClick={onClose} type="button">
+          <h2 id="leave-modal-title">
+            {entry ? t('shifts.leaves.editLeave') : t('shifts.leaves.addLeave')}
+          </h2>
+          <button
+            aria-label={t('shifts.closeSchedule')}
+            className="leave-modal__close"
+            onClick={onClose}
+            type="button"
+          >
             <X size={18} />
           </button>
         </header>
@@ -217,7 +236,10 @@ export function LeaveModal({ isOpen, slotId, entry, canManage, onClose, onSave }
           {canManage ? (
             <label className="leave-modal__field">
               <span>{t('shifts.leaves.statusLabel')}</span>
-              <select onChange={(e) => setStatus(e.target.value as LeaveStatus)} value={status}>
+              <select
+                onChange={(e) => setStatus(e.target.value as LeaveStatus)}
+                value={status}
+              >
                 {(Object.keys(statusKeys) as LeaveStatus[]).map((item) => (
                   <option key={item} value={item}>
                     {t(statusKeys[item])}
@@ -233,7 +255,8 @@ export function LeaveModal({ isOpen, slotId, entry, canManage, onClose, onSave }
                 {t('shifts.leaves.approvedBy')}: {entry.approvedBy || '—'}
               </p>
               <p className="leave-modal__meta">
-                {t('shifts.leaves.approvalDate')}: {formatDateTime(entry.approvalDate, language)}
+                {t('shifts.leaves.approvalDate')}:{' '}
+                {formatDateTime(entry.approvalDate, language)}
               </p>
             </>
           ) : null}

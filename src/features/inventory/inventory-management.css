@@ -194,6 +194,12 @@
   text-transform: uppercase;
 }
 
+.inv-management-page .inv-warehouse__table-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .inv-management-page .inv-table-wrap--erp {
   overflow-x: auto;
   overflow-y: auto;
@@ -235,7 +241,9 @@
   min-width: var(--inv-name-col-min);
 }
 
-.inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) .inv-erp-col--name {
+.inv-management-page
+  .luxury-table.inv-erp-table:not(.inv-erp-table--history)
+  .inv-erp-col--name {
   width: auto;
 }
 
@@ -255,6 +263,181 @@
   width: 7.25rem;
 }
 
+.inv-management-page .inv-erp-col--actions {
+  width: 2.75rem;
+}
+
+.inv-management-page .inv-erp-table__actions {
+  text-align: center;
+  padding-inline: 0.125rem !important;
+  overflow: visible !important;
+}
+
+.inv-management-page .inv-erp-table__row--disabled td {
+  opacity: 0.62;
+}
+
+.inv-management-page .inv-erp-table__badge {
+  display: inline-block;
+  margin-inline-start: 0.375rem;
+  padding: 0.0625rem 0.375rem;
+  border-radius: 999px;
+  font-size: 0.5625rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: color-mix(in srgb, var(--inv-muted, #8a8175) 18%, transparent);
+  color: var(--inv-muted, #8a8175);
+}
+
+.inv-row-actions {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+}
+
+.inv-row-actions__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: none;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.inv-row-actions__trigger:hover,
+.inv-row-actions__trigger:focus-visible {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.inv-row-actions__menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 10.5rem;
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+  overflow: visible;
+  background: var(--inv-panel-bg, #fff);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.inv-row-actions__menu--portal {
+  position: fixed;
+  z-index: 100;
+  max-height: none;
+  height: auto;
+  color: var(--inv-text, #f4e8c1);
+  background: linear-gradient(180deg, rgb(12 12 12 / 98%), rgb(5 5 5 / 99%));
+  border: 1px solid var(--inv-gold-border, #ae8625);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 42%);
+}
+
+.inv-row-actions__menu--portal .inv-row-actions__item {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  min-height: 2rem;
+  padding: 0.5rem 0.625rem;
+  border: none;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--inv-text, #f4e8c1);
+  text-align: start;
+  font: inherit;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.inv-row-actions__menu--portal .inv-row-actions__item:hover,
+.inv-row-actions__menu--portal .inv-row-actions__item:focus-visible {
+  background: rgb(201 164 92 / 14%);
+  color: var(--inv-gold-soft, #e8d5a6);
+}
+
+.inv-row-actions__menu--portal .inv-row-actions__item--danger {
+  color: #f87171;
+}
+
+.inv-row-actions__menu--portal .inv-row-actions__item--danger:hover,
+.inv-row-actions__menu--portal .inv-row-actions__item--danger:focus-visible {
+  color: #fca5a5;
+  background: rgb(248 113 113 / 12%);
+}
+
+:root[data-theme='luxury-light'] .inv-row-actions__menu--portal {
+  color: #2f2a25;
+  background: linear-gradient(180deg, #ffffff, #faf6ee);
+  border-color: #ae8625;
+  box-shadow: 0 12px 28px rgb(47 42 37 / 14%);
+}
+
+:root[data-theme='luxury-light']
+  .inv-row-actions__menu--portal
+  .inv-row-actions__item {
+  color: #2f2a25;
+}
+
+:root[data-theme='luxury-light']
+  .inv-row-actions__menu--portal
+  .inv-row-actions__item:hover,
+:root[data-theme='luxury-light']
+  .inv-row-actions__menu--portal
+  .inv-row-actions__item:focus-visible {
+  color: #9a7b35;
+  background: rgb(201 164 92 / 12%);
+}
+
+:root[data-theme='luxury-light']
+  .inv-row-actions__menu--portal
+  .inv-row-actions__item--danger {
+  color: #b42318;
+}
+
+:root[data-theme='luxury-light']
+  .inv-row-actions__menu--portal
+  .inv-row-actions__item--danger:hover,
+:root[data-theme='luxury-light']
+  .inv-row-actions__menu--portal
+  .inv-row-actions__item--danger:focus-visible {
+  color: #991b1b;
+  background: rgb(180 35 24 / 10%);
+}
+
+.inv-row-actions__item {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  border: none;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  font: inherit;
+  cursor: pointer;
+}
+
+.inv-row-actions__item:hover,
+.inv-row-actions__item:focus-visible {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.inv-row-actions__item--danger {
+  color: #b42318;
+}
+
+.admin-employee-modal__body {
+  margin: 0;
+  line-height: 1.5;
+}
+
 .inv-management-page .luxury-table.inv-erp-table thead th,
 .inv-management-page .luxury-table.inv-erp-table tbody td {
   box-sizing: border-box;
@@ -263,7 +446,10 @@
   overflow: hidden;
 }
 
-.inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) thead th {
+.inv-management-page
+  .luxury-table.inv-erp-table:not(.inv-erp-table--history)
+  thead
+  th {
   font-size: 0.625rem;
   line-height: 1.2;
   padding: 0.4375rem 0.375rem;
@@ -325,12 +511,21 @@
   direction: rtl;
 }
 
-.inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) thead th.inv-erp-table__code {
+.inv-management-page
+  .luxury-table.inv-erp-table:not(.inv-erp-table--history)
+  thead
+  th.inv-erp-table__code {
   border-inline-end: 1px solid rgb(201 164 92 / 18%);
 }
 
-.inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) thead th.inv-erp-table__name,
-.inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) tbody td.inv-erp-table__name {
+.inv-management-page
+  .luxury-table.inv-erp-table:not(.inv-erp-table--history)
+  thead
+  th.inv-erp-table__name,
+.inv-management-page
+  .luxury-table.inv-erp-table:not(.inv-erp-table--history)
+  tbody
+  td.inv-erp-table__name {
   width: auto;
 }
 
@@ -357,14 +552,25 @@
   padding-inline-start: 0.375rem;
 }
 
-.inv-management-page .luxury-table.inv-erp-table--history tbody td:not(.inv-erp-table__code):not(.inv-erp-table__name):not(.inv-erp-table__num) {
+.inv-management-page
+  .luxury-table.inv-erp-table--history
+  tbody
+  td:not(.inv-erp-table__code):not(.inv-erp-table__name):not(
+    .inv-erp-table__num
+  ) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: left;
 }
 
-html[dir='rtl'] .inv-management-page .luxury-table.inv-erp-table--history tbody td:not(.inv-erp-table__code):not(.inv-erp-table__name):not(.inv-erp-table__num) {
+html[dir='rtl']
+  .inv-management-page
+  .luxury-table.inv-erp-table--history
+  tbody
+  td:not(.inv-erp-table__code):not(.inv-erp-table__name):not(
+    .inv-erp-table__num
+  ) {
   text-align: right;
 }
 
@@ -498,7 +704,9 @@ html[dir='rtl'] .inv-management-page .luxury-table.inv-erp-table--history tbody 
   background: rgb(201 164 92 / 8%);
   color: var(--inv-gold-soft);
   cursor: pointer;
-  transition: background 160ms ease, color 160ms ease;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
 }
 
 .inv-management-page .inv-combobox__control--open .inv-combobox__toggle {
@@ -539,13 +747,23 @@ html[dir='rtl'] .inv-management-page .luxury-table.inv-erp-table--history tbody 
   -webkit-overflow-scrolling: touch;
 }
 
+.inv-combobox__list.inv-combobox__list--portal {
+  position: fixed;
+  z-index: 10000;
+  top: auto;
+  right: auto;
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
 .inv-management-page .inv-combobox__option {
   padding: 0.625rem 0.875rem;
   color: var(--inv-text);
   cursor: pointer;
   font-size: 0.875rem;
   line-height: 1.35;
-  transition: background 120ms ease, color 120ms ease;
+  transition:
+    background 120ms ease,
+    color 120ms ease;
 }
 
 .inv-management-page .inv-combobox__option--active,
@@ -579,7 +797,10 @@ html[dir='rtl'] .inv-management-page .inv-combobox__input {
   padding: 0.55rem 0.75rem 0.55rem 2.5rem;
 }
 
-html[dir='rtl'] .inv-management-page .inv-combobox__control--open .inv-combobox__toggle {
+html[dir='rtl']
+  .inv-management-page
+  .inv-combobox__control--open
+  .inv-combobox__toggle {
   border-bottom-left-radius: 0;
 }
 
@@ -657,7 +878,11 @@ html[dir='rtl'] .inv-management-page .inv-combobox__control--open .inv-combobox_
 
 .inv-management-page .inv-btn--gold {
   border: 1px solid var(--inv-gold-border);
-  background: linear-gradient(180deg, rgb(201 164 92 / 18%), rgb(201 164 92 / 6%));
+  background: linear-gradient(
+    180deg,
+    rgb(201 164 92 / 18%),
+    rgb(201 164 92 / 6%)
+  );
   color: var(--inv-gold-soft);
 }
 
@@ -697,7 +922,12 @@ html[dir='rtl'] .inv-management-page .inv-combobox__control--open .inv-combobox_
 .inv-management-page .inv-skeleton__table-head,
 .inv-management-page .inv-skeleton__table-row,
 .inv-management-page .inv-skeleton__row {
-  background: linear-gradient(90deg, rgb(201 164 92 / 8%), rgb(201 164 92 / 16%), rgb(201 164 92 / 8%));
+  background: linear-gradient(
+    90deg,
+    rgb(201 164 92 / 8%),
+    rgb(201 164 92 / 16%),
+    rgb(201 164 92 / 8%)
+  );
   background-size: 200% 100%;
   animation: inv-shimmer 1.2s linear infinite;
 }
@@ -775,11 +1005,15 @@ html[dir='rtl'] .inv-management-page .inv-combobox__control--open .inv-combobox_
     --inv-num-col-width: 3.5rem;
   }
 
-  .inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) {
+  .inv-management-page
+    .luxury-table.inv-erp-table:not(.inv-erp-table--history) {
     font-size: 0.8125rem;
   }
 
-  .inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) thead th {
+  .inv-management-page
+    .luxury-table.inv-erp-table:not(.inv-erp-table--history)
+    thead
+    th {
     font-size: 0.6875rem;
     padding: 0.5rem 0.4375rem;
   }
@@ -817,11 +1051,15 @@ html[dir='rtl'] .inv-management-page .inv-combobox__control--open .inv-combobox_
     --inv-num-col-width: 5rem;
   }
 
-  .inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) {
+  .inv-management-page
+    .luxury-table.inv-erp-table:not(.inv-erp-table--history) {
     font-size: 0.875rem;
   }
 
-  .inv-management-page .luxury-table.inv-erp-table:not(.inv-erp-table--history) thead th {
+  .inv-management-page
+    .luxury-table.inv-erp-table:not(.inv-erp-table--history)
+    thead
+    th {
     font-size: 0.75rem;
     padding: 0.5rem 0.625rem;
   }
@@ -907,15 +1145,23 @@ html[dir='rtl'] .inv-management-page .inv-combobox__control--open .inv-combobox_
     padding: 0.3125rem 0.375rem;
   }
 
-  .inv-management-page .luxury-table.inv-erp-table--history .inv-erp-table__code,
-  .inv-management-page .luxury-table.inv-erp-table--history thead th.inv-erp-table__code {
+  .inv-management-page
+    .luxury-table.inv-erp-table--history
+    .inv-erp-table__code,
+  .inv-management-page
+    .luxury-table.inv-erp-table--history
+    thead
+    th.inv-erp-table__code {
     position: sticky;
     inset-inline-start: 0;
     z-index: 3;
     background: #0d0d0d;
   }
 
-  .inv-management-page .luxury-table.inv-erp-table--history tbody td.inv-erp-table__code {
+  .inv-management-page
+    .luxury-table.inv-erp-table--history
+    tbody
+    td.inv-erp-table__code {
     background: #0a0a0a;
   }
 
@@ -935,8 +1181,13 @@ html[dir='rtl'] .inv-management-page .inv-combobox__control--open .inv-combobox_
     background: rgb(18 16 12 / 98%);
   }
 
-  .inv-management-page .luxury-table.inv-erp-table--history .inv-erp-table__name,
-  .inv-management-page .luxury-table.inv-erp-table--history thead th.inv-erp-table__name {
+  .inv-management-page
+    .luxury-table.inv-erp-table--history
+    .inv-erp-table__name,
+  .inv-management-page
+    .luxury-table.inv-erp-table--history
+    thead
+    th.inv-erp-table__name {
     position: sticky;
     inset-inline-start: var(--inv-code-col-width);
     z-index: 2;
@@ -944,7 +1195,10 @@ html[dir='rtl'] .inv-management-page .inv-combobox__control--open .inv-combobox_
     box-shadow: 4px 0 12px rgb(0 0 0 / 22%);
   }
 
-  .inv-management-page .luxury-table.inv-erp-table--history tbody td.inv-erp-table__name {
+  .inv-management-page
+    .luxury-table.inv-erp-table--history
+    tbody
+    td.inv-erp-table__name {
     background: #0a0a0a;
   }
 

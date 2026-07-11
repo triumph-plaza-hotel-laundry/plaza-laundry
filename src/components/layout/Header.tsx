@@ -10,10 +10,14 @@ const ICON_STROKE = 1.75;
 const ICON_SIZE = 18;
 
 type HeaderProps = {
+  isMenuExpanded?: boolean;
   onToggleSidebar: () => void;
 };
 
-export const Header = memo(function Header({ onToggleSidebar }: HeaderProps) {
+export const Header = memo(function Header({
+  isMenuExpanded = false,
+  onToggleSidebar,
+}: HeaderProps) {
   const { t, toggleLanguage } = useLanguage();
 
   return (
@@ -22,6 +26,7 @@ export const Header = memo(function Header({ onToggleSidebar }: HeaderProps) {
 
       <div className="luxury-header__inner">
         <button
+          aria-expanded={isMenuExpanded}
           aria-label={t('common.menu')}
           className="luxury-header__control luxury-header__menu"
           onClick={onToggleSidebar}
@@ -58,7 +63,11 @@ export const Header = memo(function Header({ onToggleSidebar }: HeaderProps) {
           onClick={toggleLanguage}
           type="button"
         >
-          <Globe aria-hidden="true" size={ICON_SIZE} strokeWidth={ICON_STROKE} />
+          <Globe
+            aria-hidden="true"
+            size={ICON_SIZE}
+            strokeWidth={ICON_STROKE}
+          />
         </button>
 
         <button

@@ -1,5 +1,6 @@
 import {
   createDefaultShiftsState,
+  migrateWeeklySchedule,
   SHIFT_HOURS,
   weekDays,
   type DailyRoster,
@@ -39,7 +40,7 @@ function normalizeShiftsState(parsed: unknown, seed: ShiftsState): ShiftsState {
 
   return {
     dailyRosters: { ...seed.dailyRosters, ...partial.dailyRosters },
-    weeklySchedule: { ...seed.weeklySchedule, ...partial.weeklySchedule },
+    weeklySchedule: migrateWeeklySchedule(partial.weeklySchedule, seed),
     workingHours,
   };
 }
@@ -66,7 +67,11 @@ export const shiftsRepository = {
       },
     });
   },
-  updateWeeklyCell(day: WeekDayId, role: ShiftRole, assignment: WeeklyCellAssignment) {
+  updateWeeklyCell(
+    day: WeekDayId,
+    role: ShiftRole,
+    assignment: WeeklyCellAssignment,
+  ) {
     const current = store.getSnapshot();
     store.replaceState({
       ...current,
@@ -79,7 +84,12 @@ export const shiftsRepository = {
       },
     });
   },
-  updateWorkingHours(day: WeekDayId, period: ShiftPeriod, lang: 'en' | 'ar', value: string) {
+  updateWorkingHours(
+    day: WeekDayId,
+    period: ShiftPeriod,
+    lang: 'en' | 'ar',
+    value: string,
+  ) {
     const current = store.getSnapshot();
     store.replaceState({
       ...current,

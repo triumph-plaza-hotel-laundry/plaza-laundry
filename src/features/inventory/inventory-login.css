@@ -13,7 +13,10 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: var(--login-atmosphere, radial-gradient(circle at 50% 0%, rgb(214 183 110 / 12%), transparent 55%));
+  background: var(
+    --login-atmosphere,
+    radial-gradient(circle at 50% 0%, rgb(214 183 110 / 12%), transparent 55%)
+  );
 }
 
 .inventory-login-page__content {
@@ -72,7 +75,11 @@
 }
 
 :root[data-theme='luxury-light'] .inventory-login-page__form {
-  background: linear-gradient(160deg, rgb(214 204 190 / 88%), rgb(207 195 178 / 76%));
+  background: linear-gradient(
+    160deg,
+    rgb(214 204 190 / 88%),
+    rgb(207 195 178 / 76%)
+  );
 }
 
 .inventory-login-page__form-title {
@@ -128,7 +135,11 @@
   min-height: 2.75rem;
   border: 1px solid var(--app-gold-border, rgb(214 183 110 / 35%));
   border-radius: 0.75rem;
-  background: linear-gradient(145deg, rgb(214 183 110 / 22%), rgb(214 183 110 / 8%));
+  background: linear-gradient(
+    145deg,
+    rgb(214 183 110 / 22%),
+    rgb(214 183 110 / 8%)
+  );
   color: var(--app-gold);
   font-size: 0.9375rem;
   font-weight: 700;

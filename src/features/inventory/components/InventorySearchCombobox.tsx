@@ -2,11 +2,13 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type KeyboardEvent,
 } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown } from 'lucide-react';
 
 type InventorySearchComboboxProps = {
@@ -25,6 +27,31 @@ type ListItem = {
   value: string;
 };
 
+type ListPosition = {
+  top: number;
+  left: number;
+  width: number;
+  maxHeight: number;
+};
+
+const VIEWPORT_PADDING_PX = 8;
+
+function getListPosition(control: HTMLElement): ListPosition {
+  const rect = control.getBoundingClientRect();
+  const viewportHeight = window.innerHeight;
+  const maxHeight = Math.max(
+    120,
+    viewportHeight - rect.bottom - VIEWPORT_PADDING_PX,
+  );
+
+  return {
+    top: rect.bottom - 1,
+    left: rect.left,
+    width: rect.width,
+    maxHeight,
+  };
+}
+
 export function InventorySearchCombobox({
   label,
   placeholder,
@@ -37,9 +64,12 @@ export function InventorySearchCombobox({
   const inputId = useId();
   const listboxId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
+  const controlRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [listPosition, setListPosition] = useState<ListPosition | null>(null);
 
   const filteredOptions = useMemo(() => {
     const query = value.trim().toLowerCase();
@@ -68,6 +98,7 @@ export function InventorySearchCombobox({
   const closeList = useCallback(() => {
     setIsOpen(false);
     setActiveIndex(-1);
+    setListPosition(null);
   }, []);
 
   const selectItem = useCallback(
@@ -84,20 +115,58 @@ export function InventorySearchCombobox({
     setActiveIndex(value.trim() ? 0 : filteredOptions.length > 0 ? 0 : -1);
   }, [filteredOptions.length, value]);
 
+  const updateListPosition = useCallback(() => {
+    if (!controlRef.current) {
+      return;
+    }
+
+    setListPosition(getListPosition(controlRef.current));
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    updateListPosition();
+  }, [isOpen, updateListPosition, value, listItems.length]);
+
   useEffect(() => {
     if (!isOpen) {
       return;
     }
 
     const handlePointerDown = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (
+        rootRef.current?.contains(target) ||
+        listRef.current?.contains(target)
+      ) {
+        return;
+      }
+
+      closeList();
+    };
+
+    const handleDocumentKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key === 'Escape') {
         closeList();
+        inputRef.current?.focus();
       }
     };
 
     document.addEventListener('mousedown', handlePointerDown);
-    return () => document.removeEventListener('mousedown', handlePointerDown);
-  }, [closeList, isOpen]);
+    document.addEventListener('keydown', handleDocumentKeyDown);
+    window.addEventListener('resize', updateListPosition);
+    window.addEventListener('scroll', updateListPosition, true);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleDocumentKeyDown);
+      window.removeEventListener('resize', updateListPosition);
+      window.removeEventListener('scroll', updateListPosition, true);
+    };
+  }, [closeList, isOpen, updateListPosition]);
 
   const handleInputChange = (nextValue: string) => {
     onChange(nextValue);
@@ -155,13 +224,67 @@ export function InventorySearchCombobox({
   };
 
   const activeOptionId =
-    activeIndex >= 0 && listItems[activeIndex] ? `${listboxId}-${listItems[activeIndex].id}` : undefined;
+    activeIndex >= 0 && listItems[activeIndex]
+      ? `${listboxId}-${listItems[activeIndex].id}`
+      : undefined;
+
+  const listbox =
+    isOpen && listPosition
+      ? createPortal(
+          <ul
+            className="inv-combobox__list inv-combobox__list--portal"
+            id={listboxId}
+            ref={listRef}
+            role="listbox"
+            style={{
+              top: listPosition.top,
+              left: listPosition.left,
+              width: listPosition.width,
+              maxHeight: listPosition.maxHeight,
+            }}
+          >
+            {listItems.length === 0 ? (
+              <li className="inv-combobox__empty" role="presentation">
+                {noResultsLabel}
+              </li>
+            ) : (
+              listItems.map((item, index) => (
+                <li
+                  aria-selected={activeIndex === index}
+                  className={`inv-combobox__option${
+                    item.id === 'clear' ? 'inv-combobox__option--clear' : ''
+                  }${activeIndex === index ? 'inv-combobox__option--active' : ''}`}
+                  id={`${listboxId}-${item.id}`}
+                  key={item.id}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onMouseEnter={() => setActiveIndex(index)}
+                  onClick={() => selectItem(item.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      selectItem(item.value);
+                    }
+                  }}
+                  role="option"
+                  tabIndex={-1}
+                >
+                  {item.label}
+                </li>
+              ))
+            )}
+          </ul>,
+          document.body,
+        )
+      : null;
 
   return (
     <div className="inv-field inv-combobox" ref={rootRef}>
       <label htmlFor={inputId}>{label}</label>
 
-      <div className={`inv-combobox__control${isOpen ? ' inv-combobox__control--open' : ''}`}>
+      <div
+        className={`inv-combobox__control${isOpen ? 'inv-combobox__control--open' : ''}`}
+        ref={controlRef}
+      >
         <input
           aria-activedescendant={activeOptionId}
           aria-autocomplete="list"
@@ -198,36 +321,7 @@ export function InventorySearchCombobox({
         </button>
       </div>
 
-      {isOpen ? (
-        <ul
-          className="inv-combobox__list"
-          id={listboxId}
-          role="listbox"
-        >
-          {listItems.length === 0 ? (
-            <li className="inv-combobox__empty" role="presentation">
-              {noResultsLabel}
-            </li>
-          ) : (
-            listItems.map((item, index) => (
-              <li
-                aria-selected={activeIndex === index}
-                className={`inv-combobox__option${
-                  item.id === 'clear' ? ' inv-combobox__option--clear' : ''
-                }${activeIndex === index ? ' inv-combobox__option--active' : ''}`}
-                id={`${listboxId}-${item.id}`}
-                key={item.id}
-                onMouseDown={(event) => event.preventDefault()}
-                onMouseEnter={() => setActiveIndex(index)}
-                onClick={() => selectItem(item.value)}
-                role="option"
-              >
-                {item.label}
-              </li>
-            ))
-          )}
-        </ul>
-      ) : null}
+      {listbox}
     </div>
   );
 }

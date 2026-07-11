@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { MotionConfig } from 'framer-motion';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthProvider';
 import { DataProvider } from '@/context/DataProvider';
@@ -13,11 +14,13 @@ export function AppProviders({ children }: AppProvidersProps) {
   return (
     <ThemeProvider>
       <LanguageProvider>
-        <AuthProvider>
-          <DataProvider>
-            <BrowserRouter>{children}</BrowserRouter>
-          </DataProvider>
-        </AuthProvider>
+        <MotionConfig reducedMotion="user">
+          <AuthProvider>
+            <DataProvider>
+              <BrowserRouter>{children}</BrowserRouter>
+            </DataProvider>
+          </AuthProvider>
+        </MotionConfig>
       </LanguageProvider>
     </ThemeProvider>
   );

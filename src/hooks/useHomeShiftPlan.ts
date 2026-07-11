@@ -26,10 +26,16 @@ export function useHomeShiftPlan() {
         }
       } catch (caught) {
         const message =
-          caught instanceof Error ? caught.message : 'Failed to load shift plan from Supabase.';
-        console.error(`${HOME_SHIFT_PLAN_LOG_PREFIX} ${message}`, caught);
+          caught instanceof Error
+            ? caught.message
+            : 'Failed to load shift plan from Supabase.';
+        if (import.meta.env.DEV) {
+          console.error(`${HOME_SHIFT_PLAN_LOG_PREFIX} ${message}`, caught);
+        }
         if (active) {
-          const hasAssignments = shiftsHasSavedAssignments(shiftsRepository.getSnapshot());
+          const hasAssignments = shiftsHasSavedAssignments(
+            shiftsRepository.getSnapshot(),
+          );
           if (!hasAssignments) {
             setError(message);
           }

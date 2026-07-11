@@ -16,7 +16,8 @@ export function AdminLoginPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as AdminLoginLocationState | null)?.from ?? '/admin';
+  const from =
+    (location.state as AdminLoginLocationState | null)?.from ?? '/admin';
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -56,7 +57,9 @@ export function AdminLoginPage() {
 
       navigate(from, { replace: true });
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : t('auth.invalidCredentials'));
+      setError(
+        caught instanceof Error ? caught.message : t('auth.invalidCredentials'),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -67,7 +70,11 @@ export function AdminLoginPage() {
   }
 
   return (
-    <div aria-label={t('admin.login.title')} className="admin-login-page" role="main">
+    <div
+      aria-label={t('admin.login.title')}
+      className="admin-login-page"
+      role="main"
+    >
       <div aria-hidden="true" className="admin-login-page__atmosphere" />
       <div className="admin-login-page__content">
         <img
@@ -79,14 +86,20 @@ export function AdminLoginPage() {
         />
         <p className="admin-login-page__eyebrow">{t('admin.login.eyebrow')}</p>
         <h1 className="admin-login-page__title">{t('login.hotelName')}</h1>
-        <p className="admin-login-page__subtitle">{t('admin.login.subtitle')}</p>
+        <p className="admin-login-page__subtitle">
+          {t('admin.login.subtitle')}
+        </p>
 
         <form className="admin-login-page__form" onSubmit={handleSubmit}>
           <h2 className="admin-login-page__form-title">
-            {isForgotPassword ? t('admin.login.forgotTitle') : t('admin.login.title')}
+            {isForgotPassword
+              ? t('admin.login.forgotTitle')
+              : t('admin.login.title')}
           </h2>
           <p className="admin-login-page__form-hint">
-            {isForgotPassword ? t('admin.login.forgotHint') : t('admin.login.hint')}
+            {isForgotPassword
+              ? t('admin.login.forgotHint')
+              : t('admin.login.hint')}
           </p>
 
           <label className="admin-login-page__label">
@@ -107,7 +120,11 @@ export function AdminLoginPage() {
               autoComplete="current-password"
               className="admin-login-page__input"
               onChange={(event) => setPassword(event.target.value)}
-              placeholder={isForgotPassword ? t('admin.login.newPasswordPlaceholder') : t('login.passwordPlaceholder')}
+              placeholder={
+                isForgotPassword
+                  ? t('admin.login.newPasswordPlaceholder')
+                  : t('login.passwordPlaceholder')
+              }
               required
               type="password"
               value={password}
@@ -131,7 +148,11 @@ export function AdminLoginPage() {
 
           {error ? <p className="admin-login-page__error">{error}</p> : null}
 
-          <button className="admin-login-page__submit" disabled={isSubmitting} type="submit">
+          <button
+            className="admin-login-page__submit"
+            disabled={isSubmitting}
+            type="submit"
+          >
             {isSubmitting
               ? t('login.submitting')
               : isForgotPassword
@@ -148,7 +169,9 @@ export function AdminLoginPage() {
             }}
             type="button"
           >
-            {isForgotPassword ? t('admin.login.backToSignIn') : t('admin.login.forgotPassword')}
+            {isForgotPassword
+              ? t('admin.login.backToSignIn')
+              : t('admin.login.forgotPassword')}
           </button>
         </form>
       </div>

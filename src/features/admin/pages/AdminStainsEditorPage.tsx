@@ -32,8 +32,11 @@ function emptyStain(): LaundryStain {
 export function AdminStainsEditorPage() {
   const { t } = useLanguage();
   const { assertCan, logAction } = useAuth();
-  const { draft, isDirty, setDraft, resetDraft, commitDraft } = useDraftState(stainsRepository);
-  const [selectedId, setSelectedId] = useState<string | null>(draft[0]?.id ?? null);
+  const { draft, isDirty, setDraft, resetDraft, commitDraft } =
+    useDraftState(stainsRepository);
+  const [selectedId, setSelectedId] = useState<string | null>(
+    draft[0]?.id ?? null,
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [saveNotice, setSaveNotice] = useState<string | null>(null);
   const [saveNoticeIsError, setSaveNoticeIsError] = useState(false);
@@ -48,7 +51,11 @@ export function AdminStainsEditorPage() {
       return;
     }
 
-    setDraft(draft.map((stain) => (stain.id === selected.id ? { ...stain, ...patch } : stain)));
+    setDraft(
+      draft.map((stain) =>
+        stain.id === selected.id ? { ...stain, ...patch } : stain,
+      ),
+    );
   };
 
   const updateLocalized = (
@@ -82,11 +89,17 @@ export function AdminStainsEditorPage() {
       assertCan('stains', 'update');
       await commitDraft(async (value) => {
         await stainsRepository.replaceAll(value);
-        logAction({ action: 'stains.replaceAll', page: 'admin/stains', newValue: value });
+        logAction({
+          action: 'stains.replaceAll',
+          page: 'admin/stains',
+          newValue: value,
+        });
       });
       setSaveNotice(t('admin.editor.saveSuccess'));
     } catch (error) {
-      setSaveNotice(error instanceof Error ? error.message : t('admin.editor.saveError'));
+      setSaveNotice(
+        error instanceof Error ? error.message : t('admin.editor.saveError'),
+      );
       setSaveNoticeIsError(true);
     } finally {
       setIsSaving(false);
@@ -129,7 +142,9 @@ export function AdminStainsEditorPage() {
               onClick={() => {
                 if (!selected) return;
                 setDraft(draft.filter((stain) => stain.id !== selected.id));
-                setSelectedId(draft.find((stain) => stain.id !== selected.id)?.id ?? null);
+                setSelectedId(
+                  draft.find((stain) => stain.id !== selected.id)?.id ?? null,
+                );
               }}
               type="button"
             >
@@ -161,7 +176,9 @@ export function AdminStainsEditorPage() {
               <label>category</label>
               <select
                 onChange={(event) =>
-                  updateSelected({ category: event.target.value as StainCategory })
+                  updateSelected({
+                    category: event.target.value as StainCategory,
+                  })
                 }
                 value={selected.category}
               >
@@ -188,31 +205,43 @@ export function AdminStainsEditorPage() {
               <label>difficulty</label>
               <select
                 onChange={(event) =>
-                  updateSelected({ difficulty: event.target.value as StainDifficulty })
+                  updateSelected({
+                    difficulty: event.target.value as StainDifficulty,
+                  })
                 }
                 value={selected.difficulty}
               >
-                {(['easy', 'medium', 'hard', 'expert'] as StainDifficulty[]).map((level) => (
+                {(
+                  ['easy', 'medium', 'hard', 'expert'] as StainDifficulty[]
+                ).map((level) => (
                   <option key={level} value={level}>
                     {level}
                   </option>
                 ))}
               </select>
             </div>
-            {(['name', 'description', 'recommendedChemical', 'recommendedProgram'] as const).flatMap(
-              (field) =>
-                (['en', 'ar'] as const).map((lang) => (
-                  <div className="admin-editor-field" key={`${field}-${lang}`}>
-                    <label>
-                      {field} ({lang.toUpperCase()})
-                    </label>
-                    <textarea
-                      onChange={(event) => updateLocalized(field, lang, event.target.value)}
-                      rows={field === 'description' ? 3 : 2}
-                      value={selected[field][lang]}
-                    />
-                  </div>
-                )),
+            {(
+              [
+                'name',
+                'description',
+                'recommendedChemical',
+                'recommendedProgram',
+              ] as const
+            ).flatMap((field) =>
+              (['en', 'ar'] as const).map((lang) => (
+                <div className="admin-editor-field" key={`${field}-${lang}`}>
+                  <label>
+                    {field} ({lang.toUpperCase()})
+                  </label>
+                  <textarea
+                    onChange={(event) =>
+                      updateLocalized(field, lang, event.target.value)
+                    }
+                    rows={field === 'description' ? 3 : 2}
+                    value={selected[field][lang]}
+                  />
+                </div>
+              )),
             )}
           </div>
         ) : null}

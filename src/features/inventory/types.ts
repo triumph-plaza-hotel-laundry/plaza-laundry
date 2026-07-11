@@ -7,6 +7,12 @@ export type InventoryItem = {
   remainingQuantity: number;
   createdAt: string;
   updatedAt: string;
+  disabledAt?: string | null;
+};
+
+export type UpdateInventoryItemInput = {
+  code: string;
+  name: string;
 };
 
 export type InventoryReceipt = {
@@ -60,9 +66,22 @@ export type IssueItemsInput = {
   reason: string;
 };
 
-export const NOT_ENOUGH_STOCK_MESSAGE = 'There is not enough stock available.';
+export type CreateInventoryItemInput = {
+  code: string;
+  name: string;
+};
 
-export type InventoryQuantityField = 'totalQuantity' | 'issuedQuantity' | 'remainingQuantity';
+export const NOT_ENOUGH_STOCK_MESSAGE = 'There is not enough stock available.';
+export const DUPLICATE_INVENTORY_CODE_MESSAGE = 'Item code already exists.';
+export const INVENTORY_ITEM_DISABLED_MESSAGE =
+  'This inventory item is disabled.';
+export const INVENTORY_ITEM_HAS_REFERENCES_MESSAGE =
+  'Cannot permanently delete this item because it is referenced by receipts, issues, movements, or archives.';
+
+export type InventoryQuantityField =
+  | 'totalQuantity'
+  | 'issuedQuantity'
+  | 'remainingQuantity';
 
 export type UpdateInventoryQuantityInput = {
   itemId: string;
@@ -70,7 +89,10 @@ export type UpdateInventoryQuantityInput = {
   value: number;
 };
 
-export function calculateRemaining(totalQuantity: number, issuedQuantity: number) {
+export function calculateRemaining(
+  totalQuantity: number,
+  issuedQuantity: number,
+) {
   return Math.max(totalQuantity - issuedQuantity, 0);
 }
 
@@ -97,7 +119,10 @@ export function applyInventoryQuantityUpdate(
 
   if (field === 'issuedQuantity') {
     const issuedQuantity = Math.min(quantity, item.totalQuantity);
-    const remainingQuantity = calculateRemaining(item.totalQuantity, issuedQuantity);
+    const remainingQuantity = calculateRemaining(
+      item.totalQuantity,
+      issuedQuantity,
+    );
 
     return {
       ...item,
@@ -131,8 +156,10 @@ export function mapInventoryItem(row: {
   created_at: string;
   updated_at?: string | null;
   last_updated_at?: string | null;
+  disabled_at?: string | null;
 }): InventoryItem {
-  const totalQuantity = row.total_quantity ?? row.incoming_quantity ?? row.quantity ?? 0;
+  const totalQuantity =
+    row.total_quantity ?? row.incoming_quantity ?? row.quantity ?? 0;
   const issuedQuantity = row.issued_quantity ?? 0;
   const remainingQuantity = calculateRemaining(totalQuantity, issuedQuantity);
 
@@ -145,5 +172,6 @@ export function mapInventoryItem(row: {
     remainingQuantity,
     createdAt: row.created_at,
     updatedAt: row.updated_at ?? row.last_updated_at ?? row.created_at,
+    disabledAt: row.disabled_at ?? null,
   };
 }

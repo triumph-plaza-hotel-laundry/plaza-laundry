@@ -6,7 +6,9 @@ export type LoginCredentials = {
   password: string;
 };
 
-export async function authenticateLogin(credentials: LoginCredentials): Promise<AuthUser> {
+export async function authenticateLogin(
+  credentials: LoginCredentials,
+): Promise<AuthUser> {
   const username = credentials.email.trim();
   const password = credentials.password.trim();
 

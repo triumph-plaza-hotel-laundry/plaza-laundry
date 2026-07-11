@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { memo, useCallback } from 'react';
 import { NavLink } from 'react-router-dom';
@@ -15,12 +16,18 @@ const SIDEBAR_ICON_STROKE = 1.75;
 
 type SidebarProps = {
   isDesktop: boolean;
+  isDesktopCollapsed?: boolean;
   isOpen: boolean;
   onClose: () => void;
 };
 
-export const Sidebar = memo(function Sidebar({ isDesktop, isOpen, onClose }: SidebarProps) {
-  const { canAccessPath, isAuthenticated, role } = useAuth();
+export const Sidebar = memo(function Sidebar({
+  isDesktop,
+  isDesktopCollapsed = false,
+  isOpen,
+  onClose,
+}: SidebarProps) {
+  const { canAccessPath, canSeeNav, isAuthenticated, role } = useAuth();
   const { direction, t } = useLanguage();
 
   const closedOffset = direction === 'rtl' ? '100%' : '-100%';
@@ -28,7 +35,10 @@ export const Sidebar = memo(function Sidebar({ isDesktop, isOpen, onClose }: Sid
   const resolveNavPath = useCallback(
     (path: string, resource: (typeof navigationItems)[number]['resource']) => {
       if (resource === 'admin') {
-        return isAuthenticated && role && canAccessAdminPortal(role) && canAccessPath('/admin')
+        return isAuthenticated &&
+          role &&
+          canAccessAdminPortal(role) &&
+          canAccessPath('/admin')
           ? '/admin'
           : '/admin/login';
       }
@@ -37,6 +47,21 @@ export const Sidebar = memo(function Sidebar({ isDesktop, isOpen, onClose }: Sid
     },
     [canAccessPath, isAuthenticated, role],
   );
+
+  useEffect(() => {
+    if (isDesktop || !isOpen) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isDesktop, isOpen, onClose]);
 
   const sidebarContent = (
     <aside className="luxury-sidebar">
@@ -68,40 +93,49 @@ export const Sidebar = memo(function Sidebar({ isDesktop, isOpen, onClose }: Sid
       </div>
 
       <nav aria-label={t('common.menu')} className="luxury-sidebar__nav">
-        {navigationItems.map((item) => {
-          const Icon = item.icon;
-          const targetPath = resolveNavPath(item.path, item.resource);
+        {navigationItems
+          .filter((item) => !role || canSeeNav(item.resource))
+          .map((item) => {
+            const Icon = item.icon;
+            const targetPath = resolveNavPath(item.path, item.resource);
 
-          return (
-            <NavLink
-              className={({ isActive }) =>
-                cn('luxury-sidebar__item', isActive && 'luxury-sidebar__item--active')
-              }
-              end={item.end ?? item.resource === 'admin'}
-              key={item.path}
-              onClick={onClose}
-              onFocus={() => preloadRoute(targetPath)}
-              onPointerEnter={() => preloadRoute(targetPath)}
-              to={targetPath}
-            >
-              <Icon
-                aria-hidden="true"
-                className="luxury-sidebar__icon"
-                size={18}
-                strokeWidth={SIDEBAR_ICON_STROKE}
-              />
-              <span className="luxury-sidebar__label">{t(item.labelKey)}</span>
-            </NavLink>
-          );
-        })}
+            return (
+              <NavLink
+                className={({ isActive }) =>
+                  cn(
+                    'luxury-sidebar__item',
+                    isActive && 'luxury-sidebar__item--active',
+                  )
+                }
+                end={item.end ?? item.resource === 'admin'}
+                key={item.path}
+                onClick={onClose}
+                onFocus={() => preloadRoute(targetPath)}
+                onPointerEnter={() => preloadRoute(targetPath)}
+                to={targetPath}
+              >
+                <Icon
+                  aria-hidden="true"
+                  className="luxury-sidebar__icon"
+                  size={18}
+                  strokeWidth={SIDEBAR_ICON_STROKE}
+                />
+                <span className="luxury-sidebar__label">
+                  {t(item.labelKey)}
+                </span>
+              </NavLink>
+            );
+          })}
       </nav>
     </aside>
   );
 
   return (
     <>
-      {isDesktop ? (
-        <div className="luxury-sidebar-shell luxury-sidebar-shell--desktop">{sidebarContent}</div>
+      {isDesktop && !isDesktopCollapsed ? (
+        <div className="luxury-sidebar-shell luxury-sidebar-shell--desktop">
+          {sidebarContent}
+        </div>
       ) : null}
 
       {!isDesktop ? (
@@ -120,7 +154,7 @@ export const Sidebar = memo(function Sidebar({ isDesktop, isOpen, onClose }: Sid
               />
               <motion.div
                 className={cn(
-                  'relative h-full w-fit p-3 gpu-smooth',
+                  'gpu-smooth relative h-full w-fit p-3',
                   direction === 'rtl' && 'ms-auto',
                 )}
                 initial={{ opacity: 0, x: closedOffset }}

@@ -34,11 +34,18 @@ export const AUTH_USER_EMPLOYEE_MAP: Record<string, string> = {
   'employee-1': 'lw-01',
 };
 
-export function computeLeaveTotalDays(startDate: string, endDate: string): number {
+export function computeLeaveTotalDays(
+  startDate: string,
+  endDate: string,
+): number {
   const start = new Date(`${startDate}T00:00:00`);
   const end = new Date(`${endDate}T00:00:00`);
 
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) {
+  if (
+    Number.isNaN(start.getTime()) ||
+    Number.isNaN(end.getTime()) ||
+    end < start
+  ) {
     return 0;
   }
 
@@ -50,26 +57,49 @@ export function toDateKey(year: number, month: number, day: number): string {
   return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
-export function isDateInLeaveRange(dateKey: string, startDate: string, endDate: string): boolean {
+export function isDateInLeaveRange(
+  dateKey: string,
+  startDate: string,
+  endDate: string,
+): boolean {
   return dateKey >= startDate && dateKey <= endDate;
 }
 
-export function isApprovedLeaveActiveOnDate(entry: LeaveEntry, dateKey: string): boolean {
-  return entry.status === 'approved' && isDateInLeaveRange(dateKey, entry.startDate, entry.endDate);
+export function isApprovedLeaveActiveOnDate(
+  entry: LeaveEntry,
+  dateKey: string,
+): boolean {
+  return (
+    entry.status === 'approved' &&
+    isDateInLeaveRange(dateKey, entry.startDate, entry.endDate)
+  );
 }
 
-export function getTodaysApprovedLeaves(slots: LeaveSlot[], dateKey: string): LeaveEntry[] {
+export function getTodaysApprovedLeaves(
+  slots: LeaveSlot[],
+  dateKey: string,
+): LeaveEntry[] {
   return slots
     .map((slot) => slot.entry)
-    .filter((entry): entry is LeaveEntry => entry !== null && isApprovedLeaveActiveOnDate(entry, dateKey))
+    .filter(
+      (entry): entry is LeaveEntry =>
+        entry !== null && isApprovedLeaveActiveOnDate(entry, dateKey),
+    )
     .slice(0, LEAVE_SLOT_COUNT);
 }
 
-export function getApprovedLeaveEmployeeIdsOnDate(slots: LeaveSlot[], dateKey: string): Set<string> {
-  return new Set(getTodaysApprovedLeaves(slots, dateKey).map((entry) => entry.employeeId));
+export function getApprovedLeaveEmployeeIdsOnDate(
+  slots: LeaveSlot[],
+  dateKey: string,
+): Set<string> {
+  return new Set(
+    getTodaysApprovedLeaves(slots, dateKey).map((entry) => entry.employeeId),
+  );
 }
 
-function normalizeLeaveEntry(entry: Partial<LeaveEntry> | null | undefined): LeaveEntry | null {
+function normalizeLeaveEntry(
+  entry: Partial<LeaveEntry> | null | undefined,
+): LeaveEntry | null {
   if (!entry?.id || !entry.employeeId) {
     return null;
   }
@@ -81,7 +111,9 @@ function normalizeLeaveEntry(entry: Partial<LeaveEntry> | null | undefined): Lea
     leaveType: entry.leaveType ?? 'annual',
     startDate: entry.startDate ?? '',
     endDate: entry.endDate ?? '',
-    totalDays: entry.totalDays ?? computeLeaveTotalDays(entry.startDate ?? '', entry.endDate ?? ''),
+    totalDays:
+      entry.totalDays ??
+      computeLeaveTotalDays(entry.startDate ?? '', entry.endDate ?? ''),
     reason: entry.reason ?? '',
     notes: entry.notes ?? '',
     status: entry.status ?? 'pending',
@@ -101,7 +133,9 @@ export function createDefaultLeavesState(): LeavesState {
   };
 }
 
-export function normalizeLeavesState(raw: Partial<LeavesState> | null | undefined): LeavesState {
+export function normalizeLeavesState(
+  raw: Partial<LeavesState> | null | undefined,
+): LeavesState {
   const defaults = createDefaultLeavesState();
 
   if (!raw?.slots?.length) {
@@ -110,7 +144,8 @@ export function normalizeLeavesState(raw: Partial<LeavesState> | null | undefine
 
   const slots = defaults.slots.map((defaultSlot, index) => {
     const match =
-      raw.slots?.find((slot) => slot.slotId === defaultSlot.slotId) ?? raw.slots?.[index];
+      raw.slots?.find((slot) => slot.slotId === defaultSlot.slotId) ??
+      raw.slots?.[index];
     return {
       slotId: defaultSlot.slotId,
       entry: normalizeLeaveEntry(match?.entry ?? null),

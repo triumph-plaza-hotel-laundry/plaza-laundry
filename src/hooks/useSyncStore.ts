@@ -6,5 +6,9 @@ type SyncStore<T> = {
 };
 
 export function useSyncStore<T>(store: SyncStore<T>): T {
-  return useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
+  return useSyncExternalStore(
+    store.subscribe,
+    store.getSnapshot,
+    store.getSnapshot,
+  );
 }

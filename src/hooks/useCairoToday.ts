@@ -26,12 +26,16 @@ export function useCairoToday(): CairoDateParts {
     const minuteTimeoutId = window.setTimeout(() => {
       setToday((previous) => {
         const next = getCairoDateParts();
-        return getCairoDateKey(previous) === getCairoDateKey(next) ? previous : next;
+        return getCairoDateKey(previous) === getCairoDateKey(next)
+          ? previous
+          : next;
       });
       intervalId = window.setInterval(() => {
         setToday((previous) => {
           const next = getCairoDateParts();
-          return getCairoDateKey(previous) === getCairoDateKey(next) ? previous : next;
+          return getCairoDateKey(previous) === getCairoDateKey(next)
+            ? previous
+            : next;
         });
       }, 60_000);
     }, msUntilNextMinute());

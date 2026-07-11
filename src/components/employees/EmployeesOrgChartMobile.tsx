@@ -2,7 +2,10 @@ import { ChevronDown } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { OrgChartEmployeeCard } from '@/components/employees/OrgChartEmployeeCard';
-import type { EmployeesOrgChart, StaffDepartmentGroup } from '@/lib/employees-org-chart';
+import type {
+  EmployeesOrgChart,
+  StaffDepartmentGroup,
+} from '@/lib/employees-org-chart';
 import type { LaundryEmployee } from '@/data/laundry-employees';
 import { useLanguage } from '@/hooks';
 
@@ -18,11 +21,18 @@ type AccordionSectionProps = {
   children: React.ReactNode;
 };
 
-function AccordionSection({ titleEn, titleAr, defaultOpen = false, children }: AccordionSectionProps) {
+function AccordionSection({
+  titleEn,
+  titleAr,
+  defaultOpen = false,
+  children,
+}: AccordionSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className={`org-accordion__section${isOpen ? ' org-accordion__section--open' : ''}`}>
+    <div
+      className={`org-accordion__section${isOpen ? 'org-accordion__section--open' : ''}`}
+    >
       <button
         aria-expanded={isOpen}
         className="org-accordion__trigger"
@@ -62,12 +72,17 @@ type DepartmentAccordionProps = {
   onIndexAdvance: () => number;
 };
 
-function DepartmentAccordion({ department, onIndexAdvance }: DepartmentAccordionProps) {
+function DepartmentAccordion({
+  department,
+  onIndexAdvance,
+}: DepartmentAccordionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const count = department.employees.length;
 
   return (
-    <div className={`org-accordion__department${isOpen ? ' org-accordion__department--open' : ''}`}>
+    <div
+      className={`org-accordion__department${isOpen ? 'org-accordion__department--open' : ''}`}
+    >
       <button
         aria-expanded={isOpen}
         className="org-accordion__department-trigger"
@@ -80,8 +95,12 @@ function DepartmentAccordion({ department, onIndexAdvance }: DepartmentAccordion
           strokeWidth={1.75}
         />
         <span className="org-accordion__department-label">
-          <span className="org-accordion__department-label-en">{department.titleEn}</span>
-          <span className="org-accordion__department-label-ar">{department.titleAr}</span>
+          <span className="org-accordion__department-label-en">
+            {department.titleEn}
+          </span>
+          <span className="org-accordion__department-label-ar">
+            {department.titleAr}
+          </span>
           <span className="org-accordion__department-count">({count})</span>
         </span>
       </button>
@@ -112,7 +131,13 @@ function DepartmentAccordion({ department, onIndexAdvance }: DepartmentAccordion
   );
 }
 
-function EmployeeCards({ employees, onIndexAdvance }: { employees: LaundryEmployee[]; onIndexAdvance: () => number }) {
+function EmployeeCards({
+  employees,
+  onIndexAdvance,
+}: {
+  employees: LaundryEmployee[];
+  onIndexAdvance: () => number;
+}) {
   return (
     <div className="org-accordion__cards">
       {employees.map((employee) => (
@@ -140,7 +165,9 @@ export function EmployeesOrgChartMobile({
     return current;
   };
 
-  const activeDepartments = chart.staffDepartments.filter((department) => department.employees.length > 0);
+  const activeDepartments = chart.staffDepartments.filter(
+    (department) => department.employees.length > 0,
+  );
 
   return (
     <div className="org-chart org-chart--mobile">
@@ -150,13 +177,22 @@ export function EmployeesOrgChartMobile({
           titleAr={t('employees.org.directorAr')}
           titleEn={t('employees.org.directorEn')}
         >
-          <EmployeeCards employees={[chart.director]} onIndexAdvance={nextIndex} />
+          <EmployeeCards
+            employees={[chart.director]}
+            onIndexAdvance={nextIndex}
+          />
         </AccordionSection>
       ) : null}
 
       {chart.manager ? (
-        <AccordionSection titleAr={t('employees.org.managersAr')} titleEn={t('employees.org.managersEn')}>
-          <EmployeeCards employees={[chart.manager]} onIndexAdvance={nextIndex} />
+        <AccordionSection
+          titleAr={t('employees.org.managersAr')}
+          titleEn={t('employees.org.managersEn')}
+        >
+          <EmployeeCards
+            employees={[chart.manager]}
+            onIndexAdvance={nextIndex}
+          />
         </AccordionSection>
       ) : null}
 
@@ -165,7 +201,10 @@ export function EmployeesOrgChartMobile({
           titleAr={t('employees.org.assistantManagersAr')}
           titleEn={t('employees.org.assistantManagersEn')}
         >
-          <EmployeeCards employees={chart.assistantManagers} onIndexAdvance={nextIndex} />
+          <EmployeeCards
+            employees={chart.assistantManagers}
+            onIndexAdvance={nextIndex}
+          />
         </AccordionSection>
       ) : null}
 
@@ -174,7 +213,10 @@ export function EmployeesOrgChartMobile({
           titleAr={t('employees.org.seniorSupervisorsAr')}
           titleEn={t('employees.org.seniorSupervisorsEn')}
         >
-          <EmployeeCards employees={chart.seniorSupervisors} onIndexAdvance={nextIndex} />
+          <EmployeeCards
+            employees={chart.seniorSupervisors}
+            onIndexAdvance={nextIndex}
+          />
         </AccordionSection>
       ) : null}
 
@@ -183,7 +225,10 @@ export function EmployeesOrgChartMobile({
           titleAr={t('employees.org.leadSupervisorsAr')}
           titleEn={t('employees.org.leadSupervisorsEn')}
         >
-          <EmployeeCards employees={chart.leadSupervisors} onIndexAdvance={nextIndex} />
+          <EmployeeCards
+            employees={chart.leadSupervisors}
+            onIndexAdvance={nextIndex}
+          />
         </AccordionSection>
       ) : null}
 
@@ -192,18 +237,30 @@ export function EmployeesOrgChartMobile({
           titleAr={t('employees.org.shiftLeadersAr')}
           titleEn={t('employees.org.shiftLeadersEn')}
         >
-          <EmployeeCards employees={chart.shiftLeaders} onIndexAdvance={nextIndex} />
+          <EmployeeCards
+            employees={chart.shiftLeaders}
+            onIndexAdvance={nextIndex}
+          />
         </AccordionSection>
       ) : null}
 
       {chart.tailor ? (
-        <AccordionSection titleAr={t('employees.org.tailorAr')} titleEn={t('employees.org.tailorEn')}>
-          <EmployeeCards employees={[chart.tailor]} onIndexAdvance={nextIndex} />
+        <AccordionSection
+          titleAr={t('employees.org.tailorAr')}
+          titleEn={t('employees.org.tailorEn')}
+        >
+          <EmployeeCards
+            employees={[chart.tailor]}
+            onIndexAdvance={nextIndex}
+          />
         </AccordionSection>
       ) : null}
 
       {activeDepartments.length > 0 ? (
-        <AccordionSection titleAr={t('employees.org.staffAr')} titleEn={t('employees.org.staffEn')}>
+        <AccordionSection
+          titleAr={t('employees.org.staffAr')}
+          titleEn={t('employees.org.staffEn')}
+        >
           <div className="org-accordion__departments">
             {activeDepartments.map((department) => (
               <DepartmentAccordion

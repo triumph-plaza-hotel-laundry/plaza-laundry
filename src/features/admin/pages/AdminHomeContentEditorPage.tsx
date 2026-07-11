@@ -16,7 +16,9 @@ function parseFeaturedIds(value: string): string[] {
 export function AdminHomeContentEditorPage() {
   const { t } = useLanguage();
   const { assertCan, logAction } = useAuth();
-  const { draft, isDirty, setDraft, resetDraft, commitDraft } = useDraftState(homeContentRepository);
+  const { draft, isDirty, setDraft, resetDraft, commitDraft } = useDraftState(
+    homeContentRepository,
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [saveNotice, setSaveNotice] = useState<string | null>(null);
   const [saveNoticeIsError, setSaveNoticeIsError] = useState(false);
@@ -29,11 +31,17 @@ export function AdminHomeContentEditorPage() {
       assertCan('dashboard', 'update');
       await commitDraft(async (value) => {
         await homeContentRepository.replaceAll(value);
-        logAction({ action: 'homeContent.replaceAll', page: 'admin/home', newValue: value });
+        logAction({
+          action: 'homeContent.replaceAll',
+          page: 'admin/home',
+          newValue: value,
+        });
       });
       setSaveNotice(t('admin.editor.saveSuccess'));
     } catch (error) {
-      setSaveNotice(error instanceof Error ? error.message : t('admin.editor.saveError'));
+      setSaveNotice(
+        error instanceof Error ? error.message : t('admin.editor.saveError'),
+      );
       setSaveNoticeIsError(true);
     } finally {
       setIsSaving(false);
@@ -61,7 +69,10 @@ export function AdminHomeContentEditorPage() {
           <label>{t('admin.editor.sloganEn')}</label>
           <input
             onChange={(event) =>
-              setDraft({ ...draft, slogan: { ...draft.slogan, en: event.target.value } })
+              setDraft({
+                ...draft,
+                slogan: { ...draft.slogan, en: event.target.value },
+              })
             }
             value={draft.slogan.en}
           />
@@ -70,7 +81,10 @@ export function AdminHomeContentEditorPage() {
           <label>{t('admin.editor.sloganAr')}</label>
           <input
             onChange={(event) =>
-              setDraft({ ...draft, slogan: { ...draft.slogan, ar: event.target.value } })
+              setDraft({
+                ...draft,
+                slogan: { ...draft.slogan, ar: event.target.value },
+              })
             }
             value={draft.slogan.ar}
           />
@@ -79,7 +93,10 @@ export function AdminHomeContentEditorPage() {
           <label>{t('admin.editor.featuredFabrics')}</label>
           <textarea
             onChange={(event) =>
-              setDraft({ ...draft, featuredFabricIds: parseFeaturedIds(event.target.value) })
+              setDraft({
+                ...draft,
+                featuredFabricIds: parseFeaturedIds(event.target.value),
+              })
             }
             placeholder="cotton, linen, silk"
             rows={4}

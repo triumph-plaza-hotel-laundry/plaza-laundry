@@ -15,9 +15,15 @@ export function AdminShiftsTimeCard({
   const { t } = useLanguage();
 
   return (
-    <section aria-label={t('admin.shifts.timeCard.title')} className="admin-shifts-editor__time-card">
+    <section
+      aria-label={t('admin.shifts.timeCard.title')}
+      className="admin-shifts-editor__time-card"
+    >
       <div className="admin-shifts-editor__time-block">
-        <label className="admin-shifts-editor__time-label" htmlFor="admin-shifts-morning-hours">
+        <label
+          className="admin-shifts-editor__time-label"
+          htmlFor="admin-shifts-morning-hours"
+        >
           {t('shifts.morningShift')}
         </label>
         <input
@@ -29,7 +35,10 @@ export function AdminShiftsTimeCard({
         />
       </div>
       <div className="admin-shifts-editor__time-block">
-        <label className="admin-shifts-editor__time-label" htmlFor="admin-shifts-evening-hours">
+        <label
+          className="admin-shifts-editor__time-label"
+          htmlFor="admin-shifts-evening-hours"
+        >
           {t('shifts.eveningShift')}
         </label>
         <input

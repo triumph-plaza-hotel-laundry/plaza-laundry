@@ -44,7 +44,9 @@ export function getCairoDateKey(parts: CairoDateParts): string {
   return `${parts.year}-${parts.month}-${parts.day}`;
 }
 
-export function parseEmployeeBirthday(dobEn: string): { month: number; day: number } | null {
+export function parseEmployeeBirthday(
+  dobEn: string,
+): { month: number; day: number } | null {
   const match = dobEn.trim().match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/);
 
   if (!match) {
@@ -63,7 +65,10 @@ export function parseEmployeeBirthday(dobEn: string): { month: number; day: numb
   };
 }
 
-export function isBirthdayOnDate(dobEn: string, today: CairoDateParts): boolean {
+export function isBirthdayOnDate(
+  dobEn: string,
+  today: CairoDateParts,
+): boolean {
   const birthday = parseEmployeeBirthday(dobEn);
 
   if (!birthday) {
@@ -73,10 +78,12 @@ export function isBirthdayOnDate(dobEn: string, today: CairoDateParts): boolean 
   return birthday.month === today.month && birthday.day === today.day;
 }
 
-export function getEmployeesWithBirthdayToday(today: CairoDateParts): LaundryEmployee[] {
-  return employeesRepository.getSnapshot().filter((employee) =>
-    isBirthdayOnDate(employee.dateOfBirth.en, today),
-  );
+export function getEmployeesWithBirthdayToday(
+  today: CairoDateParts,
+): LaundryEmployee[] {
+  return employeesRepository
+    .getSnapshot()
+    .filter((employee) => isBirthdayOnDate(employee.dateOfBirth.en, today));
 }
 
 export function msUntilNextMinute(): number {
@@ -95,8 +102,12 @@ export function msUntilNextCairoMidnight(now = new Date()): number {
 
   const parts = formatter.formatToParts(now);
   const hour = Number(parts.find((part) => part.type === 'hour')?.value ?? 0);
-  const minute = Number(parts.find((part) => part.type === 'minute')?.value ?? 0);
-  const second = Number(parts.find((part) => part.type === 'second')?.value ?? 0);
+  const minute = Number(
+    parts.find((part) => part.type === 'minute')?.value ?? 0,
+  );
+  const second = Number(
+    parts.find((part) => part.type === 'second')?.value ?? 0,
+  );
   const elapsedMs = ((hour * 60 + minute) * 60 + second) * 1000;
 
   return 86_400_000 - elapsedMs + 1;

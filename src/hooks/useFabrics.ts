@@ -11,7 +11,11 @@ export function useFabrics() {
     (fabric: LaundryFabric) => {
       assertCan('fabrics', 'create');
       const created = fabricsRepository.create(fabric);
-      logAction({ action: 'fabrics.create', page: 'fabrics', newValue: created });
+      logAction({
+        action: 'fabrics.create',
+        page: 'fabrics',
+        newValue: created,
+      });
       return created;
     },
     [assertCan, logAction],
@@ -22,7 +26,12 @@ export function useFabrics() {
       assertCan('fabrics', 'update');
       const oldValue = fabricsRepository.getById(id);
       const updated = fabricsRepository.update(id, next);
-      logAction({ action: 'fabrics.update', page: 'fabrics', oldValue, newValue: updated });
+      logAction({
+        action: 'fabrics.update',
+        page: 'fabrics',
+        oldValue,
+        newValue: updated,
+      });
       return updated;
     },
     [assertCan, logAction],

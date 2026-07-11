@@ -7,14 +7,23 @@ type FabricImageProps = {
   src: string;
 };
 
-export function FabricImage({ alt = '', className = '', compact = false, src }: FabricImageProps) {
+export function FabricImage({
+  alt = '',
+  className = '',
+  compact = false,
+  src,
+}: FabricImageProps) {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const size = compact ? 80 : 120;
 
   return (
-    <div className={`fabric-image${loaded ? ' fabric-image--loaded' : ''}${className ? ` ${className}` : ''}`}>
-      {!loaded ? <div aria-hidden="true" className="fabric-image__skeleton" /> : null}
+    <div
+      className={`fabric-image${loaded ? 'fabric-image--loaded' : ''}${className ? ` ${className}` : ''}`}
+    >
+      {!loaded ? (
+        <div aria-hidden="true" className="fabric-image__skeleton" />
+      ) : null}
       <img
         alt={alt}
         className="fabric-image__img"

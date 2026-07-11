@@ -41,8 +41,12 @@ export function OfficialFormHeader({
       <div className="tpl-official-sheet__title-block">
         <h1 className="tpl-official-sheet__title-en">{titleEn}</h1>
         <h1 className="tpl-official-sheet__title-ar">{titleAr}</h1>
-        {subtitleEn ? <p className="tpl-official-sheet__subtitle-en">{subtitleEn}</p> : null}
-        {subtitleAr ? <p className="tpl-official-sheet__subtitle-ar">{subtitleAr}</p> : null}
+        {subtitleEn ? (
+          <p className="tpl-official-sheet__subtitle-en">{subtitleEn}</p>
+        ) : null}
+        {subtitleAr ? (
+          <p className="tpl-official-sheet__subtitle-ar">{subtitleAr}</p>
+        ) : null}
         {badgeEn && badgeAr ? (
           <div className="tpl-official-sheet__badge">
             <span className="tpl-official-sheet__badge-ar">{badgeAr}</span>

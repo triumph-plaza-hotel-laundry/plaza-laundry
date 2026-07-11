@@ -6,7 +6,9 @@ export function useCairoWeekDay(): WeekDayId {
   const today = useCairoToday();
 
   return useMemo(() => {
-    const anchor = new Date(Date.UTC(today.year, today.month - 1, today.day, 12, 0, 0));
+    const anchor = new Date(
+      Date.UTC(today.year, today.month - 1, today.day, 12, 0, 0),
+    );
     return getCairoWeekDay(anchor);
   }, [today.day, today.month, today.year]);
 }

@@ -17,7 +17,11 @@
   padding: 0.45rem 1rem;
   border: 1px solid var(--app-gold-border);
   border-radius: 999px;
-  background: linear-gradient(145deg, rgb(201 164 92 / 12%), rgb(10 10 10 / 88%));
+  background: linear-gradient(
+    145deg,
+    rgb(201 164 92 / 12%),
+    rgb(10 10 10 / 88%)
+  );
   color: var(--app-gold-soft);
   font-size: 0.8125rem;
   font-weight: 600;

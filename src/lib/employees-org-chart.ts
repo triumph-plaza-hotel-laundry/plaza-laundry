@@ -24,7 +24,9 @@ export type EmployeesOrgChart = {
   staffDepartments: StaffDepartmentGroup[];
 };
 
-export function buildEmployeesOrgChart(employees: LaundryEmployee[]): EmployeesOrgChart {
+export function buildEmployeesOrgChart(
+  employees: LaundryEmployee[],
+): EmployeesOrgChart {
   const { buckets } = assignEmployeesToOrgSections(employees);
 
   const laundryManagers = buckets.get('laundryManagers') ?? [];
@@ -45,12 +47,14 @@ export function buildEmployeesOrgChart(employees: LaundryEmployee[]): EmployeesO
 export function orgChartHasMembers(chart: EmployeesOrgChart): boolean {
   return Boolean(
     chart.director ||
-      chart.manager ||
-      chart.assistantManagers.length > 0 ||
-      chart.seniorSupervisors.length > 0 ||
-      chart.leadSupervisors.length > 0 ||
-      chart.tailor ||
-      chart.shiftLeaders.length > 0 ||
-      chart.staffDepartments.some((department) => department.employees.length > 0),
+    chart.manager ||
+    chart.assistantManagers.length > 0 ||
+    chart.seniorSupervisors.length > 0 ||
+    chart.leadSupervisors.length > 0 ||
+    chart.tailor ||
+    chart.shiftLeaders.length > 0 ||
+    chart.staffDepartments.some(
+      (department) => department.employees.length > 0,
+    ),
   );
 }

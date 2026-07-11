@@ -29,7 +29,11 @@ export function StainCard({ stain, onSelect }: StainCardProps) {
       tabIndex={0}
     >
       <div className="stain-card__icon-wrap">
-        <Icon aria-hidden="true" className="stain-card__icon" strokeWidth={1.5} />
+        <Icon
+          aria-hidden="true"
+          className="stain-card__icon"
+          strokeWidth={1.5}
+        />
       </div>
 
       <div className="stain-card__body">
@@ -37,7 +41,9 @@ export function StainCard({ stain, onSelect }: StainCardProps) {
         <p className="stain-card__name-en">{stain.name.en}</p>
 
         <div className="stain-card__badges">
-          <span className={`stain-card__badge stain-card__badge--difficulty stain-card__badge--${stain.difficulty}`}>
+          <span
+            className={`stain-card__badge stain-card__badge--difficulty stain-card__badge--${stain.difficulty}`}
+          >
             <span className="stain-card__badge-ar">{difficulty.ar}</span>
             <span className="stain-card__badge-en">{difficulty.en}</span>
           </span>

@@ -13,7 +13,11 @@ type AdminEmployeesTableProps = {
   onEdit: (employee: LaundryEmployee) => void;
 };
 
-export function AdminEmployeesTable({ employees, onDelete, onEdit }: AdminEmployeesTableProps) {
+export function AdminEmployeesTable({
+  employees,
+  onDelete,
+  onEdit,
+}: AdminEmployeesTableProps) {
   const { language, t } = useLanguage();
   const lang = language === 'ar' ? 'ar' : 'en';
 
@@ -45,20 +49,30 @@ export function AdminEmployeesTable({ employees, onDelete, onEdit }: AdminEmploy
           {employees.map((employee) => {
             const status = getEmployeeStatus(employee);
             const statusLabel =
-              status === 'active' ? t('admin.editor.statusActive') : t('admin.editor.statusInactive');
+              status === 'active'
+                ? t('admin.editor.statusActive')
+                : t('admin.editor.statusInactive');
 
             return (
               <tr key={employee.id}>
-                <td data-label={t('admin.editor.table.employeeCode')}>{getEmployeeCode(employee)}</td>
-                <td data-label={t('admin.editor.table.nameAr')}>{employee.name.ar || '—'}</td>
-                <td data-label={t('admin.editor.table.nameEn')}>{employee.name.en || '—'}</td>
+                <td data-label={t('admin.editor.table.employeeCode')}>
+                  {getEmployeeCode(employee)}
+                </td>
+                <td data-label={t('admin.editor.table.nameAr')}>
+                  {employee.name.ar || '—'}
+                </td>
+                <td data-label={t('admin.editor.table.nameEn')}>
+                  {employee.name.en || '—'}
+                </td>
                 <td data-label={t('admin.editor.table.department')}>
                   {getLocalizedDisplay(employee.department, lang)}
                 </td>
                 <td data-label={t('admin.editor.table.position')}>
                   {getLocalizedDisplay(employee.jobTitle, lang)}
                 </td>
-                <td data-label={t('admin.editor.table.phone')}>{employee.phone.trim() || '—'}</td>
+                <td data-label={t('admin.editor.table.phone')}>
+                  {employee.phone.trim() || '—'}
+                </td>
                 <td data-label={t('admin.editor.table.shift')}>
                   {getLocalizedDisplay(employee.shift, lang)}
                 </td>

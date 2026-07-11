@@ -28,8 +28,11 @@ function emptyFabric(): LaundryFabric {
 export function AdminFabricsEditorPage() {
   const { t } = useLanguage();
   const { assertCan, logAction } = useAuth();
-  const { draft, isDirty, setDraft, resetDraft, commitDraft } = useDraftState(fabricsRepository);
-  const [selectedId, setSelectedId] = useState<string | null>(draft[0]?.id ?? null);
+  const { draft, isDirty, setDraft, resetDraft, commitDraft } =
+    useDraftState(fabricsRepository);
+  const [selectedId, setSelectedId] = useState<string | null>(
+    draft[0]?.id ?? null,
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [saveNotice, setSaveNotice] = useState<string | null>(null);
   const [saveNoticeIsError, setSaveNoticeIsError] = useState(false);
@@ -44,11 +47,20 @@ export function AdminFabricsEditorPage() {
       return;
     }
 
-    setDraft(draft.map((fabric) => (fabric.id === selected.id ? { ...fabric, ...patch } : fabric)));
+    setDraft(
+      draft.map((fabric) =>
+        fabric.id === selected.id ? { ...fabric, ...patch } : fabric,
+      ),
+    );
   };
 
   const updateLocalized = (
-    field: 'name' | 'fabricType' | 'characteristics' | 'washTemperature' | 'washingProgram',
+    field:
+      | 'name'
+      | 'fabricType'
+      | 'characteristics'
+      | 'washTemperature'
+      | 'washingProgram',
     lang: 'en' | 'ar',
     value: string,
   ) => {
@@ -67,11 +79,17 @@ export function AdminFabricsEditorPage() {
       assertCan('fabrics', 'update');
       await commitDraft(async (value) => {
         await fabricsRepository.replaceAll(value);
-        logAction({ action: 'fabrics.replaceAll', page: 'admin/fabrics', newValue: value });
+        logAction({
+          action: 'fabrics.replaceAll',
+          page: 'admin/fabrics',
+          newValue: value,
+        });
       });
       setSaveNotice(t('admin.editor.saveSuccess'));
     } catch (error) {
-      setSaveNotice(error instanceof Error ? error.message : t('admin.editor.saveError'));
+      setSaveNotice(
+        error instanceof Error ? error.message : t('admin.editor.saveError'),
+      );
       setSaveNoticeIsError(true);
     } finally {
       setIsSaving(false);
@@ -114,7 +132,9 @@ export function AdminFabricsEditorPage() {
               onClick={() => {
                 if (!selected) return;
                 setDraft(draft.filter((fabric) => fabric.id !== selected.id));
-                setSelectedId(draft.find((fabric) => fabric.id !== selected.id)?.id ?? null);
+                setSelectedId(
+                  draft.find((fabric) => fabric.id !== selected.id)?.id ?? null,
+                );
               }}
               type="button"
             >
@@ -142,25 +162,36 @@ export function AdminFabricsEditorPage() {
 
         {selected ? (
           <div className="admin-editor-panel admin-editor-grid">
-            {(['name', 'fabricType', 'characteristics', 'washTemperature', 'washingProgram'] as const).flatMap(
-              (field) =>
-                (['en', 'ar'] as const).map((lang) => (
-                  <div className="admin-editor-field" key={`${field}-${lang}`}>
-                    <label>
-                      {field} ({lang.toUpperCase()})
-                    </label>
-                    <input
-                      onChange={(event) => updateLocalized(field, lang, event.target.value)}
-                      value={selected[field][lang]}
-                    />
-                  </div>
-                )),
+            {(
+              [
+                'name',
+                'fabricType',
+                'characteristics',
+                'washTemperature',
+                'washingProgram',
+              ] as const
+            ).flatMap((field) =>
+              (['en', 'ar'] as const).map((lang) => (
+                <div className="admin-editor-field" key={`${field}-${lang}`}>
+                  <label>
+                    {field} ({lang.toUpperCase()})
+                  </label>
+                  <input
+                    onChange={(event) =>
+                      updateLocalized(field, lang, event.target.value)
+                    }
+                    value={selected[field][lang]}
+                  />
+                </div>
+              )),
             )}
             <div className="admin-editor-field">
               <label>bleachAllowed</label>
               <input
                 checked={selected.bleachAllowed}
-                onChange={(event) => updateSelected({ bleachAllowed: event.target.checked })}
+                onChange={(event) =>
+                  updateSelected({ bleachAllowed: event.target.checked })
+                }
                 type="checkbox"
               />
             </div>
@@ -168,7 +199,9 @@ export function AdminFabricsEditorPage() {
               <label>dryCleaning</label>
               <input
                 checked={selected.dryCleaning}
-                onChange={(event) => updateSelected({ dryCleaning: event.target.checked })}
+                onChange={(event) =>
+                  updateSelected({ dryCleaning: event.target.checked })
+                }
                 type="checkbox"
               />
             </div>

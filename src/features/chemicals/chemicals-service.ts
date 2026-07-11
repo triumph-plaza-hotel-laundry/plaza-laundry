@@ -1,4 +1,7 @@
-import { laundryChemicals, type LaundryChemical } from '@/data/laundry-chemicals';
+import {
+  laundryChemicals,
+  type LaundryChemical,
+} from '@/data/laundry-chemicals';
 import { requireSupabase } from '@/lib/data-store/create-relational-catalog-store';
 import type { Json } from '@/lib/supabase/types';
 
@@ -48,7 +51,10 @@ function normalizeStringList(value: unknown): string[] {
   return value.filter((entry): entry is string => typeof entry === 'string');
 }
 
-function normalizeFeaturesWarnings(value: unknown): { en: string[]; ar: string[] } {
+function normalizeFeaturesWarnings(value: unknown): {
+  en: string[];
+  ar: string[];
+} {
   if (!value || typeof value !== 'object') {
     return { en: [], ar: [] };
   }
@@ -59,7 +65,10 @@ function normalizeFeaturesWarnings(value: unknown): { en: string[]; ar: string[]
   };
 }
 
-function mapChemical(row: ChemicalRow, technicalRows: TechnicalRow[]): LaundryChemical {
+function mapChemical(
+  row: ChemicalRow,
+  technicalRows: TechnicalRow[],
+): LaundryChemical {
   return {
     id: row.id,
     productCode: row.product_code,
@@ -90,7 +99,10 @@ function mapChemical(row: ChemicalRow, technicalRows: TechnicalRow[]): LaundryCh
   };
 }
 
-function toJsonList(value: { en: readonly string[]; ar: readonly string[] }): Json {
+function toJsonList(value: {
+  en: readonly string[];
+  ar: readonly string[];
+}): Json {
   return { en: [...value.en], ar: [...value.ar] };
 }
 
@@ -144,8 +156,16 @@ export async function fetchAllChemicals(): Promise<LaundryChemical[]> {
   const client = requireSupabase();
 
   const [chemicalsResult, technicalResult] = await Promise.all([
-    client.from('laundry_chemicals').select('*').order('sort_order').order('id'),
-    client.from('chemical_technical_info').select('*').order('chemical_id').order('sort_order'),
+    client
+      .from('laundry_chemicals')
+      .select('*')
+      .order('sort_order')
+      .order('id'),
+    client
+      .from('chemical_technical_info')
+      .select('*')
+      .order('chemical_id')
+      .order('sort_order'),
   ]);
 
   if (chemicalsResult.error) {
@@ -156,15 +176,22 @@ export async function fetchAllChemicals(): Promise<LaundryChemical[]> {
   }
 
   const technicalRows = (technicalResult.data as TechnicalRow[]) ?? [];
-  return (chemicalsResult.data ?? []).map((row) => mapChemical(row as ChemicalRow, technicalRows));
+  return (chemicalsResult.data ?? []).map((row) =>
+    mapChemical(row as ChemicalRow, technicalRows),
+  );
 }
 
-export async function replaceAllChemicals(chemicals: LaundryChemical[]): Promise<void> {
+export async function replaceAllChemicals(
+  chemicals: LaundryChemical[],
+): Promise<void> {
   const client = requireSupabase();
   const ids = chemicals.map((chemical) => chemical.id);
 
   if (ids.length === 0) {
-    const { error: chemicalsError } = await client.from('laundry_chemicals').delete().gte('id', 0);
+    const { error: chemicalsError } = await client
+      .from('laundry_chemicals')
+      .delete()
+      .gte('id', 0);
     if (chemicalsError) {
       throw chemicalsError;
     }
@@ -183,7 +210,10 @@ export async function replaceAllChemicals(chemicals: LaundryChemical[]): Promise
     .filter((id) => !ids.includes(id));
 
   if (staleIds.length > 0) {
-    const { error: deleteError } = await client.from('laundry_chemicals').delete().in('id', staleIds);
+    const { error: deleteError } = await client
+      .from('laundry_chemicals')
+      .delete()
+      .in('id', staleIds);
     if (deleteError) {
       throw deleteError;
     }
@@ -193,7 +223,9 @@ export async function replaceAllChemicals(chemicals: LaundryChemical[]): Promise
     const chemical = chemicals[index];
     const rows = chemicalToRows(chemical, index);
 
-    const { error: chemicalError } = await client.from('laundry_chemicals').upsert(rows.chemical);
+    const { error: chemicalError } = await client
+      .from('laundry_chemicals')
+      .upsert(rows.chemical);
     if (chemicalError) {
       throw chemicalError;
     }
@@ -207,7 +239,9 @@ export async function replaceAllChemicals(chemicals: LaundryChemical[]): Promise
     }
 
     if (rows.technical.length > 0) {
-      const { error: technicalError } = await client.from('chemical_technical_info').insert(rows.technical);
+      const { error: technicalError } = await client
+        .from('chemical_technical_info')
+        .insert(rows.technical);
       if (technicalError) {
         throw technicalError;
       }
@@ -215,4 +249,7 @@ export async function replaceAllChemicals(chemicals: LaundryChemical[]): Promise
   }
 }
 
-export const CHEMICALS_REALTIME_TABLES = ['laundry_chemicals', 'chemical_technical_info'] as const;
+export const CHEMICALS_REALTIME_TABLES = [
+  'laundry_chemicals',
+  'chemical_technical_info',
+] as const;

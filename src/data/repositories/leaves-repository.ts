@@ -65,7 +65,9 @@ export const leavesRepository = {
       throw new Error('Invalid leave dates');
     }
 
-    const existingSlot = snapshot.slots.find((slot) => slot.slotId === input.slotId);
+    const existingSlot = snapshot.slots.find(
+      (slot) => slot.slotId === input.slotId,
+    );
     if (!existingSlot) {
       throw new Error('Leave slot not found');
     }

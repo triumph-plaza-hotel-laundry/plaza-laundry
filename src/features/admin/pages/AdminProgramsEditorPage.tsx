@@ -20,7 +20,9 @@ function emptyProgram(): WashingProgram {
 
 function emptyStep(existingSteps: readonly ProgramStep[]): ProgramStep {
   const nextStepNumber =
-    existingSteps.length > 0 ? Math.max(...existingSteps.map((step) => step.step)) + 1 : 1;
+    existingSteps.length > 0
+      ? Math.max(...existingSteps.map((step) => step.step)) + 1
+      : 1;
 
   return {
     step: nextStepNumber,
@@ -33,8 +35,11 @@ function emptyStep(existingSteps: readonly ProgramStep[]): ProgramStep {
 export function AdminProgramsEditorPage() {
   const { t } = useLanguage();
   const { assertCan, logAction } = useAuth();
-  const { draft, isDirty, setDraft, resetDraft, commitDraft } = useDraftState(programsRepository);
-  const [selectedId, setSelectedId] = useState<number | null>(draft[0]?.id ?? null);
+  const { draft, isDirty, setDraft, resetDraft, commitDraft } =
+    useDraftState(programsRepository);
+  const [selectedId, setSelectedId] = useState<number | null>(
+    draft[0]?.id ?? null,
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [saveNotice, setSaveNotice] = useState<string | null>(null);
   const [saveNoticeIsError, setSaveNoticeIsError] = useState(false);
@@ -49,7 +54,11 @@ export function AdminProgramsEditorPage() {
       return;
     }
 
-    setDraft(draft.map((program) => (program.id === selected.id ? { ...program, ...patch } : program)));
+    setDraft(
+      draft.map((program) =>
+        program.id === selected.id ? { ...program, ...patch } : program,
+      ),
+    );
   };
 
   const updateLocalized = (
@@ -104,11 +113,17 @@ export function AdminProgramsEditorPage() {
       assertCan('programs', 'update');
       await commitDraft(async (value) => {
         await programsRepository.replaceAll(value);
-        logAction({ action: 'programs.replaceAll', page: 'admin/programs', newValue: value });
+        logAction({
+          action: 'programs.replaceAll',
+          page: 'admin/programs',
+          newValue: value,
+        });
       });
       setSaveNotice(t('admin.editor.saveSuccess'));
     } catch (error) {
-      setSaveNotice(error instanceof Error ? error.message : t('admin.editor.saveError'));
+      setSaveNotice(
+        error instanceof Error ? error.message : t('admin.editor.saveError'),
+      );
       setSaveNoticeIsError(true);
     } finally {
       setIsSaving(false);
@@ -151,7 +166,10 @@ export function AdminProgramsEditorPage() {
               onClick={() => {
                 if (!selected) return;
                 setDraft(draft.filter((program) => program.id !== selected.id));
-                setSelectedId(draft.find((program) => program.id !== selected.id)?.id ?? null);
+                setSelectedId(
+                  draft.find((program) => program.id !== selected.id)?.id ??
+                    null,
+                );
               }}
               type="button"
             >
@@ -179,24 +197,29 @@ export function AdminProgramsEditorPage() {
 
         {selected ? (
           <div className="admin-editor-panel admin-editor-grid">
-            {(['title', 'temperatureBadge', 'footerNote'] as const).flatMap((field) =>
-              (['en', 'ar'] as const).map((lang) => (
-                <div className="admin-editor-field" key={`${field}-${lang}`}>
-                  <label>
-                    {field} ({lang.toUpperCase()})
-                  </label>
-                  <input
-                    onChange={(event) => updateLocalized(field, lang, event.target.value)}
-                    value={selected[field][lang]}
-                  />
-                </div>
-              )),
+            {(['title', 'temperatureBadge', 'footerNote'] as const).flatMap(
+              (field) =>
+                (['en', 'ar'] as const).map((lang) => (
+                  <div className="admin-editor-field" key={`${field}-${lang}`}>
+                    <label>
+                      {field} ({lang.toUpperCase()})
+                    </label>
+                    <input
+                      onChange={(event) =>
+                        updateLocalized(field, lang, event.target.value)
+                      }
+                      value={selected[field][lang]}
+                    />
+                  </div>
+                )),
             )}
             <div className="admin-editor-field">
               <label>durationMin</label>
               <input
                 onChange={(event) =>
-                  updateSelected({ durationMin: Number.parseInt(event.target.value, 10) || 0 })
+                  updateSelected({
+                    durationMin: Number.parseInt(event.target.value, 10) || 0,
+                  })
                 }
                 type="number"
                 value={selected.durationMin}
@@ -209,7 +232,9 @@ export function AdminProgramsEditorPage() {
                 <button
                   className="admin-editor-btn"
                   onClick={() =>
-                    updateSelected({ steps: [...selected.steps, emptyStep(selected.steps)] })
+                    updateSelected({
+                      steps: [...selected.steps, emptyStep(selected.steps)],
+                    })
                   }
                   type="button"
                 >
@@ -235,7 +260,9 @@ export function AdminProgramsEditorPage() {
                         <input
                           onChange={(event) =>
                             updateStep(step.step, {
-                              step: Number.parseInt(event.target.value, 10) || step.step,
+                              step:
+                                Number.parseInt(event.target.value, 10) ||
+                                step.step,
                             })
                           }
                           type="number"
@@ -245,7 +272,12 @@ export function AdminProgramsEditorPage() {
                       <td>
                         <input
                           onChange={(event) =>
-                            updateStepLocalized(step.step, 'process', 'en', event.target.value)
+                            updateStepLocalized(
+                              step.step,
+                              'process',
+                              'en',
+                              event.target.value,
+                            )
                           }
                           value={step.process.en}
                         />
@@ -253,7 +285,12 @@ export function AdminProgramsEditorPage() {
                       <td>
                         <input
                           onChange={(event) =>
-                            updateStepLocalized(step.step, 'process', 'ar', event.target.value)
+                            updateStepLocalized(
+                              step.step,
+                              'process',
+                              'ar',
+                              event.target.value,
+                            )
                           }
                           value={step.process.ar}
                         />
@@ -261,7 +298,9 @@ export function AdminProgramsEditorPage() {
                       <td>
                         <input
                           onChange={(event) =>
-                            updateStep(step.step, { waterLevel: event.target.value })
+                            updateStep(step.step, {
+                              waterLevel: event.target.value,
+                            })
                           }
                           value={step.waterLevel}
                         />
@@ -269,7 +308,12 @@ export function AdminProgramsEditorPage() {
                       <td>
                         <input
                           onChange={(event) =>
-                            updateStepLocalized(step.step, 'temperature', 'en', event.target.value)
+                            updateStepLocalized(
+                              step.step,
+                              'temperature',
+                              'en',
+                              event.target.value,
+                            )
                           }
                           value={step.temperature.en}
                         />
@@ -277,7 +321,12 @@ export function AdminProgramsEditorPage() {
                       <td>
                         <input
                           onChange={(event) =>
-                            updateStepLocalized(step.step, 'temperature', 'ar', event.target.value)
+                            updateStepLocalized(
+                              step.step,
+                              'temperature',
+                              'ar',
+                              event.target.value,
+                            )
                           }
                           value={step.temperature.ar}
                         />
@@ -287,7 +336,9 @@ export function AdminProgramsEditorPage() {
                           className="admin-editor-btn admin-editor-btn--danger"
                           onClick={() =>
                             updateSelected({
-                              steps: selected.steps.filter((entry) => entry.step !== step.step),
+                              steps: selected.steps.filter(
+                                (entry) => entry.step !== step.step,
+                              ),
                             })
                           }
                           type="button"

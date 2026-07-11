@@ -29,11 +29,15 @@ export function PriceListPage() {
         showSync={false}
       />
 
-      <div aria-label={t('priceList.tabs.label')} className="tpl-form-page__tabs" role="tablist">
+      <div
+        aria-label={t('priceList.tabs.label')}
+        className="tpl-form-page__tabs"
+        role="tablist"
+      >
         {(Object.keys(tabLabelKeys) as PriceListTab[]).map((tab) => (
           <button
             aria-selected={activeTab === tab}
-            className={`tpl-form-page__tab${activeTab === tab ? ' tpl-form-page__tab--active' : ''}`}
+            className={`tpl-form-page__tab${activeTab === tab ? 'tpl-form-page__tab--active' : ''}`}
             key={tab}
             onClick={() => setActiveTab(tab)}
             role="tab"

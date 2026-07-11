@@ -15,7 +15,9 @@ export function App() {
     <AppProviders>
       <AppErrorBoundary>
         <AppRouter />
-        {splashVisible ? <SplashOverlay key="app-splash" onDismiss={dismissSplash} /> : null}
+        {splashVisible ? (
+          <SplashOverlay key="app-splash" onDismiss={dismissSplash} />
+        ) : null}
       </AppErrorBoundary>
     </AppProviders>
   );

@@ -64,8 +64,16 @@
   pointer-events: none;
   opacity: 0.42;
   background:
-    radial-gradient(ellipse 72% 58% at 24% 38%, rgb(246 215 107 / 14%), transparent 68%),
-    radial-gradient(ellipse 54% 44% at 78% 62%, rgb(201 164 92 / 10%), transparent 72%);
+    radial-gradient(
+      ellipse 72% 58% at 24% 38%,
+      rgb(246 215 107 / 14%),
+      transparent 68%
+    ),
+    radial-gradient(
+      ellipse 54% 44% at 78% 62%,
+      rgb(201 164 92 / 10%),
+      transparent 72%
+    );
   animation: home-cinematic-bg-glow 18s ease-in-out infinite alternate;
 }
 

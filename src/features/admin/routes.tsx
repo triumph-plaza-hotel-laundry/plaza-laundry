@@ -21,6 +21,12 @@ const AdminTrainingPage = lazy(() =>
   })),
 );
 
+const AdminDepartmentItemsPage = lazy(() =>
+  import('@/features/admin/pages/AdminDepartmentItemsPage').then((module) => ({
+    default: module.AdminDepartmentItemsPage,
+  })),
+);
+
 const AdminInventoryPage = lazy(() =>
   import('@/features/admin/pages/AdminInventoryEditorPage').then((module) => ({
     default: module.AdminInventoryEditorPage,
@@ -76,15 +82,19 @@ const AdminProgramsPage = lazy(() =>
 );
 
 const AdminCareSymbolsPage = lazy(() =>
-  import('@/features/admin/pages/AdminCareSymbolsEditorPage').then((module) => ({
-    default: module.AdminCareSymbolsEditorPage,
-  })),
+  import('@/features/admin/pages/AdminCareSymbolsEditorPage').then(
+    (module) => ({
+      default: module.AdminCareSymbolsEditorPage,
+    }),
+  ),
 );
 
 const AdminHomeContentPage = lazy(() =>
-  import('@/features/admin/pages/AdminHomeContentEditorPage').then((module) => ({
-    default: module.AdminHomeContentEditorPage,
-  })),
+  import('@/features/admin/pages/AdminHomeContentEditorPage').then(
+    (module) => ({
+      default: module.AdminHomeContentEditorPage,
+    }),
+  ),
 );
 
 const AdminAiSettingsPage = lazy(() =>
@@ -111,6 +121,7 @@ export const adminRoutes = (
     >
       <Route index element={<AdminIndexPage />} />
       <Route element={<AdminInventoryPage />} path="inventory" />
+      <Route element={<AdminDepartmentItemsPage />} path="department-items" />
       <Route element={<AdminEmployeesPage />} path="employees" />
       <Route element={<AdminShiftsPage />} path="shifts" />
       <Route element={<AdminLeavesPage />} path="leaves" />

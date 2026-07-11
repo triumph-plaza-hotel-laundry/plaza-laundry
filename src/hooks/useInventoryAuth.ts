@@ -7,7 +7,9 @@ import {
 } from '@/features/inventory/inventory-auth';
 
 export function useInventoryAuth() {
-  const [isAuthenticated, setIsAuthenticated] = useState(isInventorySessionActive);
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    isInventorySessionActive,
+  );
 
   const login = useCallback((username: string, password: string) => {
     if (!validateInventoryCredentials(username, password)) {

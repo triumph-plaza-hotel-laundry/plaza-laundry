@@ -60,7 +60,11 @@
 }
 
 :root[data-theme='luxury-light'] .admin-edit-toolbar {
-  background: linear-gradient(145deg, rgb(201 164 92 / 14%), rgb(255 255 255 / 96%));
+  background: linear-gradient(
+    145deg,
+    rgb(201 164 92 / 14%),
+    rgb(255 255 255 / 96%)
+  );
 }
 
 :root[data-theme='luxury-light'] .admin-edit-toolbar__btn--cancel {
@@ -95,7 +99,11 @@
   color: var(--table-text);
 }
 
-:root[data-theme='luxury-light'] .admin-editor-table tbody tr:nth-child(even) td {
+:root[data-theme='luxury-light']
+  .admin-editor-table
+  tbody
+  tr:nth-child(even)
+  td {
   background: var(--table-row-alt-bg);
 }
 
@@ -206,7 +214,9 @@
   );
 }
 
-:root[data-theme='luxury-light'] .inv-management-page .inv-management-page__marble {
+:root[data-theme='luxury-light']
+  .inv-management-page
+  .inv-management-page__marble {
   background: var(--inv-marble-bg);
   border-color: rgb(174 134 37 / 22%);
 }
@@ -221,7 +231,11 @@
   background: var(--inv-search-bg);
 }
 
-:root[data-theme='luxury-light'] .inv-management-page .luxury-table.inv-erp-table thead th {
+:root[data-theme='luxury-light']
+  .inv-management-page
+  .luxury-table.inv-erp-table
+  thead
+  th {
   background: var(--inv-erp-header-bg);
   color: var(--table-header-text);
   box-shadow: inset 0 -1px 0 rgb(174 134 37 / 22%);
@@ -241,8 +255,12 @@
   box-shadow: var(--card-shadow);
 }
 
-:root[data-theme='luxury-light'] .inv-management-page .inv-combobox__option--active,
-:root[data-theme='luxury-light'] .inv-management-page .inv-combobox__option:hover {
+:root[data-theme='luxury-light']
+  .inv-management-page
+  .inv-combobox__option--active,
+:root[data-theme='luxury-light']
+  .inv-management-page
+  .inv-combobox__option:hover {
   color: var(--inv-text);
 }
 
@@ -262,22 +280,52 @@
   border-color: var(--btn-primary-bg);
 }
 
-:root[data-theme='luxury-light'] .inv-management-page .inv-erp-table__remaining {
+:root[data-theme='luxury-light']
+  .inv-management-page
+  .inv-erp-table__remaining {
   color: var(--inv-gold);
 }
 
-:root[data-theme='luxury-light'] .inv-management-page .inv-erp-table tbody td.inv-erp-table__code,
-:root[data-theme='luxury-light'] .inv-management-page .inv-erp-table tbody td.inv-erp-table__name {
+:root[data-theme='luxury-light']
+  .inv-management-page
+  .inv-erp-table
+  tbody
+  td.inv-erp-table__code,
+:root[data-theme='luxury-light']
+  .inv-management-page
+  .inv-erp-table
+  tbody
+  td.inv-erp-table__name {
   background: var(--table-body-bg, #ffffff);
 }
 
-:root[data-theme='luxury-light'] .inv-management-page .inv-erp-table tbody tr:nth-child(even) td.inv-erp-table__code,
-:root[data-theme='luxury-light'] .inv-management-page .inv-erp-table tbody tr:nth-child(even) td.inv-erp-table__name {
+:root[data-theme='luxury-light']
+  .inv-management-page
+  .inv-erp-table
+  tbody
+  tr:nth-child(even)
+  td.inv-erp-table__code,
+:root[data-theme='luxury-light']
+  .inv-management-page
+  .inv-erp-table
+  tbody
+  tr:nth-child(even)
+  td.inv-erp-table__name {
   background: var(--table-row-alt-bg, #faf6ee);
 }
 
-:root[data-theme='luxury-light'] .inv-management-page .inv-erp-table tbody tr:hover td.inv-erp-table__code,
-:root[data-theme='luxury-light'] .inv-management-page .inv-erp-table tbody tr:hover td.inv-erp-table__name {
+:root[data-theme='luxury-light']
+  .inv-management-page
+  .inv-erp-table
+  tbody
+  tr:hover
+  td.inv-erp-table__code,
+:root[data-theme='luxury-light']
+  .inv-management-page
+  .inv-erp-table
+  tbody
+  tr:hover
+  td.inv-erp-table__name {
   background: var(--table-row-hover, rgb(201 164 92 / 10%));
 }
 
@@ -347,7 +395,11 @@
   color: var(--table-text);
 }
 
-:root[data-theme='luxury-light'] .tpl-official-table tbody tr:nth-child(even) td {
+:root[data-theme='luxury-light']
+  .tpl-official-table
+  tbody
+  tr:nth-child(even)
+  td {
   background: var(--table-row-alt-bg);
 }
 

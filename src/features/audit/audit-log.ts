@@ -58,7 +58,11 @@ export async function appendAuditLog(input: {
     new_value: serializeAuditValue(input.newValue),
   };
 
-  const { data, error } = await client.from('audit_log_entries').insert(row).select('*').single();
+  const { data, error } = await client
+    .from('audit_log_entries')
+    .insert(row)
+    .select('*')
+    .single();
   if (error || !data) {
     throw error ?? new Error('Failed to write audit log');
   }
@@ -106,7 +110,10 @@ export async function clearAuditLogs(actor: AuthUser): Promise<void> {
   }
 
   const client = requireSupabase();
-  const { error } = await client.from('audit_log_entries').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  const { error } = await client
+    .from('audit_log_entries')
+    .delete()
+    .neq('id', '00000000-0000-0000-0000-000000000000');
   if (error) {
     throw error;
   }

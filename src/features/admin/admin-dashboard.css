@@ -75,7 +75,10 @@
   background: linear-gradient(160deg, rgb(15 15 15 / 78%), rgb(12 12 12 / 58%));
   box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
   text-decoration: none;
-  transition: border-color 150ms ease, transform 150ms ease, background 150ms ease;
+  transition:
+    border-color 150ms ease,
+    transform 150ms ease,
+    background 150ms ease;
 }
 
 :root[data-theme='luxury-light'] .admin-dashboard__card {

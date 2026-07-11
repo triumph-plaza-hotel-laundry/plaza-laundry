@@ -1,5 +1,8 @@
 import { createContext } from 'react';
-import type { InventoryPlanDocument, MonthlyArchiveRecord } from '@/features/inventory/monthly-archive-types';
+import type {
+  InventoryPlanDocument,
+  MonthlyArchiveRecord,
+} from '@/features/inventory/monthly-archive-types';
 
 export type InventoryArchiveContextValue = {
   archiveMonths: string[];
@@ -12,11 +15,14 @@ export type InventoryArchiveContextValue = {
   openDrawer: () => void;
   closeDrawer: () => void;
   planDocument: InventoryPlanDocument | null;
-  savePlanDrafts: (rowDrafts: InventoryPlanDocument['rowDrafts']) => Promise<void>;
+  savePlanDrafts: (
+    rowDrafts: InventoryPlanDocument['rowDrafts'],
+  ) => Promise<void>;
   selectArchiveMonth: (monthKey: string) => Promise<void>;
   syncError: string | null;
   viewingArchive: MonthlyArchiveRecord | null;
   viewingMonth: string | null;
 };
 
-export const InventoryArchiveContext = createContext<InventoryArchiveContextValue | null>(null);
+export const InventoryArchiveContext =
+  createContext<InventoryArchiveContextValue | null>(null);

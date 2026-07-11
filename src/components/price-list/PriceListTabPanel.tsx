@@ -17,7 +17,12 @@ type PriceListTabPanelProps = {
   readOnly?: boolean;
 };
 
-export function PriceListTabPanel({ tab, prices, onPriceChange, readOnly = false }: PriceListTabPanelProps) {
+export function PriceListTabPanel({
+  tab,
+  prices,
+  onPriceChange,
+  readOnly = false,
+}: PriceListTabPanelProps) {
   const { items } = useSyncStore(priceListRepository);
   const tabPrices = prices[tab];
   const isGuest = tab === 'guest';
@@ -27,15 +32,31 @@ export function PriceListTabPanel({ tab, prices, onPriceChange, readOnly = false
     <div className={`price-tab-panel price-tab-panel--${tab}`}>
       <header className={`price-tab-hero price-tab-hero--${tab}`}>
         <div className="price-tab-hero__icon-wrap">
-          <HeroIcon aria-hidden="true" className="price-tab-hero__icon" strokeWidth={1.5} />
+          <HeroIcon
+            aria-hidden="true"
+            className="price-tab-hero__icon"
+            strokeWidth={1.5}
+          />
         </div>
         <div className="price-tab-hero__content">
           <span className="price-tab-hero__badge">
             <span className="price-tab-hero__badge-ar">
-              {dictionaries.ar[isGuest ? 'priceList.badges.guest' : 'priceList.badges.outsideGuest']}
+              {
+                dictionaries.ar[
+                  isGuest
+                    ? 'priceList.badges.guest'
+                    : 'priceList.badges.outsideGuest'
+                ]
+              }
             </span>
             <span className="price-tab-hero__badge-en">
-              {dictionaries.en[isGuest ? 'priceList.badges.guest' : 'priceList.badges.outsideGuest']}
+              {
+                dictionaries.en[
+                  isGuest
+                    ? 'priceList.badges.guest'
+                    : 'priceList.badges.outsideGuest'
+                ]
+              }
             </span>
           </span>
           <p className="price-tab-hero__desc-ar">
@@ -54,9 +75,13 @@ export function PriceListTabPanel({ tab, prices, onPriceChange, readOnly = false
       {priceListCategories.map((category) => (
         <PriceListSection
           category={category}
-          items={items.filter((item: PriceListItem) => item.category === category)}
+          items={items.filter(
+            (item: PriceListItem) => item.category === category,
+          )}
           key={category}
-          onPriceChange={(itemId, field, value) => onPriceChange(tab, itemId, field, value)}
+          onPriceChange={(itemId, field, value) =>
+            onPriceChange(tab, itemId, field, value)
+          }
           prices={tabPrices}
           readOnly={readOnly}
           variant={tab}
@@ -64,10 +89,18 @@ export function PriceListTabPanel({ tab, prices, onPriceChange, readOnly = false
       ))}
 
       <aside className={`price-notice price-notice--${tab}`} role="note">
-        <p className="price-notice__label-ar">{dictionaries.ar['priceList.note.label']}</p>
-        <p className="price-notice__text-ar">{dictionaries.ar['priceList.note.body']}</p>
-        <p className="price-notice__label-en">{dictionaries.en['priceList.note.label']}</p>
-        <p className="price-notice__text-en">{dictionaries.en['priceList.note.body']}</p>
+        <p className="price-notice__label-ar">
+          {dictionaries.ar['priceList.note.label']}
+        </p>
+        <p className="price-notice__text-ar">
+          {dictionaries.ar['priceList.note.body']}
+        </p>
+        <p className="price-notice__label-en">
+          {dictionaries.en['priceList.note.label']}
+        </p>
+        <p className="price-notice__text-en">
+          {dictionaries.en['priceList.note.body']}
+        </p>
       </aside>
     </div>
   );

@@ -23,7 +23,10 @@ function randomBetween(min: number, max: number) {
   return min + Math.random() * (max - min);
 }
 
-export function GoldenParticleField({ mode, burstKey = 0 }: GoldenParticleFieldProps) {
+export function GoldenParticleField({
+  mode,
+  burstKey = 0,
+}: GoldenParticleFieldProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const particlesRef = useRef<Particle[]>([]);
   const modeRef = useRef(mode);
@@ -160,7 +163,13 @@ export function GoldenParticleField({ mode, burstKey = 0 }: GoldenParticleFieldP
         if (particle.size > 2.2) {
           context.beginPath();
           context.fillStyle = `rgba(255, 244, 210, ${alpha * 0.35})`;
-          context.arc(particle.x, particle.y, particle.size * 0.45, 0, Math.PI * 2);
+          context.arc(
+            particle.x,
+            particle.y,
+            particle.size * 0.45,
+            0,
+            Math.PI * 2,
+          );
           context.fill();
         }
 
@@ -180,5 +189,11 @@ export function GoldenParticleField({ mode, burstKey = 0 }: GoldenParticleFieldP
     };
   }, []);
 
-  return <canvas aria-hidden="true" className="cinematic-splash__particles" ref={canvasRef} />;
+  return (
+    <canvas
+      aria-hidden="true"
+      className="cinematic-splash__particles"
+      ref={canvasRef}
+    />
+  );
 }

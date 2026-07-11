@@ -7,10 +7,14 @@ type ShiftEmployeeMiniCardProps = {
   index: number;
 };
 
-export function ShiftEmployeeMiniCard({ employee, index }: ShiftEmployeeMiniCardProps) {
+export function ShiftEmployeeMiniCard({
+  employee,
+  index,
+}: ShiftEmployeeMiniCardProps) {
   const { language } = useLanguage();
   const name = language === 'ar' ? employee.name.ar : employee.name.en;
-  const jobTitle = language === 'ar' ? employee.jobTitle.ar : employee.jobTitle.en;
+  const jobTitle =
+    language === 'ar' ? employee.jobTitle.ar : employee.jobTitle.en;
 
   return (
     <motion.article

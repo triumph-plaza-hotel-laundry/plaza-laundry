@@ -1,5 +1,8 @@
 import { createRelationalCatalogStore } from '@/lib/data-store/create-relational-catalog-store';
-import { createCatalogRepository, registerRepository } from '@/data/repositories/repository-utils';
+import {
+  createCatalogRepository,
+  registerRepository,
+} from '@/data/repositories/repository-utils';
 import {
   fetchAllChemicals,
   getChemicalsSeed,
@@ -9,7 +12,11 @@ import {
 import { STORAGE_KEYS } from '@/lib/data-store/storage-keys';
 import type { LaundryChemical } from '@/data/laundry-chemicals';
 
-export type { ChemicalTechnicalRow, LaundryChemical, LocalizedText } from '@/data/laundry-chemicals';
+export type {
+  ChemicalTechnicalRow,
+  LaundryChemical,
+  LocalizedText,
+} from '@/data/laundry-chemicals';
 export { localizedText } from '@/data/laundry-chemicals';
 
 const chemicalsStore = createRelationalCatalogStore<LaundryChemical>({

@@ -67,7 +67,11 @@ export function CareSymbolsPage() {
         </div>
 
         <label className="care-catalog__search">
-          <Search aria-hidden="true" className="care-catalog__search-icon" strokeWidth={1.75} />
+          <Search
+            aria-hidden="true"
+            className="care-catalog__search-icon"
+            strokeWidth={1.75}
+          />
           <input
             className="care-catalog__search-input"
             onChange={(event) => setSearchQuery(event.target.value)}
@@ -77,10 +81,14 @@ export function CareSymbolsPage() {
           />
         </label>
 
-        <div aria-label={t('care.catalog.filtersLabel')} className="care-catalog__filters" role="group">
+        <div
+          aria-label={t('care.catalog.filtersLabel')}
+          className="care-catalog__filters"
+          role="group"
+        >
           {careCatalogFilters.map((filter) => (
             <button
-              className={`care-catalog__filter${activeFilter === filter ? ' care-catalog__filter--active' : ''}`}
+              className={`care-catalog__filter${activeFilter === filter ? 'care-catalog__filter--active' : ''}`}
               key={filter}
               onClick={() => setActiveFilter(filter)}
               type="button"
@@ -94,17 +102,28 @@ export function CareSymbolsPage() {
       {filteredLabels.length > 0 ? (
         <div className="care-catalog__grid">
           {filteredLabels.map((label) => (
-            <CareSymbolCard key={label.id} label={label} onSelect={setSelectedLabel} />
+            <CareSymbolCard
+              key={label.id}
+              label={label}
+              onSelect={setSelectedLabel}
+            />
           ))}
         </div>
       ) : (
         <div className="care-catalog__empty">
-          <p className="care-catalog__empty-en">{t('care.catalog.noResults')}</p>
-          <p className="care-catalog__empty-ar">{t('care.catalog.noResultsAr')}</p>
+          <p className="care-catalog__empty-en">
+            {t('care.catalog.noResults')}
+          </p>
+          <p className="care-catalog__empty-ar">
+            {t('care.catalog.noResultsAr')}
+          </p>
         </div>
       )}
 
-      <CareSymbolDetailModal label={selectedLabel} onClose={() => setSelectedLabel(null)} />
+      <CareSymbolDetailModal
+        label={selectedLabel}
+        onClose={() => setSelectedLabel(null)}
+      />
     </section>
   );
 }

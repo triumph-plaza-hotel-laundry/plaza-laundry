@@ -17,7 +17,10 @@ function fromBase64(value: string): Uint8Array {
   return bytes;
 }
 
-async function deriveKey(password: string, salt: Uint8Array): Promise<Uint8Array> {
+async function deriveKey(
+  password: string,
+  salt: Uint8Array,
+): Promise<Uint8Array> {
   const keyMaterial = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(password),
@@ -46,7 +49,10 @@ export async function hashPassword(password: string): Promise<string> {
   return `pbkdf2:${ITERATIONS}:${toBase64(salt)}:${toBase64(derived)}`;
 }
 
-export async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
+export async function verifyPassword(
+  password: string,
+  storedHash: string,
+): Promise<boolean> {
   const parts = storedHash.split(':');
   if (parts.length !== 4 || parts[0] !== 'pbkdf2') {
     return false;

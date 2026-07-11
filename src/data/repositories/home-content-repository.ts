@@ -5,7 +5,10 @@ import { STORAGE_KEYS } from '@/lib/data-store/storage-keys';
 
 export type { HomeContentState } from '@/data/home-content';
 
-function normalizeHomeContent(parsed: unknown, seed: HomeContentState): HomeContentState {
+function normalizeHomeContent(
+  parsed: unknown,
+  seed: HomeContentState,
+): HomeContentState {
   if (!parsed || typeof parsed !== 'object') {
     return seed;
   }

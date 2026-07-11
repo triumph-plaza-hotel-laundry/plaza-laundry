@@ -1,6 +1,17 @@
-export type UserRole = 'OWNER' | 'SUPER_ADMIN' | 'ADMIN' | 'MANAGER' | 'EMPLOYEE';
+export type UserRole =
+  | 'OWNER'
+  | 'SUPER_ADMIN'
+  | 'ADMIN'
+  | 'MANAGER'
+  | 'EMPLOYEE';
 
-export type PermissionAction = 'view' | 'create' | 'update' | 'delete' | 'edit' | 'export';
+export type PermissionAction =
+  | 'view'
+  | 'create'
+  | 'update'
+  | 'delete'
+  | 'edit'
+  | 'export';
 
 export type PermissionResource =
   | 'dashboard'

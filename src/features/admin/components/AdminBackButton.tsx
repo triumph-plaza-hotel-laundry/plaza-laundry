@@ -6,7 +6,9 @@ type AdminBackButtonProps = {
   fallbackPath?: string;
 };
 
-export function AdminBackButton({ fallbackPath = '/admin' }: AdminBackButtonProps) {
+export function AdminBackButton({
+  fallbackPath = '/admin',
+}: AdminBackButtonProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLanguage();

@@ -1,4 +1,8 @@
-import type { PlanRowDraft, PlanRowDrafts } from '@/features/inventory/monthly-archive-types';
+import type {
+  PlanRowDraft,
+  PlanRowDrafts,
+} from '@/features/inventory/monthly-archive-types';
+import type { PlanDepartmentRow } from '@/features/inventory/department-items-types';
 import type { TranslationKey } from '@/types/language';
 
 export type PlanDepartmentId =
@@ -52,7 +56,7 @@ export type PlanItemKey =
   | 'sportsPants'
   | 'sportsShorts';
 
-export type PlanRowId = `${PlanDepartmentId}-${PlanItemKey}`;
+export type PlanRowId = `${PlanDepartmentId}-${string}`;
 
 export const PLAN_ITEM_BLANK_OPTION_LABEL = 'ــــــــــــ';
 
@@ -77,11 +81,15 @@ export const PLAN_DEPARTMENTS: readonly PlanDepartmentId[] = [
   'gym',
 ];
 
-export const PLAN_DEPARTMENT_LABEL_KEYS: Record<PlanDepartmentId, TranslationKey> = {
+export const PLAN_DEPARTMENT_LABEL_KEYS: Record<
+  PlanDepartmentId,
+  TranslationKey
+> = {
   directors: 'admin.inventory.plan.sections.directors',
   frontOffice: 'admin.inventory.plan.directorsSub.frontOffice',
   personnelAffairs: 'admin.inventory.plan.directorsSub.personnelAffairs',
-  informationTechnology: 'admin.inventory.plan.directorsSub.informationTechnology',
+  informationTechnology:
+    'admin.inventory.plan.directorsSub.informationTechnology',
   audioEngineering: 'admin.inventory.plan.directorsSub.audioEngineering',
   sales: 'admin.inventory.plan.directorsSub.sales',
   publicRelations: 'admin.inventory.plan.directorsSub.publicRelations',
@@ -98,7 +106,10 @@ export const PLAN_DEPARTMENT_LABEL_KEYS: Record<PlanDepartmentId, TranslationKey
   gym: 'admin.inventory.plan.sections.gym',
 };
 
-export const PLAN_DEPARTMENT_ITEMS: Record<PlanDepartmentId, readonly PlanItemKey[]> = {
+export const PLAN_DEPARTMENT_ITEMS: Record<
+  PlanDepartmentId,
+  readonly PlanItemKey[]
+> = {
   directors: ['suit', 'shirt', 'tie'],
   frontOffice: ['suit', 'womens', 'balman', 'shirt', 'blouse', 'tie'],
   personnelAffairs: ['suit', 'shirt', 'tie'],
@@ -108,10 +119,48 @@ export const PLAN_DEPARTMENT_ITEMS: Record<PlanDepartmentId, readonly PlanItemKe
   publicRelations: ['suit', 'shirt', 'tie'],
   driversSecretariat: ['suit', 'shirt', 'tie'],
   accounts: ['suit', 'shirt', 'tie', 'pants', 'tshirt', 'tshirt2', 'jacket'],
-  foodBeverageBanquets: ['suit', 'shirt', 'shirt2', 'tie', 'pants', 'apron', 'apron2', 'jacket', 'kitchenJacket'],
-  security: ['suit', 'suit2', 'shirt', 'shirt2', 'shirt3', 'pants', 'jacket', 'tie', 'coat'],
-  housekeeping: ['suit', 'suit2', 'shirt', 'shirt2', 'shirt3', 'hkKit', 'hkKit2', 'pants', 'tie', 'headCover'],
-  kitchen: ['kitchenJacket', 'kitchenJacket2', 'kitchenJacket3', 'apron', 'apron2', 'pants', 'pants2'],
+  foodBeverageBanquets: [
+    'suit',
+    'shirt',
+    'shirt2',
+    'tie',
+    'pants',
+    'apron',
+    'apron2',
+    'jacket',
+  ],
+  security: [
+    'suit',
+    'suit2',
+    'shirt',
+    'shirt2',
+    'shirt3',
+    'pants',
+    'jacket',
+    'tie',
+    'coat',
+  ],
+  housekeeping: [
+    'suit',
+    'suit2',
+    'shirt',
+    'shirt2',
+    'shirt3',
+    'hkKit',
+    'hkKit2',
+    'pants',
+    'tie',
+    'headCover',
+  ],
+  kitchen: [
+    'kitchenJacket',
+    'kitchenJacket2',
+    'kitchenJacket3',
+    'apron',
+    'apron2',
+    'pants',
+    'pants2',
+  ],
   laundry: ['pants', 'pants2', 'tshirt', 'tshirt2', 'shirt'],
   stewarding: ['shirt', 'pants', 'supervisionKit', 'workersKit'],
   maintenance: ['shirt', 'pants', 'supervisionKit', 'workersKit'],
@@ -391,11 +440,26 @@ const EMPTY_ROW_DRAFT: PlanRowDraft = {
   itemVariant: '',
 };
 
-export function buildDepartmentRows(departmentId: PlanDepartmentId) {
-  return PLAN_DEPARTMENT_ITEMS[departmentId].map((itemKey) => ({
+export function buildDepartmentRows(
+  departmentId: PlanDepartmentId,
+  customCategories: readonly { itemKey: string }[] = [],
+): PlanDepartmentRow[] {
+  const builtInKeys = PLAN_DEPARTMENT_ITEMS[departmentId];
+  const builtInRows = builtInKeys.map((itemKey) => ({
     id: `${departmentId}-${itemKey}` as PlanRowId,
     itemKey,
   }));
+
+  const customRows = customCategories
+    .filter(
+      (category) => !builtInKeys.includes(category.itemKey as PlanItemKey),
+    )
+    .map((category) => ({
+      id: `${departmentId}-${category.itemKey}` as PlanRowId,
+      itemKey: category.itemKey,
+    }));
+
+  return [...builtInRows, ...customRows];
 }
 
 export function createInitialPlanRowDrafts(): PlanRowDrafts {
@@ -415,8 +479,13 @@ export function planHasSavedRecords(rowDrafts: PlanRowDrafts) {
   return Object.values(rowDrafts).some((draft) => isPlanRowVisible(draft));
 }
 
-export function departmentHasVisibleRows(departmentId: PlanDepartmentId, rowDrafts: PlanRowDrafts) {
-  return buildDepartmentRows(departmentId).some((row) => isPlanRowVisible(rowDrafts[row.id]));
+export function departmentHasVisibleRows(
+  departmentId: PlanDepartmentId,
+  rowDrafts: PlanRowDrafts,
+) {
+  return buildDepartmentRows(departmentId).some((row) =>
+    isPlanRowVisible(rowDrafts[row.id]),
+  );
 }
 
 export function formatPlanReceivingDate(draft: PlanRowDraft) {

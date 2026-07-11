@@ -30,9 +30,24 @@
   inset: 0;
   opacity: 0.72;
   background:
-    linear-gradient(118deg, transparent 36%, rgb(201 164 92 / 16%) 49%, transparent 58%),
-    linear-gradient(62deg, transparent 18%, rgb(174 134 37 / 12%) 28%, transparent 38%),
-    linear-gradient(198deg, transparent 62%, rgb(232 197 120 / 10%) 70%, transparent 78%),
+    linear-gradient(
+      118deg,
+      transparent 36%,
+      rgb(201 164 92 / 16%) 49%,
+      transparent 58%
+    ),
+    linear-gradient(
+      62deg,
+      transparent 18%,
+      rgb(174 134 37 / 12%) 28%,
+      transparent 38%
+    ),
+    linear-gradient(
+      198deg,
+      transparent 62%,
+      rgb(232 197 120 / 10%) 70%,
+      transparent 78%
+    ),
     repeating-linear-gradient(
       90deg,
       transparent 0,
@@ -46,14 +61,24 @@
 .cinematic-splash__marble-gloss {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgb(255 255 255 / 5%) 0%, transparent 28%, rgb(0 0 0 / 28%) 100%);
+  background: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 5%) 0%,
+    transparent 28%,
+    rgb(0 0 0 / 28%) 100%
+  );
 }
 
 .cinematic-splash__marble-reflection {
   position: absolute;
   inset: auto 0 0;
   height: 42%;
-  background: linear-gradient(180deg, transparent 0%, rgb(201 164 92 / 5%) 38%, rgb(0 0 0 / 55%) 100%);
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgb(201 164 92 / 5%) 38%,
+    rgb(0 0 0 / 55%) 100%
+  );
 }
 
 .cinematic-splash__fog {
@@ -78,14 +103,22 @@
 .cinematic-splash__spotlight {
   position: absolute;
   inset: -10% 10% 35%;
-  background: radial-gradient(circle at 50% 18%, rgb(255 244 210 / 12%) 0%, transparent 58%);
+  background: radial-gradient(
+    circle at 50% 18%,
+    rgb(255 244 210 / 12%) 0%,
+    transparent 58%
+  );
   mix-blend-mode: screen;
 }
 
 .cinematic-splash__vignette {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 45%, transparent 34%, rgb(0 0 0 / 62%) 100%);
+  background: radial-gradient(
+    circle at 50% 45%,
+    transparent 34%,
+    rgb(0 0 0 / 62%) 100%
+  );
   pointer-events: none;
 }
 
@@ -141,7 +174,8 @@
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 2px 10px rgb(201 164 92 / 28%)) drop-shadow(0 0 24px rgb(201 164 92 / 16%));
+  filter: drop-shadow(0 2px 10px rgb(201 164 92 / 28%))
+    drop-shadow(0 0 24px rgb(201 164 92 / 16%));
 }
 
 .cinematic-splash__title--line1 {
@@ -175,7 +209,8 @@
   width: min(72vw, 34rem);
   height: auto;
   object-fit: contain;
-  filter: saturate(0.92) contrast(1.04) brightness(0.96) drop-shadow(0 18px 28px rgb(0 0 0 / 42%));
+  filter: saturate(0.92) contrast(1.04) brightness(0.96)
+    drop-shadow(0 18px 28px rgb(0 0 0 / 42%));
   pointer-events: none;
 }
 
@@ -199,7 +234,12 @@
   width: min(28vw, 12rem);
   height: 0.35rem;
   border-radius: 999px;
-  background: linear-gradient(90deg, transparent 0%, rgb(232 197 120 / 72%) 42%, rgb(201 164 92 / 18%) 100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(232 197 120 / 72%) 42%,
+    rgb(201 164 92 / 18%) 100%
+  );
   filter: blur(4px);
   transform: translateY(-50%);
 }
@@ -218,24 +258,58 @@
 
 .cinematic-splash__smoke--core {
   background:
-    radial-gradient(circle at 50% 46%, rgb(255 244 210 / 92%) 0%, rgb(201 164 92 / 72%) 16%, transparent 52%),
-    radial-gradient(circle at 48% 52%, rgb(255 255 255 / 88%) 0%, rgb(232 213 166 / 55%) 18%, transparent 46%);
+    radial-gradient(
+      circle at 50% 46%,
+      rgb(255 244 210 / 92%) 0%,
+      rgb(201 164 92 / 72%) 16%,
+      transparent 52%
+    ),
+    radial-gradient(
+      circle at 48% 52%,
+      rgb(255 255 255 / 88%) 0%,
+      rgb(232 213 166 / 55%) 18%,
+      transparent 46%
+    );
   filter: blur(18px);
   mix-blend-mode: screen;
 }
 
 .cinematic-splash__smoke--volume {
   background:
-    radial-gradient(circle at 50% 48%, rgb(232 213 166 / 78%) 0%, rgb(201 164 92 / 42%) 24%, transparent 62%),
-    radial-gradient(circle at 42% 58%, rgb(255 255 255 / 36%) 0%, transparent 48%),
-    radial-gradient(circle at 58% 40%, rgb(174 134 37 / 28%) 0%, transparent 54%);
+    radial-gradient(
+      circle at 50% 48%,
+      rgb(232 213 166 / 78%) 0%,
+      rgb(201 164 92 / 42%) 24%,
+      transparent 62%
+    ),
+    radial-gradient(
+      circle at 42% 58%,
+      rgb(255 255 255 / 36%) 0%,
+      transparent 48%
+    ),
+    radial-gradient(
+      circle at 58% 40%,
+      rgb(174 134 37 / 28%) 0%,
+      transparent 54%
+    );
   filter: blur(34px);
 }
 
 .cinematic-splash__smoke--spark {
   background:
-    radial-gradient(circle at 50% 46%, rgb(255 255 255 / 55%) 0%, transparent 28%),
-    conic-gradient(from 210deg at 50% 48%, transparent 0deg, rgb(255 236 180 / 24%) 40deg, transparent 80deg, rgb(255 244 210 / 18%) 140deg, transparent 360deg);
+    radial-gradient(
+      circle at 50% 46%,
+      rgb(255 255 255 / 55%) 0%,
+      transparent 28%
+    ),
+    conic-gradient(
+      from 210deg at 50% 48%,
+      transparent 0deg,
+      rgb(255 236 180 / 24%) 40deg,
+      transparent 80deg,
+      rgb(255 244 210 / 18%) 140deg,
+      transparent 360deg
+    );
   filter: blur(8px);
   mix-blend-mode: screen;
 }
@@ -254,7 +328,11 @@
   width: min(72vw, 24rem);
   height: min(72vw, 24rem);
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(201 164 92 / 28%) 0%, transparent 68%);
+  background: radial-gradient(
+    circle,
+    rgb(201 164 92 / 28%) 0%,
+    transparent 68%
+  );
   filter: blur(18px);
 }
 
@@ -265,11 +343,8 @@
   width: min(68vw, 18rem);
   height: auto;
   object-fit: contain;
-  filter:
-    drop-shadow(0 0 24px rgb(201 164 92 / 28%))
-    drop-shadow(0 12px 28px rgb(0 0 0 / 38%))
-    saturate(1.08)
-    contrast(1.05);
+  filter: drop-shadow(0 0 24px rgb(201 164 92 / 28%))
+    drop-shadow(0 12px 28px rgb(0 0 0 / 38%)) saturate(1.08) contrast(1.05);
 }
 
 .cinematic-splash__logo-reflection {

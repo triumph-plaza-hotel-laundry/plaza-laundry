@@ -1,17 +1,45 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type { InventoryItem, InventoryQuantityField } from '@/features/inventory';
+import type {
+  InventoryItem,
+  InventoryQuantityField,
+} from '@/features/inventory';
+import { InventoryItemActionsMenu } from '@/features/inventory/components/InventoryItemActionsMenu';
 import { InventorySearchCombobox } from '@/features/inventory/components/InventorySearchCombobox';
 import { useLanguage } from '@/hooks';
 
 const PAGE_SIZE = 12;
 
-type SortKey = 'code' | 'name' | 'totalQuantity' | 'issuedQuantity' | 'remainingQuantity';
+type SortKey =
+  | 'code'
+  | 'name'
+  | 'totalQuantity'
+  | 'issuedQuantity'
+  | 'remainingQuantity';
 
 type InventoryItemsTableProps = {
   items: InventoryItem[];
   editable?: boolean;
-  onQuantityChange?: (itemId: string, field: InventoryQuantityField, value: number) => Promise<void>;
+  showActions?: boolean;
+  canEdit?: boolean;
+  canEnableDisable?: boolean;
+  canDelete?: boolean;
+  onQuantityChange?: (
+    itemId: string,
+    field: InventoryQuantityField,
+    value: number,
+  ) => Promise<void>;
+  onEditItem?: (item: InventoryItem) => void;
+  onToggleItemEnabled?: (item: InventoryItem) => void;
+  onDeleteItem?: (item: InventoryItem) => void;
+  toolbarAction?: ReactNode;
 };
 
 const quantityInputStyle = {
@@ -32,7 +60,11 @@ type EditableQuantityCellProps = {
   editable: boolean;
   field: InventoryQuantityField;
   itemId: string;
-  onQuantityChange?: (itemId: string, field: InventoryQuantityField, value: number) => Promise<void>;
+  onQuantityChange?: (
+    itemId: string,
+    field: InventoryQuantityField,
+    value: number,
+  ) => Promise<void>;
   value: number;
 };
 
@@ -165,7 +197,15 @@ function EditableQuantityCell({
 export function InventoryItemsTable({
   items,
   editable = false,
+  showActions = false,
+  canEdit = false,
+  canEnableDisable = false,
+  canDelete = false,
   onQuantityChange,
+  onEditItem,
+  onToggleItemEnabled,
+  onDeleteItem,
+  toolbarAction,
 }: InventoryItemsTableProps) {
   const { language, t } = useLanguage();
   const [codeQuery, setCodeQuery] = useState('');
@@ -176,9 +216,9 @@ export function InventoryItemsTable({
 
   const codeOptions = useMemo(() => {
     const locale = language === 'ar' ? 'ar' : 'en';
-    return [...new Set(items.map((item) => item.code.trim()).filter(Boolean))].sort((left, right) =>
-      left.localeCompare(right, locale),
-    );
+    return [
+      ...new Set(items.map((item) => item.code.trim()).filter(Boolean)),
+    ].sort((left, right) => left.localeCompare(right, locale));
   }, [items, language]);
 
   const nameOptions = useMemo(() => {
@@ -214,7 +254,10 @@ export function InventoryItemsTable({
       const comparison =
         typeof leftValue === 'number' && typeof rightValue === 'number'
           ? leftValue - rightValue
-          : String(leftValue).localeCompare(String(rightValue), language === 'ar' ? 'ar' : 'en');
+          : String(leftValue).localeCompare(
+              String(rightValue),
+              language === 'ar' ? 'ar' : 'en',
+            );
       return sortDir === 'asc' ? comparison : -comparison;
     });
 
@@ -222,7 +265,10 @@ export function InventoryItemsTable({
   }, [codeQuery, items, language, nameQuery, sortDir, sortKey]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const pageItems = filtered.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+  const pageItems = filtered.slice(
+    page * PAGE_SIZE,
+    page * PAGE_SIZE + PAGE_SIZE,
+  );
   const rangeStart = filtered.length === 0 ? 0 : page * PAGE_SIZE + 1;
   const rangeEnd = Math.min(filtered.length, page * PAGE_SIZE + PAGE_SIZE);
 
@@ -235,6 +281,16 @@ export function InventoryItemsTable({
     setSortDir('asc');
   };
 
+  const handleSortKeyDown = (
+    event: KeyboardEvent<HTMLTableCellElement>,
+    key: SortKey,
+  ) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      toggleSort(key);
+    }
+  };
+
   const sortIndicator = (key: SortKey) => {
     if (sortKey !== key) {
       return null;
@@ -242,17 +298,42 @@ export function InventoryItemsTable({
     return sortDir === 'asc' ? ' ↑' : ' ↓';
   };
 
+  const showActionsColumn =
+    showActions &&
+    (canEdit || canEnableDisable || canDelete) &&
+    onEditItem &&
+    onToggleItemEnabled &&
+    onDeleteItem;
+
   if (items.length === 0) {
     return (
-      <div className="inv-empty">
-        <p>{t('inventory.empty.title')}</p>
-        <p>{t('inventory.empty.titleAr')}</p>
-      </div>
+      <section
+        aria-label={t('inventory.sections.table')}
+        className="inv-warehouse"
+      >
+        {toolbarAction ? (
+          <header className="inv-warehouse__table-toolbar">
+            <h2 className="inv-warehouse__table-title">
+              {t('inventory.sections.table')}
+            </h2>
+            <div className="inv-warehouse__table-toolbar-actions">
+              {toolbarAction}
+            </div>
+          </header>
+        ) : null}
+        <div className="inv-empty">
+          <p>{t('inventory.empty.title')}</p>
+          <p>{t('inventory.empty.titleAr')}</p>
+        </div>
+      </section>
     );
   }
 
   return (
-    <section aria-label={t('inventory.sections.table')} className="inv-warehouse">
+    <section
+      aria-label={t('inventory.sections.table')}
+      className="inv-warehouse"
+    >
       <div className="inv-warehouse__search">
         <InventorySearchCombobox
           clearLabel={t('inventory.search.clearFilter')}
@@ -276,10 +357,15 @@ export function InventoryItemsTable({
 
       <div className="inv-warehouse__table-block">
         <header className="inv-warehouse__table-toolbar">
-          <h2 className="inv-warehouse__table-title">{t('inventory.sections.table')}</h2>
-          <p className="inv-warehouse__table-meta">
-            {filtered.length} {t('inventory.table.name')}
-          </p>
+          <h2 className="inv-warehouse__table-title">
+            {t('inventory.sections.table')}
+          </h2>
+          <div className="inv-warehouse__table-toolbar-actions">
+            {toolbarAction}
+            <p className="inv-warehouse__table-meta">
+              {filtered.length} {t('inventory.table.name')}
+            </p>
+          </div>
         </header>
 
         <div className="inv-table-wrap inv-table-wrap--erp">
@@ -290,73 +376,138 @@ export function InventoryItemsTable({
               <col className="inv-erp-col inv-erp-col--num" />
               <col className="inv-erp-col inv-erp-col--num" />
               <col className="inv-erp-col inv-erp-col--num" />
+              {showActionsColumn ? (
+                <col className="inv-erp-col inv-erp-col--actions" />
+              ) : null}
             </colgroup>
             <thead>
               <tr>
                 <th
-                  aria-sort={sortKey === 'code' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  aria-sort={
+                    sortKey === 'code'
+                      ? sortDir === 'asc'
+                        ? 'ascending'
+                        : 'descending'
+                      : 'none'
+                  }
                   className="inv-erp-table__sortable inv-erp-table__code"
                   onClick={() => toggleSort('code')}
+                  onKeyDown={(event) => handleSortKeyDown(event, 'code')}
                   scope="col"
+                  tabIndex={0}
                 >
                   {t('inventory.table.code')}
                   {sortIndicator('code')}
                 </th>
                 <th
-                  aria-sort={sortKey === 'name' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  aria-sort={
+                    sortKey === 'name'
+                      ? sortDir === 'asc'
+                        ? 'ascending'
+                        : 'descending'
+                      : 'none'
+                  }
                   className="inv-erp-table__sortable inv-erp-table__name"
                   onClick={() => toggleSort('name')}
+                  onKeyDown={(event) => handleSortKeyDown(event, 'name')}
                   scope="col"
+                  tabIndex={0}
                 >
                   {t('inventory.table.name')}
                   {sortIndicator('name')}
                 </th>
                 <th
                   aria-sort={
-                    sortKey === 'totalQuantity' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'
+                    sortKey === 'totalQuantity'
+                      ? sortDir === 'asc'
+                        ? 'ascending'
+                        : 'descending'
+                      : 'none'
                   }
                   className="inv-erp-table__sortable inv-erp-table__num"
                   onClick={() => toggleSort('totalQuantity')}
+                  onKeyDown={(event) =>
+                    handleSortKeyDown(event, 'totalQuantity')
+                  }
                   scope="col"
+                  tabIndex={0}
                 >
                   {t('inventory.table.incoming')}
                   {sortIndicator('totalQuantity')}
                 </th>
                 <th
                   aria-sort={
-                    sortKey === 'issuedQuantity' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'
+                    sortKey === 'issuedQuantity'
+                      ? sortDir === 'asc'
+                        ? 'ascending'
+                        : 'descending'
+                      : 'none'
                   }
                   className="inv-erp-table__sortable inv-erp-table__num"
                   onClick={() => toggleSort('issuedQuantity')}
+                  onKeyDown={(event) =>
+                    handleSortKeyDown(event, 'issuedQuantity')
+                  }
                   scope="col"
+                  tabIndex={0}
                 >
                   {t('inventory.table.issued')}
                   {sortIndicator('issuedQuantity')}
                 </th>
                 <th
                   aria-sort={
-                    sortKey === 'remainingQuantity' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'
+                    sortKey === 'remainingQuantity'
+                      ? sortDir === 'asc'
+                        ? 'ascending'
+                        : 'descending'
+                      : 'none'
                   }
                   className="inv-erp-table__sortable inv-erp-table__num"
                   onClick={() => toggleSort('remainingQuantity')}
+                  onKeyDown={(event) =>
+                    handleSortKeyDown(event, 'remainingQuantity')
+                  }
                   scope="col"
+                  tabIndex={0}
                 >
                   {t('inventory.table.remaining')}
                   {sortIndicator('remainingQuantity')}
                 </th>
+                {showActionsColumn ? (
+                  <th className="inv-erp-table__actions" scope="col">
+                    {t('inventory.table.actions')}
+                  </th>
+                ) : null}
               </tr>
             </thead>
             <tbody>
               {pageItems.length === 0 ? (
                 <tr>
-                  <td className="inv-erp-table__empty" colSpan={5}>
+                  <td
+                    className="inv-erp-table__empty"
+                    colSpan={showActionsColumn ? 6 : 5}
+                  >
                     {t('inventory.search.noResults')}
                   </td>
                 </tr>
               ) : (
                 pageItems.map((item) => (
-                  <tr key={item.id}>
-                    <td className="inv-erp-table__code">{item.code || '—'}</td>
+                  <tr
+                    className={
+                      item.disabledAt
+                        ? 'inv-erp-table__row--disabled'
+                        : undefined
+                    }
+                    key={item.id}
+                  >
+                    <td className="inv-erp-table__code">
+                      {item.code || '—'}
+                      {item.disabledAt ? (
+                        <span className="inv-erp-table__badge">
+                          {t('inventory.table.disabled')}
+                        </span>
+                      ) : null}
+                    </td>
                     <td className="inv-erp-table__name" title={item.name}>
                       {item.name}
                     </td>
@@ -384,6 +535,19 @@ export function InventoryItemsTable({
                       onQuantityChange={onQuantityChange}
                       value={item.remainingQuantity}
                     />
+                    {showActionsColumn ? (
+                      <td className="inv-erp-table__actions">
+                        <InventoryItemActionsMenu
+                          canDelete={canDelete}
+                          canEdit={canEdit}
+                          canEnableDisable={canEnableDisable}
+                          item={item}
+                          onDelete={onDeleteItem}
+                          onEdit={onEditItem}
+                          onToggleEnabled={onToggleItemEnabled}
+                        />
+                      </td>
+                    ) : null}
                   </tr>
                 ))
               )}

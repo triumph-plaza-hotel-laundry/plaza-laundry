@@ -11,7 +11,11 @@ export function useEmployees() {
     (employee: LaundryEmployee) => {
       assertCan('employees', 'create');
       const created = employeesRepository.create(employee);
-      logAction({ action: 'employees.create', page: 'employees', newValue: created });
+      logAction({
+        action: 'employees.create',
+        page: 'employees',
+        newValue: created,
+      });
       return created;
     },
     [assertCan, logAction],
@@ -22,7 +26,12 @@ export function useEmployees() {
       assertCan('employees', 'update');
       const oldValue = employeesRepository.getById(id);
       const updated = employeesRepository.update(id, next);
-      logAction({ action: 'employees.update', page: 'employees', oldValue, newValue: updated });
+      logAction({
+        action: 'employees.update',
+        page: 'employees',
+        oldValue,
+        newValue: updated,
+      });
       return updated;
     },
     [assertCan, logAction],

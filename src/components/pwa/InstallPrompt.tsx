@@ -10,8 +10,11 @@ type BeforeInstallPromptEvent = Event & {
 
 export function InstallPrompt() {
   const { language } = useLanguage();
-  const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
-  const [dismissed, setDismissed] = useState(() => window.localStorage.getItem('tpl-install-dismissed') === 'true');
+  const [installEvent, setInstallEvent] =
+    useState<BeforeInstallPromptEvent | null>(null);
+  const [dismissed, setDismissed] = useState(
+    () => window.localStorage.getItem('tpl-install-dismissed') === 'true',
+  );
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (event: Event) => {
@@ -29,7 +32,10 @@ export function InstallPrompt() {
     window.addEventListener('appinstalled', handleInstalled);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener(
+        'beforeinstallprompt',
+        handleBeforeInstallPrompt,
+      );
       window.removeEventListener('appinstalled', handleInstalled);
     };
   }, []);
@@ -56,7 +62,9 @@ export function InstallPrompt() {
   return (
     <aside className="install-prompt" dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="install-prompt__copy">
-        <strong>{isArabic ? 'ثبّت تطبيق المغسلة' : 'Install Laundry App'}</strong>
+        <strong>
+          {isArabic ? 'ثبّت تطبيق المغسلة' : 'Install Laundry App'}
+        </strong>
         <span>
           {isArabic
             ? 'استخدم التطبيق بسرعة من الشاشة الرئيسية مع دعم العمل دون اتصال.'
@@ -64,7 +72,11 @@ export function InstallPrompt() {
         </span>
       </div>
       <div className="install-prompt__actions">
-        <button className="install-prompt__button" onClick={handleInstall} type="button">
+        <button
+          className="install-prompt__button"
+          onClick={handleInstall}
+          type="button"
+        >
           <Download aria-hidden="true" size={16} />
           {isArabic ? 'تثبيت' : 'Install'}
         </button>

@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { RootLayout } from '@/components/layout/RootLayout';
 import { adminRoutes } from '@/features/admin/routes';
@@ -79,39 +79,25 @@ const ReportsPage = lazy(() =>
   })),
 );
 
-function PageLoader() {
-  return (
-    <div className="flex min-h-[50dvh] items-center justify-center bg-[var(--app-bg)]">
-      <div
-        className="size-8 animate-spin rounded-full border-2 border-[var(--app-border)] border-t-luxury-gold"
-        role="status"
-        aria-label="Loading"
-      />
-    </div>
-  );
-}
-
 export function AppRouter() {
   return (
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
-        <Route element={<AccessDeniedPage />} path="access-denied" />
-        <Route element={<RootLayout />}>
-          <Route index element={<HomePage />} />
-          <Route element={<ProgramsPage />} path="programs" />
-          <Route element={<ChemicalsPage />} path="chemicals" />
-          <Route element={<FabricsPage />} path="fabrics" />
-          <Route element={<StainsPage />} path="stains" />
-          <Route element={<CareSymbolsPage />} path="care-symbols" />
-          <Route element={<PriceListPage />} path="price-list" />
-          <Route element={<EmployeesPage />} path="employees" />
-          <Route element={<ShiftsPage />} path="shifts" />
-          <Route element={<TrainingPage />} path="training" />
-          <Route element={<ReportsPage />} path="inventory" />
-          {adminRoutes}
-          <Route path="*" element={<NotFoundPage />} />
-        </Route>
-      </Routes>
-    </Suspense>
+    <Routes>
+      <Route element={<AccessDeniedPage />} path="access-denied" />
+      <Route element={<RootLayout />} path="/">
+        <Route index element={<HomePage />} />
+        <Route element={<ProgramsPage />} path="programs" />
+        <Route element={<ChemicalsPage />} path="chemicals" />
+        <Route element={<FabricsPage />} path="fabrics" />
+        <Route element={<StainsPage />} path="stains" />
+        <Route element={<CareSymbolsPage />} path="care-symbols" />
+        <Route element={<PriceListPage />} path="price-list" />
+        <Route element={<EmployeesPage />} path="employees" />
+        <Route element={<ShiftsPage />} path="shifts" />
+        <Route element={<TrainingPage />} path="training" />
+        <Route element={<ReportsPage />} path="inventory" />
+        {adminRoutes}
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
+    </Routes>
   );
 }

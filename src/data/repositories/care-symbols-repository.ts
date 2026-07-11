@@ -1,5 +1,8 @@
 import { careLabels, type CareLabel } from '@/data/care-symbols';
-import { createCatalogRepository, registerRepository } from '@/data/repositories/repository-utils';
+import {
+  createCatalogRepository,
+  registerRepository,
+} from '@/data/repositories/repository-utils';
 import { STORAGE_KEYS } from '@/lib/data-store/storage-keys';
 
 export type {
