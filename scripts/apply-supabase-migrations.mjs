@@ -37,6 +37,8 @@ const REALTIME_TABLES = [
   'inventory_items',
   'inventory_receipts',
   'inventory_issues',
+  'inventory_under_execution',
+  'inventory_under_execution_history',
   'inventory_movements',
   'department_items',
   'department_item_categories',

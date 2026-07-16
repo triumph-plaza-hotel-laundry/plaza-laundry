@@ -915,24 +915,28 @@ export function subscribeInventoryChanges(onChange: () => void) {
     return () => {};
   }
 
-  const channel = client
-    .channel('inventory-management-v2')
-    .on(
-      'postgres_changes',
-      { event: '*', schema: 'public', table: 'inventory_items' },
-      onChange,
-    )
-    .on(
-      'postgres_changes',
-      { event: '*', schema: 'public', table: 'inventory_receipts' },
-      onChange,
-    )
-    .on(
-      'postgres_changes',
-      { event: '*', schema: 'public', table: 'inventory_issues' },
-      onChange,
-    )
-    .subscribe();
+  // Unique channel name per subscriber so .on() is never called on an
+  // already-subscribed channel (Inventory tab stays mounted while Under
+  // Execution also calls useInventoryManagement).
+  const channel = client.channel(
+    `inventory-management-v2:${crypto.randomUUID()}`,
+  );
+  channel.on(
+    'postgres_changes',
+    { event: '*', schema: 'public', table: 'inventory_items' },
+    onChange,
+  );
+  channel.on(
+    'postgres_changes',
+    { event: '*', schema: 'public', table: 'inventory_receipts' },
+    onChange,
+  );
+  channel.on(
+    'postgres_changes',
+    { event: '*', schema: 'public', table: 'inventory_issues' },
+    onChange,
+  );
+  channel.subscribe();
 
   return () => {
     void client.removeChannel(channel);

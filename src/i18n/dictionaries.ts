@@ -744,6 +744,38 @@ export const dictionaries: Record<Language, Dictionary> = {
     'inventory.tabs.label': 'Inventory page sections',
     'inventory.tabs.inventory': '📦 Inventory',
     'inventory.tabs.plan': '📋 Plan',
+    'inventory.tabs.underExecution': 'تحت التنفيذ',
+    'inventory.underExecution.subtitle':
+      'Track supplier items currently under execution.',
+    'inventory.underExecution.formTitle': 'Under Execution',
+    'inventory.underExecution.formTitleAr': 'تحت التنفيذ',
+    'inventory.underExecution.supplierName': 'Supplier Name',
+    'inventory.underExecution.listTitle': 'Under Execution List',
+    'inventory.underExecution.listTitleAr': 'قائمة تحت التنفيذ',
+    'inventory.underExecution.listEmpty': 'No under execution records yet.',
+    'inventory.underExecution.historyTitle': 'History',
+    'inventory.underExecution.historyTitleAr': 'السجل',
+    'inventory.underExecution.historyEmpty': 'No history recorded yet.',
+    'inventory.underExecution.recordedDate': 'Recorded',
+    'inventory.underExecution.editTitle': 'Edit Under Execution',
+    'inventory.underExecution.deleteTitle': 'Delete Under Execution',
+    'inventory.underExecution.deleteMessage':
+      'Delete this under execution record? This cannot be undone.',
+    'inventory.underExecution.updateFailed': 'Unable to update the record.',
+    'inventory.underExecution.loading': 'Loading under execution…',
+    'inventory.underExecution.clearHistory': 'Clear History',
+    'inventory.underExecution.clearHistoryTitle': 'Clear History',
+    'inventory.underExecution.clearHistoryMessage':
+      'This permanently removes all Under Execution history records. Active Under Execution items are not affected. Type DELETE to confirm.',
+    'inventory.underExecution.clearHistoryTypeDelete':
+      'Type DELETE to confirm',
+    'inventory.underExecution.validation.supplier': 'Supplier is required.',
+    'inventory.underExecution.validation.supplierName':
+      'Supplier name is required.',
+    'inventory.underExecution.validation.item': 'Please select an item.',
+    'inventory.underExecution.validation.quantity':
+      'Quantity must be at least 1.',
+    'inventory.underExecution.validation.date': 'Date is required.',
     'inventory.login.eyebrow': 'Secure Access',
     'inventory.login.title': 'Inventory Sign In',
     'inventory.login.subtitle':
@@ -1739,6 +1771,37 @@ export const dictionaries: Record<Language, Dictionary> = {
     'inventory.tabs.label': 'أقسام صفحة المخزون',
     'inventory.tabs.inventory': '📦 المخزن',
     'inventory.tabs.plan': '📋 الخطة',
+    'inventory.tabs.underExecution': 'تحت التنفيذ',
+    'inventory.underExecution.subtitle':
+      'تتبع أصناف الموردين قيد التنفيذ حالياً.',
+    'inventory.underExecution.formTitle': 'Under Execution',
+    'inventory.underExecution.formTitleAr': 'تحت التنفيذ',
+    'inventory.underExecution.supplierName': 'اسم المورد',
+    'inventory.underExecution.listTitle': 'Under Execution List',
+    'inventory.underExecution.listTitleAr': 'قائمة تحت التنفيذ',
+    'inventory.underExecution.listEmpty': 'لا توجد سجلات تحت التنفيذ بعد.',
+    'inventory.underExecution.historyTitle': 'History',
+    'inventory.underExecution.historyTitleAr': 'السجل',
+    'inventory.underExecution.historyEmpty': 'لا يوجد سجل بعد.',
+    'inventory.underExecution.recordedDate': 'تاريخ التسجيل',
+    'inventory.underExecution.editTitle': 'تعديل تحت التنفيذ',
+    'inventory.underExecution.deleteTitle': 'حذف تحت التنفيذ',
+    'inventory.underExecution.deleteMessage':
+      'حذف سجل تحت التنفيذ هذا؟ لا يمكن التراجع عن هذا الإجراء.',
+    'inventory.underExecution.updateFailed': 'تعذر تحديث السجل.',
+    'inventory.underExecution.loading': 'جاري تحميل تحت التنفيذ…',
+    'inventory.underExecution.clearHistory': 'مسح السجل',
+    'inventory.underExecution.clearHistoryTitle': 'مسح السجل',
+    'inventory.underExecution.clearHistoryMessage':
+      'سيؤدي هذا إلى حذف جميع سجلات تحت التنفيذ نهائياً. لن تتأثر العناصر النشطة تحت التنفيذ. اكتب DELETE للتأكيد.',
+    'inventory.underExecution.clearHistoryTypeDelete':
+      'اكتب DELETE للتأكيد',
+    'inventory.underExecution.validation.supplier': 'المورد مطلوب.',
+    'inventory.underExecution.validation.supplierName': 'اسم المورد مطلوب.',
+    'inventory.underExecution.validation.item': 'يرجى اختيار صنف.',
+    'inventory.underExecution.validation.quantity':
+      'يجب أن تكون الكمية 1 على الأقل.',
+    'inventory.underExecution.validation.date': 'التاريخ مطلوب.',
     'inventory.login.eyebrow': 'وصول آمن',
     'inventory.login.title': 'تسجيل دخول المخزن',
     'inventory.login.subtitle':

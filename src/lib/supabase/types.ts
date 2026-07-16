@@ -305,6 +305,72 @@ export type Database = {
         };
         Relationships: [];
       };
+      inventory_under_execution: {
+        Row: {
+          id: string;
+          supplier: string;
+          supplier_name: string;
+          item_code: string;
+          item_name: string;
+          quantity: number;
+          date: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          supplier?: string;
+          supplier_name?: string;
+          item_code?: string;
+          item_name?: string;
+          quantity: number;
+          date: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          supplier?: string;
+          supplier_name?: string;
+          item_code?: string;
+          item_name?: string;
+          quantity?: number;
+          date?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      inventory_under_execution_history: {
+        Row: {
+          id: string;
+          supplier: string;
+          supplier_name: string;
+          item_code: string;
+          item_name: string;
+          quantity: number;
+          date: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          supplier?: string;
+          supplier_name?: string;
+          item_code?: string;
+          item_name?: string;
+          quantity: number;
+          date: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          supplier?: string;
+          supplier_name?: string;
+          item_code?: string;
+          item_name?: string;
+          quantity?: number;
+          date?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       inventory_receipts: {
         Row: {
           id: string;
@@ -664,7 +730,14 @@ export type Database = {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      admin_clear_inventory_under_execution_history: {
+        Args: {
+          p_actor_id: string;
+        };
+        Returns: number;
+      };
+    };
     Enums: {
       inventory_operation_type: InventoryOperationType;
     };

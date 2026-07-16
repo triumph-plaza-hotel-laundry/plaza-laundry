@@ -25,6 +25,7 @@ export type { InventoryToastState } from '@/hooks/useInventoryManagement';
 export { useInventoryPermissions } from '@/hooks/useInventoryPermissions';
 export type { InventoryPermissionFlags } from '@/hooks/useInventoryPermissions';
 export { useInventoryAuth } from '@/hooks/useInventoryAuth';
+export { useUnderExecution } from '@/hooks/useUnderExecution';
 export { useSyncStore } from '@/hooks/useSyncStore';
 export { useHomeShiftPlan } from '@/hooks/useHomeShiftPlan';
 export { useFormAutoSave } from '@/hooks/useFormAutoSave';

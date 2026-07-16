@@ -8,6 +8,12 @@ const AdminInventoryPlanPage = lazy(() =>
   })),
 );
 
+const AdminUnderExecutionPage = lazy(() =>
+  import('@/features/admin/pages/AdminUnderExecutionPage').then((module) => ({
+    default: module.AdminUnderExecutionPage,
+  })),
+);
+
 import { AdminPageHeader } from '@/features/admin/components/AdminPageHeader';
 
 import {
@@ -26,7 +32,7 @@ import '@/features/admin/admin-editor.css';
 
 import '@/features/inventory/inventory-management.css';
 
-type AdminInventoryTab = 'inventory' | 'plan';
+type AdminInventoryTab = 'inventory' | 'plan' | 'underExecution';
 
 function AdminInventoryEditorContent() {
   const { t } = useLanguage();
@@ -83,6 +89,18 @@ function AdminInventoryEditorContent() {
         >
           {t('inventory.tabs.plan')}
         </button>
+
+        <button
+          aria-controls="admin-inv-panel-under-execution"
+          aria-selected={activeTab === 'underExecution'}
+          className={`inv-page-shell__tab${activeTab === 'underExecution' ? ' inv-page-shell__tab--active' : ''}`}
+          id="admin-inv-tab-under-execution"
+          onClick={() => setActiveTab('underExecution')}
+          role="tab"
+          type="button"
+        >
+          {t('inventory.tabs.underExecution')}
+        </button>
       </nav>
 
       <div
@@ -122,6 +140,25 @@ function AdminInventoryEditorContent() {
             }
           >
             <AdminInventoryPlanPage />
+          </Suspense>
+        ) : null}
+      </div>
+
+      <div
+        aria-labelledby="admin-inv-tab-under-execution"
+        hidden={activeTab !== 'underExecution'}
+        id="admin-inv-panel-under-execution"
+        role="tabpanel"
+      >
+        {activeTab === 'underExecution' ? (
+          <Suspense
+            fallback={
+              <p className="admin-inventory-plan__loading">
+                {t('inventory.underExecution.loading')}
+              </p>
+            }
+          >
+            <AdminUnderExecutionPage />
           </Suspense>
         ) : null}
       </div>
