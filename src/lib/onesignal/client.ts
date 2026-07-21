@@ -4,14 +4,13 @@ import {
   removeOneSignalSubscriptionsForEmployee,
   upsertOneSignalSubscription,
 } from '@/lib/onesignal/subscriptions-repository';
-
-const ONESIGNAL_SW_PATH = '/onesignal/OneSignalSDKWorker.js';
-const ONESIGNAL_SW_SCOPE = '/onesignal/';
+import { ONESIGNAL_SERVICE_WORKER } from '@/lib/onesignal/service-worker-config';
 
 let initPromise: Promise<boolean> | null = null;
 let changeListenerBound = false;
 let activeEmployeeId: string | null = null;
 let activeLaundryEmployeeId: string | null = null;
+let permissionPromptInFlight: Promise<boolean> | null = null;
 
 function logStep(step: string, detail?: unknown) {
   if (detail !== undefined) {
@@ -59,6 +58,18 @@ function detectDeviceLabel(): string {
   }
 
   return 'desktop-web';
+}
+
+function getNativePermission(): NotificationPermission {
+  if (typeof Notification !== 'undefined') {
+    return Notification.permission;
+  }
+
+  try {
+    return OneSignal.Notifications.permissionNative;
+  } catch {
+    return 'default';
+  }
 }
 
 function getPushSubscriptionId(): string | null {
@@ -120,125 +131,143 @@ function bindSubscriptionChangeListener() {
   }
 }
 
-async function verifyServiceWorkerSetup(): Promise<boolean> {
+/**
+ * Registers the dedicated OneSignal worker under /onesignal/ before SDK init.
+ * This avoids racing the root-scoped PWA worker (/sw.js).
+ */
+async function ensureOneSignalServiceWorkerRegistered(): Promise<boolean> {
   if (!('serviceWorker' in navigator)) {
     logFail('service worker support', 'navigator.serviceWorker is unavailable');
     return false;
   }
 
+  const { url, scope, path } = ONESIGNAL_SERVICE_WORKER;
+
   try {
-    const swResponse = await fetch(ONESIGNAL_SW_PATH, { cache: 'no-store' });
+    const swResponse = await fetch(url, { cache: 'no-store' });
     if (!swResponse.ok) {
-      logFail(
-        'service worker file fetch',
-        `${ONESIGNAL_SW_PATH} → HTTP ${swResponse.status}`,
-      );
+      logFail('service worker file fetch', `${url} → HTTP ${swResponse.status}`);
       return false;
     }
-    logStep('service worker file reachable', ONESIGNAL_SW_PATH);
+    logStep('service worker file reachable', url);
   } catch (error) {
     logFail('service worker file fetch', error);
     return false;
   }
 
-  const registrations = await navigator.serviceWorker.getRegistrations();
-  const onesignalRegistration = registrations.find((registration) => {
-    const scriptUrl =
-      registration.active?.scriptURL ||
-      registration.installing?.scriptURL ||
-      registration.waiting?.scriptURL ||
-      '';
-    return (
-      scriptUrl.includes('OneSignalSDKWorker') ||
-      registration.scope.includes('/onesignal/')
-    );
-  });
-
-  if (!onesignalRegistration) {
-    logFail(
-      'service worker registration',
-      {
-        message: 'No OneSignal service worker registration found yet',
-        scopes: registrations.map((registration) => registration.scope),
-      },
-    );
-    // Not always fatal immediately after init — OneSignal may register async.
+  try {
+    const registration = await navigator.serviceWorker.register(url, { scope });
+    logStep('service worker register() OK', {
+      path,
+      scope: registration.scope,
+      scriptURL:
+        registration.active?.scriptURL ||
+        registration.installing?.scriptURL ||
+        registration.waiting?.scriptURL,
+    });
+    return true;
+  } catch (error) {
+    logFail('service worker register()', error);
     return false;
   }
+}
 
-  logStep('service worker registered', {
-    scope: onesignalRegistration.scope,
-    scriptURL:
-      onesignalRegistration.active?.scriptURL ||
-      onesignalRegistration.installing?.scriptURL ||
-      onesignalRegistration.waiting?.scriptURL,
-  });
-  return true;
+async function logActiveServiceWorkers() {
+  if (!('serviceWorker' in navigator)) {
+    return;
+  }
+
+  const registrations = await navigator.serviceWorker.getRegistrations();
+  logStep(
+    'active service workers',
+    registrations.map((registration) => ({
+      scope: registration.scope,
+      scriptURL:
+        registration.active?.scriptURL ||
+        registration.installing?.scriptURL ||
+        registration.waiting?.scriptURL,
+    })),
+  );
 }
 
 /**
- * Soft prompt → native browser permission.
- * Direct requestPermission() from useEffect is often blocked on Chromium (no user gesture).
+ * Soft prompt (Slidedown) → native browser permission.
+ * Chromium often blocks bare requestPermission() without a user gesture;
+ * Slidedown supplies that gesture when the user clicks Allow.
  */
 async function requestBrowserPushPermission(): Promise<boolean> {
-  const nativeBefore = OneSignal.Notifications.permissionNative;
-  logStep('browser permission before prompt', {
-    permissionNative: nativeBefore,
-    permission: OneSignal.Notifications.permission,
-    NotificationPermission:
-      typeof Notification !== 'undefined' ? Notification.permission : 'n/a',
-  });
-
-  if (nativeBefore === 'granted') {
-    logStep('permission already granted — skipping prompt');
-    return true;
+  if (permissionPromptInFlight) {
+    return permissionPromptInFlight;
   }
 
-  if (nativeBefore === 'denied') {
-    logFail(
-      'browser permission request',
-      'Notification permission is permanently denied for this origin. Reset it in browser site settings, then reload.',
-    );
-    return false;
-  }
-
-  // Step: show OneSignal slidedown (creates the user gesture Chromium requires).
-  try {
-    logStep('calling OneSignal.Slidedown.promptPush({ force: true })');
-    await OneSignal.Slidedown.promptPush({ force: true });
-    logStep('Slidedown.promptPush finished', {
-      permissionNative: OneSignal.Notifications.permissionNative,
-      permission: OneSignal.Notifications.permission,
+  permissionPromptInFlight = (async () => {
+    const nativeBefore = getNativePermission();
+    logStep('browser permission before prompt', {
+      permissionNative: nativeBefore,
+      NotificationPermission: nativeBefore,
     });
-  } catch (error) {
-    logFail('Slidedown.promptPush', error);
-    logStep('falling back to Notifications.requestPermission()');
-    try {
-      const allowed = await OneSignal.Notifications.requestPermission();
-      logStep('requestPermission result', allowed);
-      return Boolean(allowed);
-    } catch (requestError) {
-      logFail('Notifications.requestPermission', requestError);
+
+    if (nativeBefore === 'granted') {
+      logStep('permission already granted — skipping prompt');
+      return true;
+    }
+
+    if (nativeBefore === 'denied') {
+      logFail(
+        'browser permission request',
+        'Notification permission is permanently denied for this origin. Reset it in browser site settings, then reload.',
+      );
       return false;
     }
-  }
 
-  // If slidedown closed without granting, try native once more (may still be blocked).
-  if (OneSignal.Notifications.permissionNative === 'default') {
-    logStep(
-      'permission still default after Slidedown — calling Notifications.requestPermission()',
-    );
     try {
-      const allowed = await OneSignal.Notifications.requestPermission();
-      logStep('requestPermission result', allowed);
-      return Boolean(allowed);
-    } catch (requestError) {
-      logFail('Notifications.requestPermission', requestError);
+      logStep('calling OneSignal.Slidedown.promptPush({ force: true })');
+      await OneSignal.Slidedown.promptPush({ force: true });
+      logStep('Slidedown.promptPush finished', {
+        permissionNative: getNativePermission(),
+      });
+    } catch (error) {
+      logFail('Slidedown.promptPush', error);
+    }
+
+    if (getNativePermission() === 'granted') {
+      return true;
+    }
+
+    if (getNativePermission() === 'denied') {
       return false;
     }
-  }
 
-  return OneSignal.Notifications.permissionNative === 'granted';
+    // Fallback: native API (may be gesture-gated on Chromium).
+    try {
+      logStep('falling back to Notifications.requestPermission()');
+      const allowed = await OneSignal.Notifications.requestPermission();
+      logStep('requestPermission result', allowed);
+      if (allowed) {
+        return true;
+      }
+    } catch (requestError) {
+      logFail('Notifications.requestPermission', requestError);
+    }
+
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+      try {
+        const result = await Notification.requestPermission();
+        logStep('Notification.requestPermission result', result);
+        return result === 'granted';
+      } catch (nativeError) {
+        logFail('Notification.requestPermission', nativeError);
+      }
+    }
+
+    return getNativePermission() === 'granted';
+  })();
+
+  try {
+    return await permissionPromptInFlight;
+  } finally {
+    permissionPromptInFlight = null;
+  }
 }
 
 /**
@@ -262,14 +291,24 @@ export function ensureOneSignalInitialized(): Promise<boolean> {
   if (!initPromise) {
     initPromise = (async () => {
       try {
+        const swConfig = ONESIGNAL_SERVICE_WORKER;
+
         logStep('init starting', {
           appIdPrefix: `${onesignalConfig.appId.slice(0, 8)}…`,
           origin: window.location.origin,
           localhost: isLocalhostOrigin(),
-          allowLocalhostAsSecureOrigin: isLocalhostOrigin(),
-          serviceWorkerPath: ONESIGNAL_SW_PATH,
-          serviceWorkerScope: ONESIGNAL_SW_SCOPE,
+          serviceWorkerPath: swConfig.path,
+          serviceWorkerScope: swConfig.scope,
         });
+
+        const swRegistered = await ensureOneSignalServiceWorkerRegistered();
+        if (!swRegistered) {
+          logFail(
+            'init',
+            'OneSignal service worker could not be registered (PWA root worker is separate and OK)',
+          );
+          // Continue — OneSignal.init may still register the worker itself.
+        }
 
         if (import.meta.env.DEV) {
           OneSignal.Debug.setLogLevel('debug');
@@ -278,10 +317,9 @@ export function ensureOneSignalInitialized(): Promise<boolean> {
         await OneSignal.init({
           appId: onesignalConfig.appId,
           allowLocalhostAsSecureOrigin: isLocalhostOrigin(),
-          serviceWorkerPath: ONESIGNAL_SW_PATH,
-          serviceWorkerParam: { scope: ONESIGNAL_SW_SCOPE },
+          serviceWorkerPath: swConfig.path,
+          serviceWorkerParam: { scope: swConfig.scope },
           autoResubscribe: true,
-          // Disable automatic native prompt; we drive permission after login.
           promptOptions: {
             slidedown: {
               prompts: [
@@ -310,10 +348,7 @@ export function ensureOneSignalInitialized(): Promise<boolean> {
 
         logStep('OneSignal.init() OK');
         bindSubscriptionChangeListener();
-
-        // Give the SDK a brief moment to finish SW registration.
-        await new Promise((resolve) => window.setTimeout(resolve, 250));
-        await verifyServiceWorkerSetup();
+        await logActiveServiceWorkers();
 
         return true;
       } catch (error) {
@@ -328,6 +363,41 @@ export function ensureOneSignalInitialized(): Promise<boolean> {
 }
 
 /**
+ * Initializes OneSignal and requests notification permission once for new users
+ * (while Notification.permission is still "default").
+ */
+export async function bootstrapOneSignalWebPush(): Promise<void> {
+  logStep('bootstrap starting');
+
+  const ready = await ensureOneSignalInitialized();
+  if (!ready) {
+    logFail('bootstrap', 'OneSignal.init did not complete successfully');
+    return;
+  }
+
+  if (!OneSignal.Notifications.isPushSupported()) {
+    logFail(
+      'bootstrap',
+      'OneSignal.Notifications.isPushSupported() returned false for this browser',
+    );
+    return;
+  }
+
+  const permissionNative = getNativePermission();
+  if (permissionNative !== 'default') {
+    logStep('bootstrap skip — permission already decided', permissionNative);
+    return;
+  }
+
+  const permitted = await requestBrowserPushPermission();
+  if (permitted) {
+    logStep('bootstrap complete — permission granted');
+  } else {
+    logStep('bootstrap complete — permission not granted', getNativePermission());
+  }
+}
+
+/**
  * Registers the current browser with OneSignal for a logged-in staff user
  * and upserts the subscription id into Supabase.
  */
@@ -335,7 +405,10 @@ export async function registerOneSignalForEmployee(
   employeeId: string,
   options?: { laundryEmployeeId?: string | null },
 ): Promise<void> {
-  logStep('register start', { employeeId, laundryEmployeeId: options?.laundryEmployeeId });
+  logStep('register start', {
+    employeeId,
+    laundryEmployeeId: options?.laundryEmployeeId,
+  });
 
   if (!employeeId) {
     logFail('register', 'employeeId is empty');
@@ -379,7 +452,6 @@ export async function registerOneSignalForEmployee(
       return;
     }
 
-    // Ensure subscription is opted in after permission grant.
     try {
       if (!OneSignal.User.PushSubscription.optedIn) {
         logStep('PushSubscription.optIn()');

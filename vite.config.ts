@@ -14,7 +14,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false,
-      includeAssets: ['favicon.ico', 'icons/*.png', 'icons/*.svg', 'onesignal/*.js'],
+      includeAssets: ['favicon.ico', 'icons/*.png', 'icons/*.svg'],
       manifest: {
         id: '/',
         name: 'Triumph Plaza Hotel Laundry',
@@ -65,6 +65,9 @@ export default defineConfig({
         skipWaiting: true,
         navigateFallback: '/index.html',
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2,webmanifest}'],
+        // OneSignal owns /onesignal/* — keep it out of the PWA precache and SPA fallback.
+        globIgnores: ['**/onesignal/**'],
+        navigateFallbackDenylist: [/^\/onesignal\//],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         runtimeCaching: [
           {

@@ -1,5 +1,6 @@
 export { onesignalConfig } from '@/lib/onesignal/config';
 export {
+  bootstrapOneSignalWebPush,
   ensureOneSignalInitialized,
   registerOneSignalForEmployee,
   unregisterOneSignalForEmployee,
