@@ -131,47 +131,6 @@ function bindSubscriptionChangeListener() {
   }
 }
 
-/**
- * Registers the dedicated OneSignal worker under /onesignal/ before SDK init.
- * This avoids racing the root-scoped PWA worker (/sw.js).
- */
-async function ensureOneSignalServiceWorkerRegistered(): Promise<boolean> {
-  if (!('serviceWorker' in navigator)) {
-    logFail('service worker support', 'navigator.serviceWorker is unavailable');
-    return false;
-  }
-
-  const { url, scope, path } = ONESIGNAL_SERVICE_WORKER;
-
-  try {
-    const swResponse = await fetch(url, { cache: 'no-store' });
-    if (!swResponse.ok) {
-      logFail('service worker file fetch', `${url} → HTTP ${swResponse.status}`);
-      return false;
-    }
-    logStep('service worker file reachable', url);
-  } catch (error) {
-    logFail('service worker file fetch', error);
-    return false;
-  }
-
-  try {
-    const registration = await navigator.serviceWorker.register(url, { scope });
-    logStep('service worker register() OK', {
-      path,
-      scope: registration.scope,
-      scriptURL:
-        registration.active?.scriptURL ||
-        registration.installing?.scriptURL ||
-        registration.waiting?.scriptURL,
-    });
-    return true;
-  } catch (error) {
-    logFail('service worker register()', error);
-    return false;
-  }
-}
-
 async function logActiveServiceWorkers() {
   if (!('serviceWorker' in navigator)) {
     return;
@@ -300,15 +259,6 @@ export function ensureOneSignalInitialized(): Promise<boolean> {
           serviceWorkerPath: swConfig.path,
           serviceWorkerScope: swConfig.scope,
         });
-
-        const swRegistered = await ensureOneSignalServiceWorkerRegistered();
-        if (!swRegistered) {
-          logFail(
-            'init',
-            'OneSignal service worker could not be registered (PWA root worker is separate and OK)',
-          );
-          // Continue — OneSignal.init may still register the worker itself.
-        }
 
         if (import.meta.env.DEV) {
           OneSignal.Debug.setLogLevel('debug');
