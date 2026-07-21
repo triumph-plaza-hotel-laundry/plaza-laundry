@@ -214,8 +214,9 @@ export function AdminProgramsEditorPage() {
                 )),
             )}
             <div className="admin-editor-field">
-              <label>durationMin</label>
+              <label htmlFor="program-duration">durationMin</label>
               <input
+                id="program-duration"
                 onChange={(event) =>
                   updateSelected({
                     durationMin: Number.parseInt(event.target.value, 10) || 0,
@@ -228,7 +229,7 @@ export function AdminProgramsEditorPage() {
 
             <div className="admin-editor-field admin-editor-field--full">
               <div className="admin-editor-actions-row">
-                <label>steps</label>
+                <span aria-hidden="true">steps</span>
                 <button
                   className="admin-editor-btn"
                   onClick={() =>

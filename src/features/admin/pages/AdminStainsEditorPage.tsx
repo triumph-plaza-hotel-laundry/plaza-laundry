@@ -173,8 +173,9 @@ export function AdminStainsEditorPage() {
         {selected ? (
           <div className="admin-editor-panel admin-editor-grid">
             <div className="admin-editor-field">
-              <label>category</label>
+              <label htmlFor="stain-category">category</label>
               <select
+                id="stain-category"
                 onChange={(event) =>
                   updateSelected({
                     category: event.target.value as StainCategory,
@@ -202,8 +203,9 @@ export function AdminStainsEditorPage() {
               </select>
             </div>
             <div className="admin-editor-field">
-              <label>difficulty</label>
+              <label htmlFor="stain-difficulty">difficulty</label>
               <select
+                id="stain-difficulty"
                 onChange={(event) =>
                   updateSelected({
                     difficulty: event.target.value as StainDifficulty,

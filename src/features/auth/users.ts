@@ -23,9 +23,26 @@ const ADMIN_PORTAL_ROLES: UserRole[] = [
 ];
 
 let usersStoreReady: Promise<void> | null = null;
+const AUTH_MIN_DELAY_MS = 220;
+const DUMMY_PASSWORD_HASH =
+  'pbkdf2:120000:BJ7QWMnterdTFKAsi80DKg==:r5xd5ArU5KkrI+VlboGPYpRXO/srt6l83ZId01qjooA=';
 
 function normalizeUsername(username: string): string {
   return username.trim().toLowerCase();
+}
+
+async function withAuthTimingGuard<T>(task: () => Promise<T>): Promise<T> {
+  const startedAt = Date.now();
+  try {
+    return await task();
+  } finally {
+    const elapsed = Date.now() - startedAt;
+    if (elapsed < AUTH_MIN_DELAY_MS) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, AUTH_MIN_DELAY_MS - elapsed),
+      );
+    }
+  }
 }
 
 function requireSupabase() {
@@ -64,6 +81,7 @@ function mapRow(row: {
   is_owner: boolean;
   is_protected: boolean;
   is_active: boolean;
+  laundry_employee_id?: string | null;
 }): StoredAuthUser {
   return {
     id: row.id,
@@ -75,6 +93,7 @@ function mapRow(row: {
     isActive: row.is_active,
     adminType: (row.admin_type as AdminType | null) ?? 'Admin',
     passwordHash: row.password_hash,
+    laundryEmployeeId: row.laundry_employee_id ?? null,
   };
 }
 
@@ -106,6 +125,7 @@ async function upsertUsers(users: StoredAuthUser[]) {
     is_owner: user.isOwner,
     is_protected: user.isProtected,
     is_active: user.isActive,
+    laundry_employee_id: user.laundryEmployeeId ?? null,
     updated_at: new Date().toISOString(),
   }));
 
@@ -149,28 +169,32 @@ export async function findUserByCredentials(
   username: string,
   password: string,
 ): Promise<AuthUser | null> {
-  await ensureUsersStoreReady();
-  const normalized = normalizeUsername(username);
-  const users = await fetchAllUsers();
+  return withAuthTimingGuard(async () => {
+    await ensureUsersStoreReady();
+    const normalized = normalizeUsername(username);
+    const users = await fetchAllUsers();
 
-  for (const user of users) {
-    if (normalizeUsername(user.username) !== normalized) {
-      continue;
+    for (const user of users) {
+      if (normalizeUsername(user.username) !== normalized) {
+        continue;
+      }
+
+      if (!user.isActive) {
+        await verifyPassword(password.trim(), DUMMY_PASSWORD_HASH);
+        return null;
+      }
+
+      const valid = await verifyPassword(password.trim(), user.passwordHash);
+      if (!valid) {
+        return null;
+      }
+
+      return stripSecrets(user);
     }
 
-    if (!user.isActive) {
-      return null;
-    }
-
-    const valid = await verifyPassword(password.trim(), user.passwordHash);
-    if (!valid) {
-      return null;
-    }
-
-    return stripSecrets(user);
-  }
-
-  return null;
+    await verifyPassword(password.trim(), DUMMY_PASSWORD_HASH);
+    return null;
+  });
 }
 
 export async function getStoredUsers(): Promise<AuthUser[]> {

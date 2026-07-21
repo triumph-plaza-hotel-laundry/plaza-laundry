@@ -6,3 +6,10 @@ enabled = true
 [db]
 port = 54322
 major_version = 15
+
+[functions.shift-reminder]
+verify_jwt = false
+
+[functions.shift-reminder.schedule]
+# 22:00 Africa/Cairo (UTC+2) = 20:00 UTC daily
+cron = "0 20 * * *"

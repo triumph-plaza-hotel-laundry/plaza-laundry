@@ -94,7 +94,13 @@ export const Sidebar = memo(function Sidebar({
 
       <nav aria-label={t('common.menu')} className="luxury-sidebar__nav">
         {navigationItems
-          .filter((item) => !role || canSeeNav(item.resource))
+          .filter((item) => {
+            if (item.resource === 'admin') {
+              return true;
+            }
+
+            return !role || canSeeNav(item.resource);
+          })
           .map((item) => {
             const Icon = item.icon;
             const targetPath = resolveNavPath(item.path, item.resource);

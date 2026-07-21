@@ -51,6 +51,8 @@ const REALTIME_TABLES = [
   'washing_program_steps',
   'laundry_chemicals',
   'chemical_technical_info',
+  'onesignal_subscriptions',
+  'push_notification_history',
 ];
 
 async function connectPostgres() {
@@ -128,7 +130,9 @@ async function run() {
       `);
     }
 
-    console.log('Migrations applied, Realtime enabled.');
+    await sql.unsafe(`NOTIFY pgrst, 'reload schema';`);
+
+    console.log('Migrations applied, Realtime enabled, PostgREST schema reloaded.');
   } finally {
     await sql.end({ timeout: 5 });
   }

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tpl-laundry.vercel.app/sitemap.xml

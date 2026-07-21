@@ -2,12 +2,21 @@ import { Link } from 'react-router-dom';
 import { preloadRoute } from '@/app/route-preload';
 import { AdminBackButton } from '@/features/admin/components/AdminBackButton';
 import { adminDashboardModules } from '@/features/admin/config/admin-dashboard-modules';
+import { isPrimaryAdminAccount } from '@/features/auth/owner-protection';
 import { useAuth, useLanguage } from '@/hooks';
 import '@/features/admin/admin-dashboard.css';
 
 export function AdminIndexPage() {
   const { t } = useLanguage();
   const { logout, user } = useAuth();
+
+  const visibleModules = adminDashboardModules.filter((module) => {
+    if (!module.ownerOnly) {
+      return true;
+    }
+
+    return user ? isPrimaryAdminAccount(user) : false;
+  });
 
   return (
     <section
@@ -39,7 +48,7 @@ export function AdminIndexPage() {
         aria-label={t('admin.dashboard.title')}
         className="admin-dashboard__grid"
       >
-        {adminDashboardModules.map((module) => {
+        {visibleModules.map((module) => {
           const Icon = module.icon;
 
           return (

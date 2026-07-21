@@ -186,8 +186,9 @@ export function AdminFabricsEditorPage() {
               )),
             )}
             <div className="admin-editor-field">
-              <label>bleachAllowed</label>
+              <label htmlFor="fabric-bleach-allowed">bleachAllowed</label>
               <input
+                id="fabric-bleach-allowed"
                 checked={selected.bleachAllowed}
                 onChange={(event) =>
                   updateSelected({ bleachAllowed: event.target.checked })
@@ -196,8 +197,9 @@ export function AdminFabricsEditorPage() {
               />
             </div>
             <div className="admin-editor-field">
-              <label>dryCleaning</label>
+              <label htmlFor="fabric-dry-cleaning">dryCleaning</label>
               <input
+                id="fabric-dry-cleaning"
                 checked={selected.dryCleaning}
                 onChange={(event) =>
                   updateSelected({ dryCleaning: event.target.checked })

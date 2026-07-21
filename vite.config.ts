@@ -14,7 +14,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false,
-      includeAssets: ['favicon.ico', 'icons/*.png', 'icons/*.svg'],
+      includeAssets: ['favicon.ico', 'icons/*.png', 'icons/*.svg', 'onesignal/*.js'],
       manifest: {
         id: '/',
         name: 'Triumph Plaza Hotel Laundry',

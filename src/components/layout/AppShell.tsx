@@ -12,9 +12,49 @@ import { RouteGuard } from '@/components/layout/RouteGuard';
 import { ScrollRestoration } from '@/components/layout/ScrollRestoration';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { InstallPrompt } from '@/components/pwa/InstallPrompt';
+import { useAdminLeaveLogout } from '@/features/admin/hooks/useAdminSessionSecurity';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const DESKTOP_SIDEBAR_QUERY = '(min-width: 1024px)';
+const BASE_TITLE = 'Triumph Plaza Hotel Laundry';
+const DEFAULT_DESCRIPTION =
+  'Premium hotel laundry operations for shifts, inventory, training, and admin workflows.';
+
+const ROUTE_SEO: Array<{
+  match: (pathname: string) => boolean;
+  title: string;
+  description: string;
+}> = [
+  {
+    match: (pathname) => pathname === '/',
+    title: `${BASE_TITLE} | Home`,
+    description:
+      'Luxury operations dashboard for Triumph Plaza Hotel Laundry.',
+  },
+  {
+    match: (pathname) => pathname.startsWith('/inventory'),
+    title: `${BASE_TITLE} | Inventory`,
+    description:
+      'Track stock, transactions, planning, and operational inventory history.',
+  },
+  {
+    match: (pathname) => pathname.startsWith('/shifts'),
+    title: `${BASE_TITLE} | Shifts`,
+    description:
+      'View and manage weekly shift schedules for laundry operations.',
+  },
+  {
+    match: (pathname) => pathname.startsWith('/employees'),
+    title: `${BASE_TITLE} | Employees`,
+    description: 'Browse the employee structure and department hierarchy.',
+  },
+  {
+    match: (pathname) => pathname.startsWith('/admin'),
+    title: `${BASE_TITLE} | Admin`,
+    description:
+      'Secure administration area for configuration, staff, and operations.',
+  },
+];
 
 function PageLoader() {
   return (
@@ -40,6 +80,8 @@ export function AppShell() {
   const prevPathnameRef = useRef(location.pathname);
   const wasDesktopRef = useRef(isDesktopSidebar);
 
+  useAdminLeaveLogout();
+
   useEffect(() => {
     if (prevPathnameRef.current === location.pathname) {
       return;
@@ -56,6 +98,24 @@ export function AppShell() {
 
     wasDesktopRef.current = isDesktopSidebar;
   }, [isDesktopSidebar]);
+
+  useEffect(() => {
+    const seoEntry = ROUTE_SEO.find((entry) => entry.match(location.pathname));
+    const title = seoEntry?.title ?? BASE_TITLE;
+    const description = seoEntry?.description ?? DEFAULT_DESCRIPTION;
+
+    document.title = title;
+
+    let meta = document.querySelector<HTMLMetaElement>(
+      'meta[name="description"]',
+    );
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = 'description';
+      document.head.appendChild(meta);
+    }
+    meta.content = description;
+  }, [location.pathname]);
 
   const handleToggleSidebar = useCallback(() => {
     if (isDesktopSidebar) {

@@ -20,8 +20,11 @@
     "apply:department-item-categories": "node scripts/apply-department-item-categories.mjs",
     "apply:department-inventory-assignments": "node scripts/apply-department-inventory-assignments.mjs",
     "apply:inventory-permissions": "node scripts/apply-inventory-permissions.mjs",
+    "apply:push-notifications": "node scripts/apply-shift-push-notifications.mjs",
+    "deploy:edge-functions": "node scripts/deploy-edge-functions.mjs",
     "seed:supabase": "npx vite-node scripts/seed-hydrate.ts",
     "verify:supabase": "node scripts/verify-supabase.mjs",
+    "verify:push-notifications": "node scripts/verify-push-notifications-db.mjs",
     "verify:plan-compat": "node scripts/verify-plan-backward-compat.mjs",
     "verify:department-items": "node scripts/verify-department-items.mjs",
     "verify:department-items-crud": "node scripts/verify-department-items-crud.mjs",
@@ -39,6 +42,7 @@
     "lucide-react": "^1.21.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-onesignal": "^3.5.6",
     "react-router-dom": "^7.6.1"
   },
   "devDependencies": {

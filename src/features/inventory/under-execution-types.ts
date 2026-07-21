@@ -1,7 +1,7 @@
 export type UnderExecutionRecord = {
   id: string;
   supplier: string;
-  supplierName: string;
+  department: string;
   itemCode: string;
   itemName: string;
   quantity: number;
@@ -11,7 +11,7 @@ export type UnderExecutionRecord = {
 
 export type CreateUnderExecutionInput = {
   supplier: string;
-  supplierName: string;
+  department: string;
   itemCode: string;
   itemName: string;
   quantity: number;

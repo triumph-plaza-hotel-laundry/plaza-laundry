@@ -1,4 +1,3 @@
-import { inventoryItems as OFFICIAL_SEED_ITEMS } from '@/data/laundry-inventory';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import {
   assertInventoryPermission,
@@ -24,6 +23,7 @@ import {
 } from '@/features/inventory/types';
 import type { ArchivedInventoryData } from '@/features/inventory/monthly-archive-types';
 import type { Json } from '@/lib/supabase/types';
+import { inventoryItems as OFFICIAL_SEED_ITEMS } from '@/data/laundry-inventory';
 
 type DbItemRow = {
   id: string;
@@ -55,7 +55,8 @@ const ITEMS_SELECT =
 
 const RECEIPTS_SELECT =
   'id, item_id, supplier, receiver, employee, quantity, created_at';
-const ISSUES_SELECT = 'id, item_id, employee, quantity, reason, created_at';
+const ISSUES_SELECT =
+  'id, item_id, employee, department, quantity, reason, created_at';
 
 const CACHE_TTL_MS = 60_000;
 const TRANSACTION_LIMIT = 200;
@@ -187,6 +188,7 @@ type IssueRow = {
   id: string;
   item_id: string;
   employee: string;
+  department: string;
   quantity: number;
   reason: string;
   created_at: string;
@@ -224,8 +226,8 @@ function mapTransactions(
       itemCode: item?.code ?? '',
       itemName: item?.name ?? '—',
       quantity: row.quantity,
-      supplier: '',
-      receiver: '',
+      supplier: row.department ?? '',
+      receiver: row.reason ?? '',
       employee: row.employee,
       createdAt: row.created_at,
     };
@@ -849,6 +851,10 @@ export async function issueInventoryItems(input: IssueItemsInput) {
     throw new Error('Invalid issue quantity.');
   }
 
+  if (!input.department.trim()) {
+    throw new Error('Department is required.');
+  }
+
   const { data: item, error: itemError } = await client
     .from('inventory_items')
     .select(
@@ -883,6 +889,7 @@ export async function issueInventoryItems(input: IssueItemsInput) {
   const { error: issueError } = await client.from('inventory_issues').insert({
     item_id: input.itemId,
     employee: input.employee.trim(),
+    department: input.department.trim(),
     quantity,
     reason: input.reason.trim(),
   });

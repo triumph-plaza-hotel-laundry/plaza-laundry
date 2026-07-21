@@ -341,7 +341,14 @@ export function ShiftEmployeeCombobox({
                     onMouseDown={(event) => event.preventDefault()}
                     onMouseEnter={() => setActiveIndex(index)}
                     onClick={() => selectItem(item.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        selectItem(item.value);
+                      }
+                    }}
                     role="option"
+                    tabIndex={0}
                   >
                     {item.label}
                   </li>

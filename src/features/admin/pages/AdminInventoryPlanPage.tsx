@@ -1,6 +1,8 @@
 import { ChevronDown } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { ArchiveHistoryViewShell } from '@/features/admin/components/ArchiveHistoryViewShell';
+import { PlanArchiveHistoryView } from '@/features/admin/components/PlanArchiveHistoryView';
 import { useInventoryArchive } from '@/features/admin/context/useInventoryArchive';
 import {
   getCatalogOptionsForRow,
@@ -313,12 +315,43 @@ function PlanAccordionSection({
 
 export function AdminInventoryPlanPage() {
   const { t } = useLanguage();
+  const { isArchiveView, liveDataRevision, viewingArchive } =
+    useInventoryArchive();
+
+  return (
+    <>
+      <div hidden={isArchiveView}>
+        <AdminInventoryPlanLivePage liveDataRevision={liveDataRevision} />
+      </div>
+
+      {isArchiveView ? (
+        <ArchiveHistoryViewShell
+          titleAr={t('admin.inventory.history.planTitleAr')}
+          titleEn={t('admin.inventory.history.planTitle')}
+        >
+          <PlanArchiveHistoryView
+            key={viewingArchive?.archiveMonth ?? 'plan-archive'}
+            rowDrafts={viewingArchive?.planData.rowDrafts ?? {}}
+          />
+        </ArchiveHistoryViewShell>
+      ) : null}
+    </>
+  );
+}
+
+function AdminInventoryPlanLivePage({
+  liveDataRevision,
+}: {
+  liveDataRevision: number;
+}) {
+  const { t } = useLanguage();
   const archive = useInventoryArchive();
   const {
     items: catalog,
     categories,
     isReady: catalogReady,
     error: catalogError,
+    refresh: refreshCatalog,
   } = useDepartmentItemsCatalog();
   const [rowDrafts, setRowDrafts] = useState<Record<PlanRowId, PlanRowDraft>>(
     () =>
@@ -330,7 +363,18 @@ export function AdminInventoryPlanPage() {
   const saveTimerRef = useRef<number | null>(null);
   const liveHydratedRef = useRef(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const readOnly = archive.isArchiveView;
+  const savePlanDrafts = archive.savePlanDrafts;
+
+  useEffect(() => {
+    if (!liveDataRevision) {
+      return;
+    }
+
+    liveHydratedRef.current = false;
+    void refreshCatalog().catch(() => {
+      // Catalog errors surface through catalogError.
+    });
+  }, [liveDataRevision, refreshCatalog]);
 
   useEffect(() => {
     if (!catalogReady || !archive.isReady) {
@@ -341,21 +385,11 @@ export function AdminInventoryPlanPage() {
   }, [archive.isReady, catalog, catalogReady, categories, rowDrafts, t]);
 
   useEffect(() => {
-    if (!archive.isReady) {
+    if (!archive.isReady || !archive.planDocument) {
       return;
     }
 
-    if (archive.isArchiveView && archive.viewingArchive) {
-      setRowDrafts(
-        mergePlanRowDrafts(
-          archive.viewingArchive.planData.rowDrafts,
-          categories,
-        ) as Record<PlanRowId, PlanRowDraft>,
-      );
-      return;
-    }
-
-    if (!liveHydratedRef.current && archive.planDocument) {
+    if (!liveHydratedRef.current) {
       setRowDrafts(
         mergePlanRowDrafts(
           archive.planDocument.rowDrafts,
@@ -365,27 +399,10 @@ export function AdminInventoryPlanPage() {
       liveHydratedRef.current = true;
     }
   }, [
-    archive.isArchiveView,
-    archive.isReady,
-    archive.planDocument,
-    archive.viewingArchive,
-    categories,
-  ]);
-
-  useEffect(() => {
-    if (!archive.isArchiveView && archive.isReady && archive.planDocument) {
-      setRowDrafts(
-        mergePlanRowDrafts(
-          archive.planDocument.rowDrafts,
-          categories,
-        ) as Record<PlanRowId, PlanRowDraft>,
-      );
-    }
-  }, [
-    archive.isArchiveView,
     archive.isReady,
     archive.planDocument,
     categories,
+    liveDataRevision,
   ]);
 
   useEffect(() => {
@@ -399,7 +416,7 @@ export function AdminInventoryPlanPage() {
   }, [categories]);
 
   useEffect(() => {
-    if (!archive.isReady || readOnly || !liveHydratedRef.current) {
+    if (!archive.isReady || !liveHydratedRef.current) {
       return;
     }
 
@@ -408,8 +425,7 @@ export function AdminInventoryPlanPage() {
     }
 
     saveTimerRef.current = window.setTimeout(() => {
-      void archive
-        .savePlanDrafts(rowDrafts)
+      void savePlanDrafts(rowDrafts)
         .then(() => setSaveError(null))
         .catch((caught) => {
           setSaveError(
@@ -425,7 +441,7 @@ export function AdminInventoryPlanPage() {
         window.clearTimeout(saveTimerRef.current);
       }
     };
-  }, [archive, readOnly, rowDrafts]);
+  }, [archive.isReady, rowDrafts, savePlanDrafts]);
 
   const dateLabels = {
     day: t('admin.inventory.plan.date.day'),
@@ -434,10 +450,6 @@ export function AdminInventoryPlanPage() {
   };
 
   const updateRowDraft = (rowId: PlanRowId, patch: Partial<PlanRowDraft>) => {
-    if (readOnly) {
-      return;
-    }
-
     setRowDrafts((current) => ({
       ...current,
       [rowId]: {
@@ -456,10 +468,6 @@ export function AdminInventoryPlanPage() {
   };
 
   const updateRowQuantity = (rowId: PlanRowId, nextValue: string) => {
-    if (readOnly) {
-      return;
-    }
-
     if (nextValue === '') {
       updateRowDraft(rowId, { quantity: '' });
       return;
@@ -521,7 +529,6 @@ export function AdminInventoryPlanPage() {
                       categories={categories}
                       dateLabels={dateLabels}
                       departmentId={departmentId}
-                      disabled={readOnly}
                       onQuantityChange={updateRowQuantity}
                       onRowDateChange={updateRowDate}
                       onRowDraftChange={updateRowDraft}

@@ -14,6 +14,7 @@ import {
   Tags,
   Users,
   WashingMachine,
+  BellRing,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { TranslationKey } from '@/types/language';
@@ -23,6 +24,7 @@ export type AdminDashboardModule = {
   labelKey: TranslationKey;
   path: string;
   descriptionKey: TranslationKey;
+  ownerOnly?: boolean;
 };
 
 export const adminDashboardModules: AdminDashboardModule[] = [
@@ -109,6 +111,13 @@ export const adminDashboardModules: AdminDashboardModule[] = [
     labelKey: 'admin.dashboard.aiSettings',
     path: '/admin/ai',
     descriptionKey: 'admin.dashboard.aiSettingsDesc',
+  },
+  {
+    icon: BellRing,
+    labelKey: 'admin.dashboard.pushNotifications',
+    path: '/admin/push-notifications',
+    descriptionKey: 'admin.dashboard.pushNotificationsDesc',
+    ownerOnly: true,
   },
   {
     icon: Settings,

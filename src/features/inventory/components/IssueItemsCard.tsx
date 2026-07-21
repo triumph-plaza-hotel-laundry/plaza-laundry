@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import type { InventoryItem } from '@/features/inventory';
 import { NOT_ENOUGH_STOCK_MESSAGE } from '@/features/inventory';
+import { ISSUE_DEPARTMENTS } from '@/features/inventory/issue-departments';
 import { useLanguage } from '@/hooks';
 
 type IssueItemsCardProps = {
@@ -11,6 +12,7 @@ type IssueItemsCardProps = {
     employee: string;
     quantity: number;
     reason: string;
+    department: string;
   }) => Promise<void>;
 };
 
@@ -19,6 +21,7 @@ const emptyForm = {
   employee: '',
   quantity: '',
   reason: '',
+  department: '',
 };
 
 export function IssueItemsCard({
@@ -38,6 +41,11 @@ export function IssueItemsCard({
     setLocalError(null);
     const quantity = Number(form.quantity);
 
+    if (!form.department.trim()) {
+      setLocalError(t('inventory.stockEntry.selectDepartment'));
+      return;
+    }
+
     if (selectedItem && quantity > selectedItem.remainingQuantity) {
       setLocalError(NOT_ENOUGH_STOCK_MESSAGE);
       return;
@@ -50,6 +58,7 @@ export function IssueItemsCard({
         employee: form.employee,
         quantity,
         reason: form.reason,
+        department: form.department,
       });
       setForm(emptyForm);
     } catch (caught) {
@@ -125,6 +134,27 @@ export function IssueItemsCard({
             required
             value={form.employee}
           />
+        </label>
+        <label className="inv-field">
+          <span>{t('inventory.history.department')}</span>
+          <select
+            disabled={disabled || isSubmitting}
+            onChange={(event) =>
+              setForm((current) => ({
+                ...current,
+                department: event.target.value,
+              }))
+            }
+            required
+            value={form.department}
+          >
+            <option value="">{t('inventory.stockEntry.selectDepartment')}</option>
+            {ISSUE_DEPARTMENTS.map((department) => (
+              <option key={department} value={department}>
+                {department}
+              </option>
+            ))}
+          </select>
         </label>
         <label className="inv-field inv-field--wide">
           <span>{t('inventory.v2.issueReason')}</span>

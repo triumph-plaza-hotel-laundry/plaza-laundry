@@ -104,29 +104,3 @@ export function InventoryHistoryDrawer() {
     </AnimatePresence>
   );
 }
-
-export function InventoryArchiveBanner() {
-  const { t } = useLanguage();
-  const { exitArchiveView, formatMonthLabel, isArchiveView, viewingMonth } =
-    useInventoryArchive();
-
-  if (!isArchiveView || !viewingMonth) {
-    return null;
-  }
-
-  return (
-    <div className="admin-inventory-history__banner" role="status">
-      <p className="admin-inventory-history__banner-text">
-        {formatMonthLabel(viewingMonth)} —{' '}
-        {t('admin.inventory.history.readOnly')}
-      </p>
-      <button
-        className="admin-inventory-history__banner-exit"
-        onClick={exitArchiveView}
-        type="button"
-      >
-        {t('admin.inventory.history.exit')}
-      </button>
-    </div>
-  );
-}

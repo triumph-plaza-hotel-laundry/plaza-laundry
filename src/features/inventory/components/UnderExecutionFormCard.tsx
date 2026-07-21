@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import type { InventoryItem } from '@/features/inventory';
+import { ISSUE_DEPARTMENTS } from '@/features/inventory/issue-departments';
 import type { CreateUnderExecutionInput } from '@/features/inventory/under-execution-types';
 import { useLanguage } from '@/hooks';
 
@@ -11,7 +12,7 @@ type UnderExecutionFormCardProps = {
 
 const emptyForm = {
   supplier: '',
-  supplierName: '',
+  department: '',
   itemId: '',
   quantity: '',
   date: '',
@@ -38,7 +39,7 @@ export function UnderExecutionFormCard({
       setFieldError(t('inventory.underExecution.validation.supplier'));
       return;
     }
-    if (!form.supplierName.trim()) {
+    if (!form.department.trim()) {
       setFieldError(t('inventory.underExecution.validation.supplierName'));
       return;
     }
@@ -59,7 +60,7 @@ export function UnderExecutionFormCard({
     try {
       await onSubmit({
         supplier: form.supplier.trim(),
-        supplierName: form.supplierName.trim(),
+        department: form.department.trim(),
         itemCode: selected.code,
         itemName: selected.name,
         quantity,
@@ -103,17 +104,24 @@ export function UnderExecutionFormCard({
 
         <label className="inv-field">
           <span>{t('inventory.underExecution.supplierName')}</span>
-          <input
+          <select
             disabled={disabled || isSubmitting}
             onChange={(event) =>
               setForm((current) => ({
                 ...current,
-                supplierName: event.target.value,
+                department: event.target.value,
               }))
             }
             required
-            value={form.supplierName}
-          />
+            value={form.department}
+          >
+            <option value="">{t('inventory.stockEntry.selectDepartment')}</option>
+            {ISSUE_DEPARTMENTS.map((department) => (
+              <option key={department} value={department}>
+                {department}
+              </option>
+            ))}
+          </select>
         </label>
 
         <label className="inv-field">

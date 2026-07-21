@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { InventoryItem } from '@/features/inventory';
+import { ISSUE_DEPARTMENTS } from '@/features/inventory/issue-departments';
 import type {
   UnderExecutionRecord,
   UpdateUnderExecutionInput,
@@ -18,7 +19,7 @@ type EditUnderExecutionDialogProps = {
 
 type EditFormState = {
   supplier: string;
-  supplierName: string;
+  department: string;
   itemId: string;
   quantity: string;
   date: string;
@@ -58,18 +59,29 @@ export function EditUnderExecutionDialog({
   const { t } = useLanguage();
   const [form, setForm] = useState<EditFormState>({
     supplier: '',
-    supplierName: '',
+    department: '',
     itemId: '',
     quantity: '',
     date: '',
   });
   const [fieldError, setFieldError] = useState<string | null>(null);
 
+  const departmentOptions = useMemo(() => {
+    const current = form.department.trim();
+    if (
+      current &&
+      !(ISSUE_DEPARTMENTS as readonly string[]).includes(current)
+    ) {
+      return [current, ...ISSUE_DEPARTMENTS];
+    }
+    return [...ISSUE_DEPARTMENTS];
+  }, [form.department]);
+
   useEffect(() => {
     if (!isOpen || !record) {
       setForm({
         supplier: '',
-        supplierName: '',
+        department: '',
         itemId: '',
         quantity: '',
         date: '',
@@ -80,7 +92,7 @@ export function EditUnderExecutionDialog({
 
     setForm({
       supplier: record.supplier,
-      supplierName: record.supplierName,
+      department: record.department,
       itemId: resolveItemId(items, record),
       quantity: String(record.quantity),
       date: record.date,
@@ -100,7 +112,7 @@ export function EditUnderExecutionDialog({
       setFieldError(t('inventory.underExecution.validation.supplier'));
       return;
     }
-    if (!form.supplierName.trim()) {
+    if (!form.department.trim()) {
       setFieldError(t('inventory.underExecution.validation.supplierName'));
       return;
     }
@@ -122,7 +134,7 @@ export function EditUnderExecutionDialog({
     try {
       await onSave(record.id, {
         supplier: form.supplier.trim(),
-        supplierName: form.supplierName.trim(),
+        department: form.department.trim(),
         itemCode: selected.code,
         itemName: selected.name,
         quantity,
@@ -183,15 +195,24 @@ export function EditUnderExecutionDialog({
 
               <label className="admin-editor-field">
                 <span>{t('inventory.underExecution.supplierName')}</span>
-                <input
+                <select
                   onChange={(event) =>
                     setForm((current) => ({
                       ...current,
-                      supplierName: event.target.value,
+                      department: event.target.value,
                     }))
                   }
-                  value={form.supplierName}
-                />
+                  value={form.department}
+                >
+                  <option value="">
+                    {t('inventory.stockEntry.selectDepartment')}
+                  </option>
+                  {departmentOptions.map((department) => (
+                    <option key={department} value={department}>
+                      {department}
+                    </option>
+                  ))}
+                </select>
               </label>
 
               <label className="admin-editor-field">

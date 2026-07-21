@@ -227,8 +227,9 @@ export function AdminChemicalsEditorPage() {
         {selected ? (
           <div className="admin-editor-panel admin-editor-grid">
             <div className="admin-editor-field">
-              <label>productCode</label>
+              <label htmlFor="chemical-product-code">productCode</label>
               <input
+                id="chemical-product-code"
                 onChange={(event) =>
                   updateSelected({ productCode: event.target.value })
                 }
@@ -236,8 +237,9 @@ export function AdminChemicalsEditorPage() {
               />
             </div>
             <div className="admin-editor-field">
-              <label>brand</label>
+              <label htmlFor="chemical-brand">brand</label>
               <input
+                id="chemical-brand"
                 onChange={(event) =>
                   updateSelected({ brand: event.target.value })
                 }
@@ -245,8 +247,9 @@ export function AdminChemicalsEditorPage() {
               />
             </div>
             <div className="admin-editor-field">
-              <label>image</label>
+              <label htmlFor="chemical-image">image</label>
               <input
+                id="chemical-image"
                 onChange={(event) =>
                   updateSelected({ image: event.target.value })
                 }
@@ -327,7 +330,7 @@ export function AdminChemicalsEditorPage() {
 
             <div className="admin-editor-field">
               <div className="admin-editor-actions-row">
-                <label>technicalInfo</label>
+                <span aria-hidden="true">technicalInfo</span>
                 <button
                   className="admin-editor-btn"
                   onClick={() =>

@@ -9,6 +9,12 @@ export type CairoDateParts = {
   day: number;
 };
 
+export type BirthDateParts = {
+  year: number;
+  month: number;
+  day: number;
+};
+
 const MONTH_BY_NAME: Record<string, number> = {
   january: 1,
   february: 2,
@@ -23,6 +29,21 @@ const MONTH_BY_NAME: Record<string, number> = {
   november: 11,
   december: 12,
 };
+
+const MONTH_NAMES_EN = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+] as const;
 
 export function getCairoDateParts(date = new Date()): CairoDateParts {
   const formatter = new Intl.DateTimeFormat('en-GB', {
@@ -44,32 +65,207 @@ export function getCairoDateKey(parts: CairoDateParts): string {
   return `${parts.year}-${parts.month}-${parts.day}`;
 }
 
-export function parseEmployeeBirthday(
-  dobEn: string,
-): { month: number; day: number } | null {
-  const match = dobEn.trim().match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/);
+function isValidBirthDateParts(
+  year: number,
+  month: number,
+  day: number,
+): boolean {
+  if (
+    !Number.isInteger(year) ||
+    !Number.isInteger(month) ||
+    !Number.isInteger(day)
+  ) {
+    return false;
+  }
 
-  if (!match) {
+  if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) {
+    return false;
+  }
+
+  const date = new Date(year, month - 1, day);
+  return (
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day
+  );
+}
+
+/** Normalizes `{ en, ar }` birth-date objects from employee JSON. */
+export function getLocalizedBirthDate(value: unknown): {
+  en: string;
+  ar: string;
+} {
+  if (!value || typeof value !== 'object') {
+    return { en: '', ar: '' };
+  }
+
+  const record = value as Record<string, unknown>;
+  return {
+    en: typeof record.en === 'string' ? record.en.trim() : '',
+    ar: typeof record.ar === 'string' ? record.ar.trim() : '',
+  };
+}
+
+/** Display label — prefers `dateOfBirth.ar`. */
+export function getBirthDateDisplayLabel(dateOfBirth: unknown): string {
+  const { ar, en } = getLocalizedBirthDate(dateOfBirth);
+  if (ar) {
+    return ar;
+  }
+
+  const parsed = parseEmployeeBirthDate(en);
+  if (!parsed) {
+    return en;
+  }
+
+  return `${parsed.day} ${MONTH_NAMES_EN[parsed.month - 1]} ${parsed.year}`;
+}
+
+/** Age from `dateOfBirth.en` (ISO or legacy English). */
+export function getEmployeeAge(
+  dateOfBirth: unknown,
+  today: CairoDateParts,
+): number | null {
+  const { en } = getLocalizedBirthDate(dateOfBirth);
+  const parsed = parseEmployeeBirthDate(en);
+  return parsed ? getAgeFromBirthDate(parsed, today) : null;
+}
+
+/** Birthday check from `dateOfBirth.en`. */
+export function isEmployeeBirthdayToday(
+  dateOfBirth: unknown,
+  today: CairoDateParts,
+): boolean {
+  const { en } = getLocalizedBirthDate(dateOfBirth);
+  return isBirthdayOnDate(en, today);
+}
+
+/** Parses ISO `YYYY-MM-DD` or legacy `D Month YYYY` English birth dates. */
+export function parseEmployeeBirthDate(
+  dobEn: string,
+): BirthDateParts | null {
+  const trimmed = dobEn.trim();
+  if (!trimmed) {
     return null;
   }
 
-  const month = MONTH_BY_NAME[match[2].toLowerCase()];
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
+  if (iso) {
+    const year = Number(iso[1]);
+    const month = Number(iso[2]);
+    const day = Number(iso[3]);
+    return isValidBirthDateParts(year, month, day)
+      ? { year, month, day }
+      : null;
+  }
 
+  const legacy = /^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/.exec(trimmed);
+  if (!legacy) {
+    return null;
+  }
+
+  const month = MONTH_BY_NAME[legacy[2].toLowerCase()];
   if (!month) {
     return null;
   }
 
-  return {
-    day: Number(match[1]),
-    month,
-  };
+  const day = Number(legacy[1]);
+  const year = Number(legacy[3]);
+  return isValidBirthDateParts(year, month, day)
+    ? { year, month, day }
+    : null;
+}
+
+/** @deprecated Prefer parseEmployeeBirthDate — kept for callers that only need month/day. */
+export function parseEmployeeBirthday(
+  dobEn: string,
+): { month: number; day: number } | null {
+  const parsed = parseEmployeeBirthDate(dobEn);
+  if (!parsed) {
+    return null;
+  }
+
+  return { month: parsed.month, day: parsed.day };
+}
+
+export function birthDateToIso(parts: BirthDateParts): string {
+  return `${parts.year}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}`;
+}
+
+export function birthDateToIsoInputValue(dobEn: string): string {
+  const parsed = parseEmployeeBirthDate(dobEn);
+  return parsed ? birthDateToIso(parsed) : '';
+}
+
+export function localizedBirthDateFromIso(iso: string): {
+  en: string;
+  ar: string;
+} {
+  const parsed = parseEmployeeBirthDate(iso);
+  if (!parsed) {
+    return { en: '', ar: '' };
+  }
+
+  const en = birthDateToIso(parsed);
+  const ar = new Intl.DateTimeFormat('ar-EG', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(parsed.year, parsed.month - 1, parsed.day));
+
+  return { en, ar };
+}
+
+export function formatBirthDateDisplay(
+  dobEn: string,
+  language: 'ar' | 'en',
+  dobAr = '',
+): string {
+  const parsed = parseEmployeeBirthDate(dobEn);
+  if (!parsed) {
+    return language === 'ar' ? dobAr.trim() : dobEn.trim();
+  }
+
+  if (language === 'ar') {
+    if (dobAr.trim()) {
+      return dobAr.trim();
+    }
+
+    return new Intl.DateTimeFormat('ar-EG', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(new Date(parsed.year, parsed.month - 1, parsed.day));
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dobEn.trim())) {
+    return `${parsed.day} ${MONTH_NAMES_EN[parsed.month - 1]} ${parsed.year}`;
+  }
+
+  return dobEn.trim();
+}
+
+export function getAgeFromBirthDate(
+  birth: BirthDateParts,
+  today: CairoDateParts,
+): number {
+  let age = today.year - birth.year;
+
+  if (
+    today.month < birth.month ||
+    (today.month === birth.month && today.day < birth.day)
+  ) {
+    age -= 1;
+  }
+
+  return Math.max(0, age);
 }
 
 export function isBirthdayOnDate(
   dobEn: string,
   today: CairoDateParts,
 ): boolean {
-  const birthday = parseEmployeeBirthday(dobEn);
+  const birthday = parseEmployeeBirthDate(dobEn);
 
   if (!birthday) {
     return false;
@@ -80,10 +276,12 @@ export function isBirthdayOnDate(
 
 export function getEmployeesWithBirthdayToday(
   today: CairoDateParts,
+  employees?: readonly LaundryEmployee[],
 ): LaundryEmployee[] {
-  return employeesRepository
-    .getSnapshot()
-    .filter((employee) => isBirthdayOnDate(employee.dateOfBirth.en, today));
+  const list = employees ?? employeesRepository.getSnapshot();
+  return list.filter((employee) =>
+    isEmployeeBirthdayToday(employee.dateOfBirth, today),
+  );
 }
 
 export function msUntilNextMinute(): number {

@@ -1,11 +1,15 @@
-import { Pencil, Trash2 } from 'lucide-react';
+import { Calendar, Pencil, Trash2 } from 'lucide-react';
 import type { LaundryEmployee } from '@/data/repositories';
 import {
   getEmployeeCode,
   getEmployeeStatus,
   getLocalizedDisplay,
 } from '@/lib/employee-admin';
-import { useLanguage } from '@/hooks';
+import {
+  getBirthDateDisplayLabel,
+  getEmployeeAge,
+} from '@/lib/birthday-utils';
+import { useCairoToday, useLanguage } from '@/hooks';
 
 type AdminEmployeesTableProps = {
   employees: LaundryEmployee[];
@@ -19,6 +23,7 @@ export function AdminEmployeesTable({
   onEdit,
 }: AdminEmployeesTableProps) {
   const { language, t } = useLanguage();
+  const today = useCairoToday();
   const lang = language === 'ar' ? 'ar' : 'en';
 
   if (employees.length === 0) {
@@ -40,6 +45,7 @@ export function AdminEmployeesTable({
             <th scope="col">{t('admin.editor.table.department')}</th>
             <th scope="col">{t('admin.editor.table.position')}</th>
             <th scope="col">{t('admin.editor.table.phone')}</th>
+            <th scope="col">{t('admin.editor.table.birthDate')}</th>
             <th scope="col">{t('admin.editor.table.shift')}</th>
             <th scope="col">{t('admin.editor.table.status')}</th>
             <th scope="col">{t('admin.editor.table.actions')}</th>
@@ -52,6 +58,10 @@ export function AdminEmployeesTable({
               status === 'active'
                 ? t('admin.editor.statusActive')
                 : t('admin.editor.statusInactive');
+            const birthDateLabel = getBirthDateDisplayLabel(
+              employee.dateOfBirth,
+            );
+            const age = getEmployeeAge(employee.dateOfBirth, today);
 
             return (
               <tr key={employee.id}>
@@ -72,6 +82,28 @@ export function AdminEmployeesTable({
                 </td>
                 <td data-label={t('admin.editor.table.phone')}>
                   {employee.phone.trim() || '—'}
+                </td>
+                <td data-label={t('admin.editor.table.birthDate')}>
+                  {birthDateLabel ? (
+                    <span className="admin-employees-dashboard__dob">
+                      <Calendar
+                        aria-hidden="true"
+                        className="admin-employees-dashboard__dob-icon"
+                        strokeWidth={1.75}
+                      />
+                      <span>
+                        {birthDateLabel}
+                        {age !== null ? (
+                          <span className="admin-employees-dashboard__dob-age">
+                            {' '}
+                            · {age} {t('employees.ageYears')}
+                          </span>
+                        ) : null}
+                      </span>
+                    </span>
+                  ) : (
+                    '—'
+                  )}
                 </td>
                 <td data-label={t('admin.editor.table.shift')}>
                   {getLocalizedDisplay(employee.shift, lang)}

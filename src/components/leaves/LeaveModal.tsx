@@ -88,6 +88,23 @@ export function LeaveModal({
     setError('');
   }, [employees, entry, isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => {
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) {
     return null;
   }
@@ -129,14 +146,17 @@ export function LeaveModal({
   return (
     <div
       className="leave-modal__backdrop"
-      onClick={onClose}
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) {
+          onClose();
+        }
+      }}
       role="presentation"
     >
       <div
         aria-labelledby="leave-modal-title"
         aria-modal="true"
         className="leave-modal"
-        onClick={(event) => event.stopPropagation()}
         role="dialog"
       >
         <header className="leave-modal__header">

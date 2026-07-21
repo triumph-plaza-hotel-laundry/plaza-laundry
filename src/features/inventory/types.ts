@@ -30,6 +30,7 @@ export type InventoryIssue = {
   id: string;
   itemId: string;
   employee: string;
+  department: string;
   quantity: number;
   reason: string;
   createdAt: string;
@@ -64,6 +65,7 @@ export type IssueItemsInput = {
   employee: string;
   quantity: number;
   reason: string;
+  department: string;
 };
 
 export type CreateInventoryItemInput = {

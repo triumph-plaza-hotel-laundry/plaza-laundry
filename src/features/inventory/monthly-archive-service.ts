@@ -8,13 +8,16 @@ import {
 import type {
   ArchivedInventoryData,
   ArchivedPlanData,
+  ArchivedUnderExecutionData,
   InventoryPlanDocument,
   MonthlyArchiveRecord,
   PlanRowDrafts,
 } from '@/features/inventory/monthly-archive-types';
+import { createEmptyUnderExecutionArchiveData } from '@/features/inventory/monthly-archive-types';
 import {
   createEmptyPlanDocument,
   getCurrentMonthKey,
+  isTimestampInMonth,
   loadPlanDocument,
   mergePlanRowDrafts,
   nextMonthKey,
@@ -23,12 +26,18 @@ import {
 import { createInitialPlanRowDrafts } from '@/features/inventory/inventory-plan-schema';
 import { ensureDepartmentItemsSeeded } from '@/features/inventory/department-items-service';
 import { listDepartmentItemCategories } from '@/features/inventory/department-item-categories-service';
+import {
+  listUnderExecutionHistory,
+  listUnderExecutionRecords,
+} from '@/features/inventory/under-execution-service';
+import type { UnderExecutionRecord } from '@/features/inventory/under-execution-types';
 
 const ITEMS_SELECT =
   'id, code, name, name_ar, total_quantity, incoming_quantity, quantity, issued_quantity, remaining_quantity, created_at, updated_at, last_updated_at';
 const RECEIPTS_SELECT =
   'id, item_id, supplier, receiver, employee, quantity, created_at';
-const ISSUES_SELECT = 'id, item_id, employee, quantity, reason, created_at';
+const ISSUES_SELECT =
+  'id, item_id, employee, department, quantity, reason, created_at';
 
 type DbItemRow = {
   id: string;
@@ -59,6 +68,7 @@ type IssueRow = {
   id: string;
   item_id: string;
   employee: string;
+  department: string;
   quantity: number;
   reason: string;
   created_at: string;
@@ -68,6 +78,7 @@ type ArchiveRow = {
   archive_month: string;
   inventory_data: Json;
   plan_data: Json;
+  under_execution_data?: Json | null;
   archived_at: string;
 };
 
@@ -88,6 +99,37 @@ function isMissingArchiveTable(error: { code?: string; message?: string }) {
     error.code === '42P01' ||
     message.includes('inventory_monthly_archives') ||
     message.includes('does not exist')
+  );
+}
+
+function isMissingUnderExecutionColumn(error: {
+  code?: string;
+  message?: string;
+}) {
+  const message = error.message?.toLowerCase() ?? '';
+  return (
+    message.includes('under_execution_data') ||
+    message.includes('under execution data')
+  );
+}
+
+export function filterTransactionsByMonth(
+  transactions: InventoryTransaction[],
+  monthKey: string,
+) {
+  return transactions.filter((transaction) =>
+    isTimestampInMonth(transaction.createdAt, monthKey),
+  );
+}
+
+export function filterUnderExecutionByMonth(
+  records: UnderExecutionRecord[],
+  monthKey: string,
+) {
+  return records.filter(
+    (record) =>
+      isTimestampInMonth(record.createdAt, monthKey) ||
+      isTimestampInMonth(record.date, monthKey),
   );
 }
 
@@ -123,8 +165,8 @@ function mapTransactions(
       itemCode: item?.code ?? '',
       itemName: item?.name ?? '—',
       quantity: row.quantity,
-      supplier: '',
-      receiver: '',
+      supplier: row.department ?? '',
+      receiver: row.reason ?? '',
       employee: row.employee,
       createdAt: row.created_at,
     };
@@ -136,7 +178,9 @@ function mapTransactions(
   );
 }
 
-export async function fetchInventorySnapshotForArchive(): Promise<ArchivedInventoryData> {
+export async function fetchInventorySnapshotForArchive(
+  monthKey?: string,
+): Promise<ArchivedInventoryData> {
   const client = requireClient();
 
   const [itemsResult, receiptsResult, issuesResult] = await Promise.all([
@@ -168,11 +212,15 @@ export async function fetchInventorySnapshotForArchive(): Promise<ArchivedInvent
   }
 
   const items = ((itemsResult.data ?? []) as DbItemRow[]).map(mapInventoryItem);
-  const transactions = mapTransactions(
+  let transactions = mapTransactions(
     items,
     (receiptsResult.data ?? []) as ReceiptRow[],
     (issuesResult.data ?? []) as IssueRow[],
   );
+
+  if (monthKey) {
+    transactions = filterTransactionsByMonth(transactions, monthKey);
+  }
 
   return {
     items,
@@ -181,13 +229,35 @@ export async function fetchInventorySnapshotForArchive(): Promise<ArchivedInvent
   };
 }
 
-function parseArchivedInventoryData(value: Json): ArchivedInventoryData {
+export async function fetchUnderExecutionSnapshotForArchive(
+  monthKey: string,
+): Promise<ArchivedUnderExecutionData> {
+  const [records, history] = await Promise.all([
+    listUnderExecutionRecords(),
+    listUnderExecutionHistory(),
+  ]);
+
+  return {
+    records: filterUnderExecutionByMonth(records, monthKey),
+    history: filterUnderExecutionByMonth(history, monthKey),
+    capturedAt: new Date().toISOString(),
+  };
+}
+
+function parseArchivedInventoryData(
+  value: Json,
+  monthKey?: string,
+): ArchivedInventoryData {
   const record = value as Partial<ArchivedInventoryData>;
+  const transactions = Array.isArray(record.transactions)
+    ? (record.transactions as InventoryTransaction[])
+    : [];
+
   return {
     items: Array.isArray(record.items) ? (record.items as InventoryItem[]) : [],
-    transactions: Array.isArray(record.transactions)
-      ? (record.transactions as InventoryTransaction[])
-      : [],
+    transactions: monthKey
+      ? filterTransactionsByMonth(transactions, monthKey)
+      : transactions,
     capturedAt: typeof record.capturedAt === 'string' ? record.capturedAt : '',
   };
 }
@@ -200,11 +270,45 @@ function parseArchivedPlanData(value: Json): ArchivedPlanData {
   };
 }
 
+function parseArchivedUnderExecutionData(
+  value: Json | null | undefined,
+  monthKey?: string,
+): ArchivedUnderExecutionData {
+  if (!value || typeof value !== 'object') {
+    return createEmptyUnderExecutionArchiveData();
+  }
+
+  const record = value as Partial<ArchivedUnderExecutionData>;
+  const records = Array.isArray(record.records)
+    ? (record.records as UnderExecutionRecord[])
+    : [];
+  const history = Array.isArray(record.history)
+    ? (record.history as UnderExecutionRecord[])
+    : [];
+
+  return {
+    records: monthKey
+      ? filterUnderExecutionByMonth(records, monthKey)
+      : records,
+    history: monthKey
+      ? filterUnderExecutionByMonth(history, monthKey)
+      : history,
+    capturedAt: typeof record.capturedAt === 'string' ? record.capturedAt : '',
+  };
+}
+
 function mapArchiveRow(row: ArchiveRow): MonthlyArchiveRecord {
   return {
     archiveMonth: row.archive_month,
-    inventoryData: parseArchivedInventoryData(row.inventory_data),
+    inventoryData: parseArchivedInventoryData(
+      row.inventory_data,
+      row.archive_month,
+    ),
     planData: parseArchivedPlanData(row.plan_data),
+    underExecutionData: parseArchivedUnderExecutionData(
+      row.under_execution_data,
+      row.archive_month,
+    ),
     archivedAt: row.archived_at,
   };
 }
@@ -232,7 +336,9 @@ export async function getMonthlyArchive(
   const client = requireClient();
   const { data, error } = await client
     .from('inventory_monthly_archives')
-    .select('archive_month, inventory_data, plan_data, archived_at')
+    .select(
+      'archive_month, inventory_data, plan_data, under_execution_data, archived_at',
+    )
     .eq('archive_month', monthKey)
     .maybeSingle();
 
@@ -240,6 +346,23 @@ export async function getMonthlyArchive(
     if (isMissingArchiveTable(error)) {
       return null;
     }
+
+    if (isMissingUnderExecutionColumn(error)) {
+      const fallback = await client
+        .from('inventory_monthly_archives')
+        .select('archive_month, inventory_data, plan_data, archived_at')
+        .eq('archive_month', monthKey)
+        .maybeSingle();
+
+      if (fallback.error) {
+        throw fallback.error;
+      }
+
+      return fallback.data
+        ? mapArchiveRow(fallback.data as ArchiveRow)
+        : null;
+    }
+
     throw error;
   }
 
@@ -250,17 +373,40 @@ async function createMonthlyArchive(
   monthKey: string,
   inventoryData: ArchivedInventoryData,
   planData: ArchivedPlanData,
+  underExecutionData: ArchivedUnderExecutionData,
 ): Promise<void> {
   const client = requireClient();
-  const { error } = await client.from('inventory_monthly_archives').insert({
+  const withUnderExecution = {
     archive_month: monthKey,
     inventory_data: inventoryData as unknown as Json,
     plan_data: planData as unknown as Json,
-  });
+    under_execution_data: underExecutionData as unknown as Json,
+  };
 
-  if (error) {
-    throw error;
+  const { error } = await client
+    .from('inventory_monthly_archives')
+    .insert(withUnderExecution);
+
+  if (!error) {
+    return;
   }
+
+  if (isMissingUnderExecutionColumn(error)) {
+    const { error: fallbackError } = await client
+      .from('inventory_monthly_archives')
+      .insert({
+        archive_month: monthKey,
+        inventory_data: inventoryData as unknown as Json,
+        plan_data: planData as unknown as Json,
+      });
+
+    if (fallbackError) {
+      throw fallbackError;
+    }
+    return;
+  }
+
+  throw error;
 }
 
 export type MonthlyArchiveSyncResult = {
@@ -280,14 +426,22 @@ export async function syncMonthlyArchiveTransition(): Promise<MonthlyArchiveSync
     const monthToArchive = planDocument.workingMonth;
 
     if (!archivedMonths.has(monthToArchive)) {
-      const inventoryData = await fetchInventorySnapshotForArchive();
+      const [inventoryData, underExecutionData] = await Promise.all([
+        fetchInventorySnapshotForArchive(monthToArchive),
+        fetchUnderExecutionSnapshotForArchive(monthToArchive),
+      ]);
       const planData: ArchivedPlanData = {
         rowDrafts: planDocument.rowDrafts,
         capturedAt: new Date().toISOString(),
       };
 
       try {
-        await createMonthlyArchive(monthToArchive, inventoryData, planData);
+        await createMonthlyArchive(
+          monthToArchive,
+          inventoryData,
+          planData,
+          underExecutionData,
+        );
         archivedMonths.add(monthToArchive);
       } catch (error) {
         if (

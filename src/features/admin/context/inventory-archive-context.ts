@@ -8,10 +8,13 @@ export type InventoryArchiveContextValue = {
   archiveMonths: string[];
   currentMonth: string;
   drawerOpen: boolean;
+  ensureArchiveSynced: () => Promise<void>;
   exitArchiveView: () => void;
   formatMonthLabel: (monthKey: string) => string;
   isArchiveView: boolean;
   isReady: boolean;
+  /** Bumps when leaving archive view so live history reloads from the database. */
+  liveDataRevision: number;
   openDrawer: () => void;
   closeDrawer: () => void;
   planDocument: InventoryPlanDocument | null;

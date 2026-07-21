@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap');
-
 .employees-page {
   --emp-bg: #0a0a0a;
   --emp-surface: rgb(15 15 15 / 72%);
@@ -339,6 +337,35 @@ html[dir='rtl'] .employees-page__search-input {
   transform: translateY(-4px);
 }
 
+.org-employee-card--highlight {
+  border-color: var(--app-gold);
+  box-shadow:
+    0 0 0 2px rgb(201 164 92 / 45%),
+    0 0 28px rgb(201 164 92 / 32%),
+    0 14px 36px rgb(201 164 92 / 16%),
+    inset 0 1px 0 rgb(214 183 110 / 18%);
+  animation: org-employee-highlight-pulse 1.4s ease-in-out 2;
+}
+
+@keyframes org-employee-highlight-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px rgb(201 164 92 / 35%),
+      0 0 18px rgb(201 164 92 / 22%),
+      0 12px 28px rgb(201 164 92 / 12%),
+      inset 0 1px 0 rgb(214 183 110 / 14%);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 3px rgb(201 164 92 / 55%),
+      0 0 34px rgb(201 164 92 / 42%),
+      0 16px 40px rgb(201 164 92 / 18%),
+      inset 0 1px 0 rgb(214 183 110 / 22%);
+  }
+}
+
 .org-employee-card--executive {
   padding: 1.375rem 1.25rem;
 }
@@ -349,19 +376,50 @@ html[dir='rtl'] .employees-page__search-input {
 }
 
 .org-employee-card--birthday {
+  overflow: visible;
+  padding-top: 3.1rem;
   border-color: var(--app-gold);
   box-shadow:
-    0 14px 38px rgb(201 164 92 / 18%),
-    inset 0 1px 0 rgb(214 183 110 / 12%);
+    0 0 18px rgb(201 164 92 / 26%),
+    0 12px 34px rgb(201 164 92 / 14%),
+    inset 0 1px 0 rgb(214 183 110 / 14%);
+  animation: org-employee-birthday-glow 2.8s ease-in-out infinite;
+}
+
+.org-employee-card--birthday.org-employee-card--executive {
+  padding-top: 3.4rem;
+}
+
+.org-employee-card--birthday.org-employee-card--compact {
+  padding-top: 2.75rem;
+}
+
+@keyframes org-employee-birthday-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 14px rgb(201 164 92 / 20%),
+      0 10px 28px rgb(201 164 92 / 12%),
+      inset 0 1px 0 rgb(214 183 110 / 12%);
+  }
+
+  50% {
+    box-shadow:
+      0 0 24px rgb(201 164 92 / 34%),
+      0 14px 36px rgb(201 164 92 / 18%),
+      inset 0 1px 0 rgb(214 183 110 / 18%);
+  }
 }
 
 .org-employee-card__avatar-wrap {
   position: relative;
+  z-index: 1;
   display: flex;
   width: 3.25rem;
   height: 3.25rem;
   align-items: center;
   justify-content: center;
+  overflow: visible;
   border: 1px solid var(--app-gold-border);
   border-radius: 50%;
   background: rgb(201 164 92 / 8%);
@@ -378,6 +436,161 @@ html[dir='rtl'] .employees-page__search-input {
   height: 2.75rem;
 }
 
+/* Royal crown — centered above avatar, ~50% larger, soft float */
+.org-employee-card__royal-crown {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 0.2rem);
+  z-index: 2;
+  display: block;
+  width: 3.5rem;
+  height: 2.75rem;
+  transform: translateX(-50%);
+  pointer-events: none;
+  filter:
+    drop-shadow(0 0 8px rgb(212 175 95 / 72%))
+    drop-shadow(0 0 16px rgb(201 164 92 / 42%))
+    drop-shadow(0 3px 6px rgb(0 0 0 / 32%));
+  animation: org-royal-crown-float 4.8s ease-in-out infinite;
+  will-change: transform;
+}
+
+.org-employee-card--executive .org-employee-card__royal-crown {
+  width: 3.8rem;
+  height: 3rem;
+  bottom: calc(100% - 0.24rem);
+}
+
+.org-employee-card--compact .org-employee-card__royal-crown {
+  width: 3rem;
+  height: 2.35rem;
+  bottom: calc(100% - 0.16rem);
+}
+
+.org-employee-card__royal-crown-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  shape-rendering: geometricPrecision;
+}
+
+@keyframes org-royal-crown-float {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(-0.28rem);
+  }
+}
+
+.org-employee-card__royal-crown-shimmer {
+  animation: org-royal-crown-shimmer 9s ease-in-out infinite;
+}
+
+@keyframes org-royal-crown-shimmer {
+  0%,
+  78% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+
+  82% {
+    opacity: 0.55;
+  }
+
+  90% {
+    opacity: 0.2;
+    transform: translateX(52px);
+  }
+
+  94%,
+  100% {
+    opacity: 0;
+    transform: translateX(58px);
+  }
+}
+
+.org-employee-card__royal-sparkles {
+  position: absolute;
+  inset: -0.2rem -0.15rem auto;
+  height: 100%;
+  width: 100%;
+  pointer-events: none;
+}
+
+.org-employee-card__royal-sparkle {
+  position: absolute;
+  width: 0.18rem;
+  height: 0.18rem;
+  border-radius: 50%;
+  background: #fff4cc;
+  box-shadow: 0 0 4px rgb(255 244 204 / 80%);
+  opacity: 0;
+  animation: org-royal-sparkle 9s ease-in-out infinite;
+}
+
+.org-employee-card__royal-sparkle--1 {
+  top: 8%;
+  left: 18%;
+  animation-delay: 0.4s;
+}
+
+.org-employee-card__royal-sparkle--2 {
+  top: 0%;
+  right: 22%;
+  width: 0.14rem;
+  height: 0.14rem;
+  animation-delay: 1.8s;
+}
+
+.org-employee-card__royal-sparkle--3 {
+  top: 28%;
+  right: 6%;
+  width: 0.12rem;
+  height: 0.12rem;
+  animation-delay: 3.2s;
+}
+
+@keyframes org-royal-sparkle {
+  0%,
+  72%,
+  100% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+
+  78% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+
+  86% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+@media (max-width: 640px) {
+  .org-employee-card__royal-crown {
+    width: 3.05rem;
+    height: 2.45rem;
+    bottom: calc(100% - 0.18rem);
+  }
+
+  .org-employee-card--executive .org-employee-card__royal-crown {
+    width: 3.35rem;
+    height: 2.65rem;
+  }
+
+  .org-employee-card--compact .org-employee-card__royal-crown {
+    width: 2.75rem;
+    height: 2.15rem;
+  }
+}
+
 .org-employee-card__avatar-icon {
   width: 1.5rem;
   height: 1.5rem;
@@ -387,23 +600,6 @@ html[dir='rtl'] .employees-page__search-input {
 .org-employee-card--compact .org-employee-card__avatar-icon {
   width: 1.25rem;
   height: 1.25rem;
-}
-
-.org-employee-card__birthday-badge {
-  position: absolute;
-  top: -0.25rem;
-  inset-inline-end: -0.25rem;
-  display: inline-flex;
-  width: 1.375rem;
-  height: 1.375rem;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--app-gold-border);
-  border-radius: 50%;
-  background: var(--emp-bg);
-  font-size: 0.75rem;
-  line-height: 1;
-  box-shadow: 0 4px 12px rgb(201 164 92 / 22%);
 }
 
 .org-employee-card__content {
@@ -751,6 +947,30 @@ html[dir='rtl'] .org-employee-card__status-en {
   .employee-card-skeleton {
     animation: none;
     transition: none;
+  }
+
+  .org-employee-card--birthday {
+    animation: none;
+  }
+
+  .org-employee-card--highlight {
+    animation: none;
+  }
+
+  .org-employee-card__royal-crown,
+  .org-employee-card__royal-crown-shimmer,
+  .org-employee-card__royal-sparkle {
+    animation: none;
+  }
+
+  .org-employee-card__royal-crown {
+    transform: translateX(-50%);
+    will-change: auto;
+  }
+
+  .org-employee-card__royal-crown-shimmer,
+  .org-employee-card__royal-sparkle {
+    opacity: 0;
   }
 
   .org-employee-card:hover {

@@ -93,12 +93,16 @@ export function UnderExecutionAccordionList({
                   <dd>{record.itemCode || '—'}</dd>
                 </div>
                 <div>
+                  <dt>{t('inventory.table.name')}</dt>
+                  <dd>{record.itemName || '—'}</dd>
+                </div>
+                <div>
                   <dt>{t('inventory.stockEntry.supplier')}</dt>
                   <dd>{record.supplier}</dd>
                 </div>
                 <div>
                   <dt>{t('inventory.underExecution.supplierName')}</dt>
-                  <dd>{record.supplierName}</dd>
+                  <dd>{record.department || '—'}</dd>
                 </div>
                 <div>
                   <dt>{t('inventory.v2.quantity')}</dt>

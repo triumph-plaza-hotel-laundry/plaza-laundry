@@ -1,46 +1,48 @@
-import { motion } from 'framer-motion';
 import { User } from 'lucide-react';
+import { motion } from 'framer-motion';
 import type { LaundryEmployee } from '@/data/laundry-employees';
 import { useCairoToday, useLanguage } from '@/hooks';
-import { isBirthdayOnDate } from '@/lib/birthday-utils';
+import { isEmployeeBirthdayToday } from '@/lib/birthday-utils';
+import { RoyalBirthdayCrown } from '@/components/employees/RoyalBirthdayCrown';
 
 type OrgChartEmployeeCardProps = {
   employee: LaundryEmployee;
   index: number;
   size?: 'executive' | 'standard' | 'compact';
+  highlight?: boolean;
 };
 
 export function OrgChartEmployeeCard({
   employee,
   index,
   size = 'standard',
+  highlight = false,
 }: OrgChartEmployeeCardProps) {
   const { t } = useLanguage();
   const today = useCairoToday();
-  const isBirthdayToday = isBirthdayOnDate(employee.dateOfBirth.en, today);
+  const isBirthdayToday = isEmployeeBirthdayToday(employee.dateOfBirth, today);
 
   return (
     <motion.article
       animate={{ opacity: 1, y: 0 }}
-      className={`org-employee-card org-employee-card--${size}${isBirthdayToday ? 'org-employee-card--birthday' : ''}`}
+      aria-label={
+        isBirthdayToday ? t('employees.birthdayToday') : undefined
+      }
+      className={`org-employee-card org-employee-card--${size}${isBirthdayToday ? ' org-employee-card--birthday' : ''}${highlight ? ' org-employee-card--highlight' : ''}`}
+      data-employee-id={employee.id}
       initial={{ opacity: 0, y: 14 }}
       transition={{ duration: 0.32, delay: index * 0.04, ease: 'easeOut' }}
     >
       <div className="org-employee-card__avatar-wrap">
+        {isBirthdayToday ? (
+          <RoyalBirthdayCrown className="org-employee-card__royal-crown" />
+        ) : null}
+
         <User
           aria-hidden="true"
           className="org-employee-card__avatar-icon"
           strokeWidth={1.5}
         />
-        {isBirthdayToday ? (
-          <span
-            aria-label={t('employees.birthdayToday')}
-            className="org-employee-card__birthday-badge"
-            title={t('employees.birthdayToday')}
-          >
-            🎂
-          </span>
-        ) : null}
       </div>
 
       <div className="org-employee-card__content">

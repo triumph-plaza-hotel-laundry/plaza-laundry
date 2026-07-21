@@ -8,6 +8,7 @@ import type {
 type DbUnderExecutionRow = {
   id: string;
   supplier: string;
+  department: string;
   supplier_name: string;
   item_code: string;
   item_name: string;
@@ -17,7 +18,7 @@ type DbUnderExecutionRow = {
 };
 
 const SELECT_COLUMNS =
-  'id, supplier, supplier_name, item_code, item_name, quantity, date, created_at';
+  'id, supplier, department, supplier_name, item_code, item_name, quantity, date, created_at';
 
 function requireClient() {
   const client = getSupabaseClient();
@@ -33,7 +34,7 @@ function mapRow(row: DbUnderExecutionRow): UnderExecutionRecord {
   return {
     id: row.id,
     supplier: row.supplier,
-    supplierName: row.supplier_name,
+    department: row.department ?? '',
     itemCode: row.item_code,
     itemName: row.item_name,
     quantity: row.quantity,
@@ -42,10 +43,10 @@ function mapRow(row: DbUnderExecutionRow): UnderExecutionRecord {
   };
 }
 
-function toInsertPayload(input: CreateUnderExecutionInput) {
+function toWritePayload(input: CreateUnderExecutionInput | UpdateUnderExecutionInput) {
   return {
     supplier: input.supplier.trim(),
-    supplier_name: input.supplierName.trim(),
+    department: input.department.trim(),
     item_code: input.itemCode.trim(),
     item_name: input.itemName.trim(),
     quantity: input.quantity,
@@ -90,7 +91,7 @@ export async function createUnderExecutionRecord(
   input: CreateUnderExecutionInput,
 ): Promise<UnderExecutionRecord> {
   const client = requireClient();
-  const payload = toInsertPayload(input);
+  const payload = toWritePayload(input);
 
   const { data, error } = await client
     .from('inventory_under_execution')
@@ -104,12 +105,12 @@ export async function createUnderExecutionRecord(
 
   const active = mapRow(data as DbUnderExecutionRow);
 
-  // Immutable snapshot — never updated/deleted when active row changes
+  // Snapshot linked by created_at; kept in sync on edit (not duplicated).
   const { error: historyError } = await client
     .from('inventory_under_execution_history')
     .insert({
       supplier: payload.supplier,
-      supplier_name: payload.supplier_name,
+      department: payload.department,
       item_code: payload.item_code,
       item_name: payload.item_name,
       quantity: payload.quantity,
@@ -130,9 +131,11 @@ export async function updateUnderExecutionRecord(
   input: UpdateUnderExecutionInput,
 ): Promise<UnderExecutionRecord> {
   const client = requireClient();
+  const payload = toWritePayload(input);
+
   const { data, error } = await client
     .from('inventory_under_execution')
-    .update(toInsertPayload(input))
+    .update(payload)
     .eq('id', id)
     .select(SELECT_COLUMNS)
     .single();
@@ -141,7 +144,26 @@ export async function updateUnderExecutionRecord(
     throw new Error(error.message);
   }
 
-  return mapRow(data as DbUnderExecutionRow);
+  const updated = mapRow(data as DbUnderExecutionRow);
+
+  // Sync the existing history snapshot (same created_at). Do not insert a new row.
+  const { error: historyError } = await client
+    .from('inventory_under_execution_history')
+    .update({
+      supplier: payload.supplier,
+      department: payload.department,
+      item_code: payload.item_code,
+      item_name: payload.item_name,
+      quantity: payload.quantity,
+      date: payload.date,
+    })
+    .eq('created_at', updated.createdAt);
+
+  if (historyError) {
+    throw new Error(historyError.message);
+  }
+
+  return updated;
 }
 
 export async function deleteUnderExecutionRecord(id: string): Promise<void> {

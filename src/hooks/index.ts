@@ -3,6 +3,7 @@ export { useTheme } from '@/hooks/useTheme';
 export { useAuth, usePermissions } from '@/hooks/useAuth';
 export { useCairoTime } from '@/hooks/useCairoTime';
 export { useCairoToday } from '@/hooks/useCairoToday';
+export { useNotifications } from '@/hooks/useNotifications';
 export { useCairoWeekDay } from '@/hooks/useCairoWeekDay';
 export {
   useFabricFavorites,

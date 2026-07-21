@@ -26,6 +26,11 @@ import {
 } from '@/features/auth/session';
 import { ensureUsersStoreReady } from '@/features/auth/users';
 import { ensureInventoryPermissionsBootstrapped } from '@/features/inventory/inventory-permissions-service';
+import { isPrimaryAdminAccount } from '@/features/auth/owner-protection';
+import {
+  registerOneSignalForEmployee,
+  unregisterOneSignalForEmployee,
+} from '@/lib/onesignal';
 import type {
   AuthSession,
   PermissionAction,
@@ -54,7 +59,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     void ensureInventoryPermissionsBootstrapped(session.user.id).catch(
       () => undefined,
     );
-  }, [session?.user?.id]);
+
+    const user = session.user;
+    const shouldRegisterPush =
+      Boolean(user.laundryEmployeeId) || isPrimaryAdminAccount(user);
+
+    if (shouldRegisterPush) {
+      void registerOneSignalForEmployee(user.id, {
+        laundryEmployeeId: user.laundryEmployeeId,
+      }).catch(() => undefined);
+    }
+  }, [session?.user]);
 
   const user = session?.user ?? null;
   const role = user?.role ?? null;
@@ -88,6 +103,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         action: 'logout',
         page: 'auth',
       }).catch(() => undefined);
+      void unregisterOneSignalForEmployee(user.id).catch(() => undefined);
     }
 
     clearAuthSession();

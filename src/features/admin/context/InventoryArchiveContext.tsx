@@ -16,6 +16,7 @@ import {
   syncMonthlyArchiveTransition,
 } from '@/features/inventory/monthly-archive-service';
 import { savePlanDocument } from '@/features/inventory/plan-document-service';
+import { invalidateInventoryCache } from '@/features/inventory';
 import { useLanguage } from '@/hooks';
 
 export function InventoryArchiveProvider({
@@ -34,6 +35,7 @@ export function InventoryArchiveProvider({
     useState<InventoryArchiveContextValue['viewingArchive']>(null);
   const [isReady, setIsReady] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
+  const [liveDataRevision, setLiveDataRevision] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -94,6 +96,15 @@ export function InventoryArchiveProvider({
   const exitArchiveView = useCallback(() => {
     setViewingMonth(null);
     setViewingArchive(null);
+    invalidateInventoryCache();
+    setLiveDataRevision((current) => current + 1);
+  }, []);
+
+  const ensureArchiveSynced = useCallback(async () => {
+    const result = await syncMonthlyArchiveTransition();
+    setArchiveMonths(result.archiveMonths);
+    setCurrentMonth(result.currentMonth);
+    setPlanDocument(result.planDocument);
   }, []);
 
   const savePlanDrafts = useCallback(
@@ -102,8 +113,12 @@ export function InventoryArchiveProvider({
         return;
       }
 
+      const syncResult = await syncMonthlyArchiveTransition();
+      setArchiveMonths(syncResult.archiveMonths);
+      setCurrentMonth(syncResult.currentMonth);
+
       const nextDocument: InventoryPlanDocument = {
-        workingMonth: planDocument.workingMonth,
+        workingMonth: syncResult.planDocument.workingMonth,
         rowDrafts,
       };
 
@@ -118,10 +133,12 @@ export function InventoryArchiveProvider({
       archiveMonths,
       currentMonth,
       drawerOpen,
+      ensureArchiveSynced,
       exitArchiveView,
       formatMonthLabel,
       isArchiveView: Boolean(viewingMonth),
       isReady,
+      liveDataRevision,
       openDrawer,
       closeDrawer,
       planDocument,
@@ -135,9 +152,11 @@ export function InventoryArchiveProvider({
       archiveMonths,
       currentMonth,
       drawerOpen,
+      ensureArchiveSynced,
       exitArchiveView,
       formatMonthLabel,
       isReady,
+      liveDataRevision,
       openDrawer,
       closeDrawer,
       planDocument,

@@ -63,8 +63,8 @@ export function TransactionHistoryTable({
                 <th className="inv-erp-table__num" scope="col">
                   {t('inventory.v2.quantity')}
                 </th>
-                <th scope="col">{t('inventory.stockEntry.supplier')}</th>
-                <th scope="col">{t('inventory.v2.receiver')}</th>
+                <th scope="col">{t('inventory.history.department')}</th>
+                <th scope="col">{t('inventory.v2.issueReason')}</th>
                 <th scope="col">{t('inventory.v2.employee')}</th>
                 <th scope="col">{t('inventory.v2.date')}</th>
                 <th scope="col">{t('inventory.v2.time')}</th>
@@ -94,7 +94,7 @@ export function TransactionHistoryTable({
                       className="inv-erp-table__name"
                       title={transaction.itemName}
                     >
-                      {transaction.itemName}
+                      {transaction.itemName || '—'}
                     </td>
                     <td className="inv-erp-table__num">
                       {transaction.quantity}

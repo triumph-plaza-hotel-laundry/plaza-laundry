@@ -45,6 +45,7 @@ export type Database = {
           is_owner: boolean;
           is_protected: boolean;
           is_active: boolean;
+          laundry_employee_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -58,6 +59,7 @@ export type Database = {
           is_owner?: boolean;
           is_protected?: boolean;
           is_active?: boolean;
+          laundry_employee_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -71,6 +73,7 @@ export type Database = {
           is_owner?: boolean;
           is_protected?: boolean;
           is_active?: boolean;
+          laundry_employee_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -309,6 +312,7 @@ export type Database = {
         Row: {
           id: string;
           supplier: string;
+          department: string;
           supplier_name: string;
           item_code: string;
           item_name: string;
@@ -319,6 +323,7 @@ export type Database = {
         Insert: {
           id?: string;
           supplier?: string;
+          department?: string;
           supplier_name?: string;
           item_code?: string;
           item_name?: string;
@@ -329,6 +334,7 @@ export type Database = {
         Update: {
           id?: string;
           supplier?: string;
+          department?: string;
           supplier_name?: string;
           item_code?: string;
           item_name?: string;
@@ -342,6 +348,7 @@ export type Database = {
         Row: {
           id: string;
           supplier: string;
+          department: string;
           supplier_name: string;
           item_code: string;
           item_name: string;
@@ -352,6 +359,7 @@ export type Database = {
         Insert: {
           id?: string;
           supplier?: string;
+          department?: string;
           supplier_name?: string;
           item_code?: string;
           item_name?: string;
@@ -362,6 +370,7 @@ export type Database = {
         Update: {
           id?: string;
           supplier?: string;
+          department?: string;
           supplier_name?: string;
           item_code?: string;
           item_name?: string;
@@ -409,6 +418,7 @@ export type Database = {
           id: string;
           item_id: string;
           employee: string;
+          department: string;
           quantity: number;
           reason: string;
           created_at: string;
@@ -417,6 +427,7 @@ export type Database = {
           id?: string;
           item_id: string;
           employee?: string;
+          department?: string;
           quantity: number;
           reason?: string;
           created_at?: string;
@@ -425,6 +436,7 @@ export type Database = {
           id?: string;
           item_id?: string;
           employee?: string;
+          department?: string;
           quantity?: number;
           reason?: string;
           created_at?: string;
@@ -436,18 +448,21 @@ export type Database = {
           archive_month: string;
           inventory_data: Json;
           plan_data: Json;
+          under_execution_data: Json;
           archived_at: string;
         };
         Insert: {
           archive_month: string;
           inventory_data: Json;
           plan_data: Json;
+          under_execution_data?: Json;
           archived_at?: string;
         };
         Update: {
           archive_month?: string;
           inventory_data?: Json;
           plan_data?: Json;
+          under_execution_data?: Json;
           archived_at?: string;
         };
         Relationships: [];
@@ -727,6 +742,121 @@ export type Database = {
           sort_order?: number;
         };
         Relationships: [];
+      };
+      onesignal_subscriptions: {
+        Row: {
+          id: string;
+          employee_id: string;
+          onesignal_player_id: string;
+          device: string;
+          laundry_employee_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          employee_id: string;
+          onesignal_player_id: string;
+          device?: string;
+          laundry_employee_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          employee_id?: string;
+          onesignal_player_id?: string;
+          device?: string;
+          laundry_employee_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'onesignal_subscriptions_employee_id_fkey';
+            columns: ['employee_id'];
+            isOneToOne: false;
+            referencedRelation: 'admin_users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      push_notification_history: {
+        Row: {
+          id: string;
+          type: 'shift_reminder' | 'shift_manual';
+          target_date: string;
+          laundry_employee_id: string | null;
+          employee_name_en: string | null;
+          employee_name_ar: string | null;
+          admin_user_id: string | null;
+          onesignal_player_id: string | null;
+          title_en: string;
+          body_en: string;
+          shift_period: string | null;
+          shift_role: string | null;
+          department_en: string | null;
+          start_time: string | null;
+          status: 'pending' | 'sent' | 'failed' | 'skipped';
+          error_message: string | null;
+          triggered_by: string;
+          audience: string;
+          sent_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          type: 'shift_reminder' | 'shift_manual';
+          target_date: string;
+          laundry_employee_id?: string | null;
+          employee_name_en?: string | null;
+          employee_name_ar?: string | null;
+          admin_user_id?: string | null;
+          onesignal_player_id?: string | null;
+          title_en: string;
+          body_en: string;
+          shift_period?: string | null;
+          shift_role?: string | null;
+          department_en?: string | null;
+          start_time?: string | null;
+          status?: 'pending' | 'sent' | 'failed' | 'skipped';
+          error_message?: string | null;
+          triggered_by?: string;
+          audience?: string;
+          sent_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          type?: 'shift_reminder' | 'shift_manual';
+          target_date?: string;
+          laundry_employee_id?: string | null;
+          employee_name_en?: string | null;
+          employee_name_ar?: string | null;
+          admin_user_id?: string | null;
+          onesignal_player_id?: string | null;
+          title_en?: string;
+          body_en?: string;
+          shift_period?: string | null;
+          shift_role?: string | null;
+          department_en?: string | null;
+          start_time?: string | null;
+          status?: 'pending' | 'sent' | 'failed' | 'skipped';
+          error_message?: string | null;
+          triggered_by?: string;
+          audience?: string;
+          sent_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'push_notification_history_admin_user_id_fkey';
+            columns: ['admin_user_id'];
+            isOneToOne: false;
+            referencedRelation: 'admin_users';
+            referencedColumns: ['id'];
+          },
+        ];
       };
     };
     Views: Record<string, never>;

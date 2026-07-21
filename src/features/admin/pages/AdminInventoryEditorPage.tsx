@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState } from 'react';
 
 import { InventoryManagementPage } from '@/features/inventory/components/InventoryManagementPage';
+import { TransactionHistoryTable } from '@/features/inventory/components/TransactionHistoryTable';
 
 const AdminInventoryPlanPage = lazy(() =>
   import('@/features/admin/pages/AdminInventoryPlanPage').then((module) => ({
@@ -15,9 +16,9 @@ const AdminUnderExecutionPage = lazy(() =>
 );
 
 import { AdminPageHeader } from '@/features/admin/components/AdminPageHeader';
+import { ArchiveHistoryViewShell } from '@/features/admin/components/ArchiveHistoryViewShell';
 
 import {
-  InventoryArchiveBanner,
   InventoryHistoryButton,
   InventoryHistoryDrawer,
 } from '@/features/admin/components/InventoryHistoryDrawer';
@@ -34,32 +35,64 @@ import '@/features/inventory/inventory-management.css';
 
 type AdminInventoryTab = 'inventory' | 'plan' | 'underExecution';
 
+function AdminInventoryLivePanel() {
+  const { t } = useLanguage();
+  const {
+    currentMonth,
+    ensureArchiveSynced,
+    isArchiveView,
+    liveDataRevision,
+    planDocument,
+    viewingArchive,
+  } = useInventoryArchive();
+
+  const liveMonthKey =
+    planDocument?.workingMonth || currentMonth || null;
+
+  return (
+    <>
+      <div hidden={isArchiveView}>
+        <AdminPageHeader
+          subtitle={t('admin.editor.inventorySubtitle')}
+          titleAr="إدارة المخزون"
+          titleEn="Manage Inventory"
+        />
+
+        <InventoryManagementPage
+          editableQuantities
+          historyMonthKey={liveMonthKey}
+          liveDataRevision={liveDataRevision}
+          managedItems
+          onBeforeWrite={ensureArchiveSynced}
+          readOnly={false}
+          showAddItem
+          showHeader={false}
+        />
+      </div>
+
+      {isArchiveView ? (
+        <ArchiveHistoryViewShell
+          titleAr={t('inventory.v2.historyTitleAr')}
+          titleEn={t('inventory.v2.historyTitle')}
+        >
+          <TransactionHistoryTable
+            transactions={viewingArchive?.inventoryData.transactions ?? []}
+          />
+        </ArchiveHistoryViewShell>
+      ) : null}
+    </>
+  );
+}
+
 function AdminInventoryEditorContent() {
   const { t } = useLanguage();
-
-  const archive = useInventoryArchive();
-
   const [activeTab, setActiveTab] = useState<AdminInventoryTab>('inventory');
-
-  const archiveInventorySnapshot = archive.viewingArchive
-    ? {
-        items: archive.viewingArchive.inventoryData.items,
-
-        transactions: archive.viewingArchive.inventoryData.transactions,
-
-        cachedAt: Date.now(),
-
-        itemsScope: 'managed' as const,
-      }
-    : null;
 
   return (
     <section className="admin-editor-page admin-editor-page--inventory mx-auto">
       <InventoryHistoryButton />
 
       <InventoryHistoryDrawer />
-
-      <InventoryArchiveBanner />
 
       <nav
         aria-label={t('inventory.tabs.label')}
@@ -69,7 +102,7 @@ function AdminInventoryEditorContent() {
         <button
           aria-controls="admin-inv-panel-inventory"
           aria-selected={activeTab === 'inventory'}
-          className={`inv-page-shell__tab${activeTab === 'inventory' ? 'inv-page-shell__tab--active' : ''}`}
+          className={`inv-page-shell__tab${activeTab === 'inventory' ? ' inv-page-shell__tab--active' : ''}`}
           id="admin-inv-tab-inventory"
           onClick={() => setActiveTab('inventory')}
           role="tab"
@@ -81,7 +114,7 @@ function AdminInventoryEditorContent() {
         <button
           aria-controls="admin-inv-panel-plan"
           aria-selected={activeTab === 'plan'}
-          className={`inv-page-shell__tab${activeTab === 'plan' ? 'inv-page-shell__tab--active' : ''}`}
+          className={`inv-page-shell__tab${activeTab === 'plan' ? ' inv-page-shell__tab--active' : ''}`}
           id="admin-inv-tab-plan"
           onClick={() => setActiveTab('plan')}
           role="tab"
@@ -109,20 +142,7 @@ function AdminInventoryEditorContent() {
         id="admin-inv-panel-inventory"
         role="tabpanel"
       >
-        <AdminPageHeader
-          subtitle={t('admin.editor.inventorySubtitle')}
-          titleAr="إدارة المخزون"
-          titleEn="Manage Inventory"
-        />
-
-        <InventoryManagementPage
-          editableQuantities={!archive.isArchiveView}
-          managedItems={!archive.isArchiveView}
-          readOnly={archive.isArchiveView}
-          showAddItem={!archive.isArchiveView}
-          showHeader={false}
-          snapshotOverride={archiveInventorySnapshot}
-        />
+        <AdminInventoryLivePanel />
       </div>
 
       <div

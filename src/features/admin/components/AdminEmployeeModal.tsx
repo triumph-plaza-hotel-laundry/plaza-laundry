@@ -3,6 +3,11 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import type { EmployeeStatus, LaundryEmployee } from '@/data/repositories';
 import { inferEmployeeTierFromPosition } from '@/lib/employee-org-hierarchy';
+import {
+  birthDateToIsoInputValue,
+  getLocalizedBirthDate,
+  localizedBirthDateFromIso,
+} from '@/lib/birthday-utils';
 import { useLanguage } from '@/hooks';
 
 type AdminEmployeeModalProps = {
@@ -49,6 +54,10 @@ export function AdminEmployeeModal({
   if (!employee) {
     return null;
   }
+
+  const birthDateInputValue = birthDateToIsoInputValue(
+    getLocalizedBirthDate(employee.dateOfBirth).en,
+  );
 
   const updatePositionEn = (value: string) => {
     onChange({
@@ -213,6 +222,22 @@ export function AdminEmployeeModal({
                     }
                     type="tel"
                     value={employee.phone}
+                  />
+                </div>
+                <div className="admin-editor-field">
+                  <label>{t('admin.editor.dateOfBirth')}</label>
+                  <input
+                    onChange={(event) => {
+                      const iso = event.target.value;
+                      onChange({
+                        ...employee,
+                        dateOfBirth: iso
+                          ? localizedBirthDateFromIso(iso)
+                          : { en: '', ar: '' },
+                      });
+                    }}
+                    type="date"
+                    value={birthDateInputValue}
                   />
                 </div>
                 <div className="admin-editor-field">

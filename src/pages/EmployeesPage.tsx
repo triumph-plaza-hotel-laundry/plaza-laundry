@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { EmployeesOrgChartDesktop } from '@/components/employees/EmployeesOrgChartDesktop';
 import { EmployeesOrgChartMobile } from '@/components/employees/EmployeesOrgChartMobile';
 import { OrgChartEmployeeCard } from '@/components/employees/OrgChartEmployeeCard';
@@ -14,13 +15,54 @@ import '@/components/employees/employees-page.css';
 export function EmployeesPage() {
   const { t } = useLanguage();
   const { employees } = useEmployees();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setIsLoading(false), 480);
     return () => window.clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    const highlight = searchParams.get('highlight');
+    if (!highlight) {
+      return;
+    }
+
+    const employee = employees.find((item) => item.id === highlight);
+    if (!employee) {
+      return;
+    }
+
+    setHighlightId(employee.id);
+    setSearchQuery(employee.employeeId || employee.name.en);
+
+    const frame = window.requestAnimationFrame(() => {
+      const node = document.querySelector<HTMLElement>(
+        `[data-employee-id="${CSS.escape(employee.id)}"]`,
+      );
+      node?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    const clearHighlight = window.setTimeout(() => {
+      setHighlightId(null);
+      setSearchParams(
+        (current) => {
+          const next = new URLSearchParams(current);
+          next.delete('highlight');
+          return next;
+        },
+        { replace: true },
+      );
+    }, 4200);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(clearHighlight);
+    };
+  }, [employees, searchParams, setSearchParams]);
 
   const filteredEmployees = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -118,6 +160,7 @@ export function EmployeesPage() {
           {filteredEmployees.map((employee, index) => (
             <OrgChartEmployeeCard
               employee={employee}
+              highlight={highlightId === employee.id}
               index={index}
               key={employee.id}
               size="compact"

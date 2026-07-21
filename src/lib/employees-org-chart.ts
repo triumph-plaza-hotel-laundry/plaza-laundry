@@ -58,3 +58,30 @@ export function orgChartHasMembers(chart: EmployeesOrgChart): boolean {
     ),
   );
 }
+
+/**
+ * Department groups from the Employees page org chart (staff department tree).
+ * Always derive from the current employee list — never maintain a separate list.
+ */
+export function buildEmployeeDepartmentTargets(
+  employees: readonly LaundryEmployee[],
+): StaffDepartmentGroup[] {
+  return buildEmployeesOrgChart([...employees]).staffDepartments.filter(
+    (department) => department.employees.length > 0,
+  );
+}
+
+export function getEmployeesForDepartmentTarget(
+  employees: readonly LaundryEmployee[],
+  departmentId: string,
+): LaundryEmployee[] {
+  if (!departmentId.trim()) {
+    return [];
+  }
+
+  const department = buildEmployeeDepartmentTargets(employees).find(
+    (entry) => entry.id === departmentId,
+  );
+
+  return department?.employees ?? [];
+}

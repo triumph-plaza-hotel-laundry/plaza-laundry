@@ -280,8 +280,9 @@ export function AdminTrainingEditorPage() {
         {selectedVideo ? (
           <div className="admin-editor-panel admin-editor-grid">
             <div className="admin-editor-field">
-              <label>YouTube URL</label>
+              <label htmlFor="training-video-url">YouTube URL</label>
               <input
+                id="training-video-url"
                 onChange={(event) =>
                   updateVideo({ youtubeUrl: event.target.value })
                 }

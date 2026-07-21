@@ -25,6 +25,23 @@ export function getCurrentMonthKey(date = new Date()) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 }
 
+export function getMonthKeyFromTimestamp(value: string) {
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+  if (dateOnly) {
+    return `${dateOnly[1]}-${dateOnly[2]}`;
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+  return getCurrentMonthKey(date);
+}
+
+export function isTimestampInMonth(value: string, monthKey: string) {
+  return getMonthKeyFromTimestamp(value) === monthKey;
+}
+
 export function nextMonthKey(monthKey: string) {
   const [year, month] = monthKey.split('-').map(Number);
   const next = new Date(year, month, 1);

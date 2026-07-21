@@ -39,6 +39,7 @@ export type AuthUser = {
   isProtected: boolean;
   isActive: boolean;
   adminType: AdminType;
+  laundryEmployeeId?: string | null;
 };
 
 export type AuthSession = {

@@ -166,8 +166,9 @@ export function AdminCareSymbolsEditorPage() {
         {selected ? (
           <div className="admin-editor-panel admin-editor-grid">
             <div className="admin-editor-field">
-              <label>category</label>
+              <label htmlFor="care-symbol-category">category</label>
               <select
+                id="care-symbol-category"
                 onChange={(event) =>
                   updateSelected({
                     category: event.target.value as CareSymbolCategory,

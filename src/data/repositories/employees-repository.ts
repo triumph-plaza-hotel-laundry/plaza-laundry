@@ -4,6 +4,7 @@ import {
   type LaundryEmployee,
 } from '@/data/laundry-employees';
 import { inferEmployeeTierFromPosition } from '@/lib/employee-org-hierarchy';
+import { getLocalizedBirthDate } from '@/lib/birthday-utils';
 import { createLocalStore } from '@/lib/data-store';
 import { registerRepository } from '@/data/repositories/repository-utils';
 import { STORAGE_KEYS } from '@/lib/data-store/storage-keys';
@@ -70,7 +71,7 @@ export function normalizeEmployee(
     name: raw.name ?? emptyLocalized(),
     jobTitle,
     phone: raw.phone ?? '',
-    dateOfBirth: raw.dateOfBirth ?? emptyLocalized(),
+    dateOfBirth: getLocalizedBirthDate(raw.dateOfBirth),
     department: raw.department ?? emptyLocalized(),
     shift: raw.shift ?? emptyLocalized(),
     salary: raw.salary ?? '',

@@ -1,7 +1,8 @@
 import { memo } from 'react';
-import { Bell, Globe, Menu, Moon, Sun } from 'lucide-react';
+import { Globe, Menu, Moon, Sun } from 'lucide-react';
 import { HeaderClock } from '@/components/layout/HeaderClock';
 import { HeaderLogo } from '@/components/layout/HeaderLogo';
+import { NotificationBell } from '@/components/layout/NotificationBell';
 import { useLanguage } from '@/hooks';
 import { toggleTheme } from '@/lib/theme';
 import '@/components/layout/header.css';
@@ -70,13 +71,7 @@ export const Header = memo(function Header({
           />
         </button>
 
-        <button
-          aria-label={t('common.notifications')}
-          className="luxury-header__control luxury-header__notification"
-          type="button"
-        >
-          <Bell aria-hidden="true" size={ICON_SIZE} strokeWidth={ICON_STROKE} />
-        </button>
+        <NotificationBell />
 
         <HeaderLogo />
       </div>

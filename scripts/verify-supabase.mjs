@@ -28,6 +28,8 @@ const tables = [
   'washing_program_steps',
   'laundry_chemicals',
   'chemical_technical_info',
+  'onesignal_subscriptions',
+  'push_notification_history',
 ];
 
 const documentKeys = [

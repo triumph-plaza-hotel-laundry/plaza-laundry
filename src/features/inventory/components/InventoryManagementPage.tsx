@@ -1,6 +1,6 @@
 import { AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   getInventoryItemReferenceCounts,
   INVENTORY_ITEM_HAS_REFERENCES_MESSAGE,
@@ -20,6 +20,7 @@ import { InventoryItemsTable } from '@/features/inventory/components/InventoryIt
 import { IssueItemsCard } from '@/features/inventory/components/IssueItemsCard';
 import { ReceiveItemsCard } from '@/features/inventory/components/ReceiveItemsCard';
 import { TransactionHistoryTable } from '@/features/inventory/components/TransactionHistoryTable';
+import { filterTransactionsByMonth } from '@/features/inventory/monthly-archive-service';
 import { useInventoryManagement } from '@/hooks/useInventoryManagement';
 import { useInventoryPermissions } from '@/hooks/useInventoryPermissions';
 import { useLanguage } from '@/hooks';
@@ -32,6 +33,12 @@ type InventoryManagementPageProps = {
   showAddItem?: boolean;
   managedItems?: boolean;
   snapshotOverride?: InventorySnapshot | null;
+  /** When set (Admin live view), Transaction History shows only this month. */
+  historyMonthKey?: string | null;
+  /** Bumps to force a fresh Transaction History reload from the database. */
+  liveDataRevision?: number;
+  /** Runs before receive/issue so month-end archive can close first. */
+  onBeforeWrite?: () => Promise<void>;
 };
 
 export function InventoryManagementPage({
@@ -41,12 +48,16 @@ export function InventoryManagementPage({
   showAddItem = false,
   managedItems = false,
   snapshotOverride = null,
+  historyMonthKey = null,
+  liveDataRevision = 0,
+  onBeforeWrite,
 }: InventoryManagementPageProps) {
   const { t } = useLanguage();
   const permissions = useInventoryPermissions();
   const live = useInventoryManagement({
     itemsScope: managedItems ? 'managed' : 'active',
   });
+  const refreshLive = live.refresh;
   const [addItemOpen, setAddItemOpen] = useState(false);
   const [editItem, setEditItem] = useState<InventoryItem | null>(null);
   const [confirmState, setConfirmState] = useState<{
@@ -55,9 +66,25 @@ export function InventoryManagementPage({
     blockedMessage?: string | null;
   } | null>(null);
 
+  useEffect(() => {
+    if (!liveDataRevision || snapshotOverride || readOnly) {
+      return;
+    }
+
+    void refreshLive({ force: true }).catch(() => {
+      // Keep the existing live error channel from the hook.
+    });
+  }, [liveDataRevision, readOnly, refreshLive, snapshotOverride]);
+
   const items = snapshotOverride?.items ?? live.items;
   const selectorItems = snapshotOverride?.items ?? live.activeItems;
-  const transactions = snapshotOverride?.transactions ?? live.transactions;
+  const rawTransactions = snapshotOverride?.transactions ?? live.transactions;
+  const transactions = useMemo(() => {
+    if (snapshotOverride || !historyMonthKey) {
+      return rawTransactions;
+    }
+    return filterTransactionsByMonth(rawTransactions, historyMonthKey);
+  }, [historyMonthKey, rawTransactions, snapshotOverride]);
   const isReady = snapshotOverride ? true : live.isReady;
   const isBusy = readOnly ? true : live.isBusy;
   const error = live.error;
@@ -73,6 +100,26 @@ export function InventoryManagementPage({
   const canManageItems = showAddItem && !readOnly && !snapshotOverride;
   const canAddItem = canManageItems && permissions.canAdd;
   const canShowRowActions = canManageItems;
+
+  const handleReceiveItems = useCallback(
+    async (input: Parameters<typeof receiveItems>[0]) => {
+      if (onBeforeWrite) {
+        await onBeforeWrite();
+      }
+      await receiveItems(input);
+    },
+    [onBeforeWrite, receiveItems],
+  );
+
+  const handleIssueItems = useCallback(
+    async (input: Parameters<typeof issueItems>[0]) => {
+      if (onBeforeWrite) {
+        await onBeforeWrite();
+      }
+      await issueItems(input);
+    },
+    [issueItems, onBeforeWrite],
+  );
 
   const handleEditItem = useCallback((item: InventoryItem) => {
     setEditItem(item);
@@ -221,12 +268,12 @@ export function InventoryManagementPage({
               <ReceiveItemsCard
                 disabled={isBusy}
                 items={selectorItems}
-                onSubmit={receiveItems}
+                onSubmit={handleReceiveItems}
               />
               <IssueItemsCard
                 disabled={isBusy}
                 items={selectorItems}
-                onSubmit={issueItems}
+                onSubmit={handleIssueItems}
               />
             </div>
           )}

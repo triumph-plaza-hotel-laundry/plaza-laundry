@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type FabricImageProps = {
   alt?: string;
@@ -15,7 +15,29 @@ export function FabricImage({
 }: FabricImageProps) {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
+  const imageRef = useRef<HTMLImageElement | null>(null);
   const size = compact ? 80 : 120;
+
+  useEffect(() => {
+    const image = imageRef.current;
+    if (!image) {
+      return;
+    }
+
+    const handleLoad = () => setLoaded(true);
+    const handleError = () => {
+      setFailed(true);
+      setLoaded(true);
+    };
+
+    image.addEventListener('load', handleLoad);
+    image.addEventListener('error', handleError);
+
+    return () => {
+      image.removeEventListener('load', handleLoad);
+      image.removeEventListener('error', handleError);
+    };
+  }, [src, failed]);
 
   return (
     <div
@@ -30,11 +52,7 @@ export function FabricImage({
         decoding="async"
         height={size}
         loading="lazy"
-        onError={() => {
-          setFailed(true);
-          setLoaded(true);
-        }}
-        onLoad={() => setLoaded(true)}
+        ref={imageRef}
         src={failed ? '/fabrics/fabric.svg' : src}
         width={size}
       />

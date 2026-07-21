@@ -99,10 +99,10 @@ export function UnderExecutionHistoryTable({
                       className="inv-erp-table__name"
                       title={record.itemName}
                     >
-                      {record.itemName}
+                      {record.itemName || '—'}
                     </td>
                     <td>{record.supplier}</td>
-                    <td>{record.supplierName}</td>
+                    <td>{record.department || '—'}</td>
                     <td className="inv-erp-table__num">{record.quantity}</td>
                     <td>{record.date}</td>
                     <td>{date}</td>

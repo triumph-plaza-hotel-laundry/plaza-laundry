@@ -17,6 +17,10 @@ export const dictionaries: Record<Language, Dictionary> = {
     'common.theme': 'Theme',
     'common.language': 'Language',
     'common.notifications': 'Notifications',
+    'common.notificationsEmpty': 'No notifications yet.',
+    'common.notificationsMarkAllRead': 'Mark all read',
+    'common.notificationsUnread': 'Notifications, {count} unread',
+    'common.dismiss': 'Dismiss',
     'common.back': 'Back',
     'common.backAr': 'رجوع',
     'footer.status': 'Prepared for the next phase',
@@ -207,6 +211,17 @@ export const dictionaries: Record<Language, Dictionary> = {
     'employees.tiers.washingTeamSupervisor': 'Washing Team Supervisors',
     'employees.tiers.laundryWorker': 'Laundry Workers',
     'employees.birthdayToday': "Today's birthday",
+    'employees.happyBirthday': 'Happy Birthday',
+    'employees.ageYears': 'yrs',
+    'employees.birthdayNotificationTitle': 'Happy Birthday!',
+    'employees.birthdayNotificationBody':
+      "Today is {name}'s birthday.\nWe wish you a wonderful year full of success.",
+    'employees.birthdayNotificationWish':
+      'We wish you a wonderful year full of success.',
+    'employees.birthdayNotificationOne':
+      "Today is {name}'s birthday. Wish them a wonderful day!",
+    'employees.birthdayNotificationMany':
+      'Today we celebrate: {names}. Wish them a wonderful day!',
     'employees.org.directorEn': 'Director Manager',
     'employees.org.directorAr': 'المدير المسؤول',
     'employees.org.managersEn': 'Managers',
@@ -285,6 +300,49 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.dashboard.aiSettings': 'AI Settings',
     'admin.dashboard.aiSettingsDesc':
       'Configure AI assistant behavior and prompts.',
+    'admin.dashboard.pushNotifications': 'Shift Push Notifications',
+    'admin.dashboard.pushNotificationsDesc':
+      'Automatic shift reminders and owner manual OneSignal broadcasts.',
+    'admin.push.titleEn': 'Shift Push Notifications',
+    'admin.push.titleAr': 'إشعارات الشفت',
+    'admin.push.subtitle':
+      'Automatic reminders at 10:00 PM Cairo time using the latest weekly schedule.',
+    'admin.push.automaticTitle': 'Automatic Shift Reminders',
+    'admin.push.automaticHint':
+      'Every night at 22:00 Africa/Cairo the system reads the current weekly shift schedule from Supabase and sends each employee only their own tomorrow shift.',
+    'admin.push.tomorrowDate': 'Tomorrow (Cairo)',
+    'admin.push.tomorrowShiftCount': 'Employees on shift tomorrow',
+    'admin.push.cronSchedule': 'Daily schedule',
+    'admin.push.manualTitle': 'Manual Notification (Owner Only)',
+    'admin.push.manualHint':
+      'Send a custom push now to everyone, a department, an individual, or tomorrow shift employees.',
+    'admin.push.audience': 'Audience',
+    'admin.push.department': 'Department',
+    'admin.push.employee': 'Employee',
+    'admin.push.selectDepartment': 'Select department…',
+    'admin.push.selectEmployee': 'Select employee…',
+    'admin.push.customTitle': 'Title',
+    'admin.push.customTitlePlaceholder': 'Announcement title',
+    'admin.push.customBody': 'Message',
+    'admin.push.customBodyPlaceholder':
+      'Hello {name},\nYour message here…',
+    'admin.push.nameTokenHint':
+      'Use {name} in the message body to insert each employee name.',
+    'admin.push.shiftTemplateHint':
+      'Tomorrow shift employees receive the standard personalized shift template.',
+    'admin.push.sendNow': 'Send notification',
+    'admin.push.sendSuccess':
+      'Done — sent: {sent}, failed: {failed}, skipped: {skipped}.',
+    'admin.push.saveFailed': 'Failed to send push notification.',
+    'admin.push.historyTitle': 'Notification History',
+    'admin.push.historyEmpty': 'No push notifications logged yet.',
+    'admin.push.colEmployee': 'Employee',
+    'admin.push.colDate': 'Date',
+    'admin.push.colTime': 'Time',
+    'admin.push.colShift': 'Shift',
+    'admin.push.colStatus': 'Status',
+    'admin.push.statusSent': 'Sent',
+    'admin.push.statusFailed': 'Failed',
     'admin.dashboard.settings': 'Application Settings',
     'admin.dashboard.settingsDesc':
       'General preferences and system configuration.',
@@ -350,6 +408,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.editor.jobEn': 'Job title (English)',
     'admin.editor.jobAr': 'Job title (Arabic)',
     'admin.editor.phone': 'Phone',
+    'admin.editor.dateOfBirth': 'Birth Date',
     'admin.editor.shiftsSubtitle':
       'Assign employees to shifts and edit working hours. Changes apply after Save.',
     'admin.editor.shiftRole': 'Role',
@@ -450,6 +509,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.editor.table.department': 'Department',
     'admin.editor.table.position': 'Position',
     'admin.editor.table.phone': 'Phone',
+    'admin.editor.table.birthDate': 'Birth Date',
     'admin.editor.table.shift': 'Shift',
     'admin.editor.table.status': 'Status',
     'admin.editor.table.actions': 'Actions',
@@ -471,6 +531,9 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.inventory.history.empty': 'No monthly archive available yet.',
     'admin.inventory.history.readOnly': 'Read-only archive',
     'admin.inventory.history.exit': 'Return to current month',
+    'admin.inventory.history.planTitle': 'Plan History',
+    'admin.inventory.history.planTitleAr': 'سجل الخطة',
+    'admin.inventory.history.planEmpty': 'No plan history for this month.',
     'admin.inventory.plan.region': 'Uniform renewal plan workspace',
     'admin.inventory.plan.titleEn': 'Uniform Renewal Plan Schedule',
     'admin.inventory.plan.titleAr': 'خطة تجديد اليونيفورمات بالمواعيد',
@@ -749,7 +812,7 @@ export const dictionaries: Record<Language, Dictionary> = {
       'Track supplier items currently under execution.',
     'inventory.underExecution.formTitle': 'Under Execution',
     'inventory.underExecution.formTitleAr': 'تحت التنفيذ',
-    'inventory.underExecution.supplierName': 'Supplier Name',
+    'inventory.underExecution.supplierName': 'Department',
     'inventory.underExecution.listTitle': 'Under Execution List',
     'inventory.underExecution.listTitleAr': 'قائمة تحت التنفيذ',
     'inventory.underExecution.listEmpty': 'No under execution records yet.',
@@ -771,7 +834,7 @@ export const dictionaries: Record<Language, Dictionary> = {
       'Type DELETE to confirm',
     'inventory.underExecution.validation.supplier': 'Supplier is required.',
     'inventory.underExecution.validation.supplierName':
-      'Supplier name is required.',
+      'Department is required.',
     'inventory.underExecution.validation.item': 'Please select an item.',
     'inventory.underExecution.validation.quantity':
       'Quantity must be at least 1.',
@@ -1054,6 +1117,8 @@ export const dictionaries: Record<Language, Dictionary> = {
     'login.submitting': 'Signing in…',
     'auth.invalidCredentials': 'Invalid credentials',
     'auth.adminAccessDenied': 'This account does not have admin portal access.',
+    'auth.adminSessionExpired':
+      'Your admin session has expired. Please log in again.',
     'auth.permissionDenied': 'Permission denied',
     'auth.ownerProtected': 'Owner account is permanently protected',
     'auth.accessDeniedTitle': 'Access Denied',
@@ -1069,6 +1134,10 @@ export const dictionaries: Record<Language, Dictionary> = {
     'common.theme': 'المظهر',
     'common.language': 'اللغة',
     'common.notifications': 'الإشعارات',
+    'common.notificationsEmpty': 'لا توجد إشعارات بعد.',
+    'common.notificationsMarkAllRead': 'تعليم تعليم الكل كمقروء',
+    'common.notificationsUnread': 'الإشعارات، {count} غير مقروء',
+    'common.dismiss': 'إغلاق',
     'common.back': 'رجوع',
     'common.backAr': 'Back',
     'footer.status': 'جاهز للمرحلة التالية',
@@ -1257,6 +1326,17 @@ export const dictionaries: Record<Language, Dictionary> = {
     'employees.tiers.washingTeamSupervisor': 'مشرفو فرق الغسيل',
     'employees.tiers.laundryWorker': 'عمال الغسيل',
     'employees.birthdayToday': 'عيد ميلاد اليوم',
+    'employees.happyBirthday': 'عيد ميلاد سعيد',
+    'employees.ageYears': 'سنة',
+    'employees.birthdayNotificationTitle': 'عيد ميلاد سعيد!',
+    'employees.birthdayNotificationBody':
+      'اليوم عيد ميلاد {name}.\nنتمنى لكم عاماً رائعاً مليئاً بالنجاح.',
+    'employees.birthdayNotificationWish':
+      'نتمنى لكم عاماً رائعاً مليئاً بالنجاح.',
+    'employees.birthdayNotificationOne':
+      'اليوم عيد ميلاد {name}. نتمنى له/لها يوماً رائعاً!',
+    'employees.birthdayNotificationMany':
+      'نحتفل اليوم بـ: {names}. نتمنى لهم يوماً رائعاً!',
     'employees.org.directorEn': 'Director Manager',
     'employees.org.directorAr': 'المدير المسؤول',
     'employees.org.managersEn': 'Managers',
@@ -1327,6 +1407,48 @@ export const dictionaries: Record<Language, Dictionary> = {
       'النص الرئيسي والعناوين ومحتوى الصفحة الأولى.',
     'admin.dashboard.aiSettings': 'إعدادات الذكاء الاصطناعي',
     'admin.dashboard.aiSettingsDesc': 'تهيئة سلوك المساعد الذكي والتعليمات.',
+    'admin.dashboard.pushNotifications': 'إشعارات الشفت',
+    'admin.dashboard.pushNotificationsDesc':
+      'تذكيرات الشفت التلقائية وإرسال يدوي عبر OneSignal للمالك فقط.',
+    'admin.push.titleEn': 'Shift Push Notifications',
+    'admin.push.titleAr': 'إشعارات الشفت',
+    'admin.push.subtitle':
+      'تذكيرات تلقائية الساعة 10:00 مساءً بتوقيت القاهرة من أحدث جدول أسبوعي.',
+    'admin.push.automaticTitle': 'تذكيرات الشفت التلقائية',
+    'admin.push.automaticHint':
+      'كل ليلة الساعة 22:00 بتوقيت القاهرة يقرأ النظام جدول الشفت الأسبوعي الحالي ويرسل لكل موظف شفته فقط.',
+    'admin.push.tomorrowDate': 'غداً (القاهرة)',
+    'admin.push.tomorrowShiftCount': 'موظفون على شفت الغد',
+    'admin.push.cronSchedule': 'الجدول اليومي',
+    'admin.push.manualTitle': 'إشعار يدوي (للمالك فقط)',
+    'admin.push.manualHint':
+      'أرسل إشعاراً الآن للجميع أو قسم أو موظف أو موظفي شفت الغد.',
+    'admin.push.audience': 'الجمهور',
+    'admin.push.department': 'القسم',
+    'admin.push.employee': 'الموظف',
+    'admin.push.selectDepartment': 'اختر القسم…',
+    'admin.push.selectEmployee': 'اختر الموظف…',
+    'admin.push.customTitle': 'العنوان',
+    'admin.push.customTitlePlaceholder': 'عنوان الإعلان',
+    'admin.push.customBody': 'الرسالة',
+    'admin.push.customBodyPlaceholder': 'مرحباً {name}،\nرسالتك هنا…',
+    'admin.push.nameTokenHint':
+      'استخدم {name} في نص الرسالة لإدراج اسم كل موظف.',
+    'admin.push.shiftTemplateHint':
+      'موظفو شفت الغد يستلمون قالب الشفت الشخصي القياسي.',
+    'admin.push.sendNow': 'إرسال الإشعار',
+    'admin.push.sendSuccess':
+      'تم — أُرسل: {sent}، فشل: {failed}، تخطي: {skipped}.',
+    'admin.push.saveFailed': 'فشل إرسال الإشعار.',
+    'admin.push.historyTitle': 'سجل الإشعارات',
+    'admin.push.historyEmpty': 'لا توجد إشعارات مسجلة بعد.',
+    'admin.push.colEmployee': 'الموظف',
+    'admin.push.colDate': 'التاريخ',
+    'admin.push.colTime': 'الوقت',
+    'admin.push.colShift': 'الشفت',
+    'admin.push.colStatus': 'الحالة',
+    'admin.push.statusSent': 'أُرسل',
+    'admin.push.statusFailed': 'فشل',
     'admin.dashboard.settings': 'إعدادات التطبيق',
     'admin.dashboard.settingsDesc': 'التفضيلات العامة وإعدادات النظام.',
     'admin.back': 'رجوع',
@@ -1388,6 +1510,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.editor.jobEn': 'المسمى الوظيفي (إنجليزي)',
     'admin.editor.jobAr': 'المسمى الوظيفي (عربي)',
     'admin.editor.phone': 'الهاتف',
+    'admin.editor.dateOfBirth': 'تاريخ الميلاد',
     'admin.editor.shiftsSubtitle':
       'تعيين الموظفين للمناوبات وتعديل ساعات العمل. التغييرات تُطبَّق بعد الحفظ.',
     'admin.editor.shiftRole': 'الدور',
@@ -1486,6 +1609,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.editor.table.department': 'القسم',
     'admin.editor.table.position': 'المسمى الوظيفي',
     'admin.editor.table.phone': 'الهاتف',
+    'admin.editor.table.birthDate': 'تاريخ الميلاد',
     'admin.editor.table.shift': 'الشيفت',
     'admin.editor.table.status': 'الحالة',
     'admin.editor.table.actions': 'الإجراءات',
@@ -1507,6 +1631,9 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.inventory.history.empty': 'لا يوجد أرشيف شهري متاح بعد.',
     'admin.inventory.history.readOnly': 'أرشيف للقراءة فقط',
     'admin.inventory.history.exit': 'العودة إلى الشهر الحالي',
+    'admin.inventory.history.planTitle': 'سجل الخطة',
+    'admin.inventory.history.planTitleAr': 'Plan History',
+    'admin.inventory.history.planEmpty': 'لا يوجد سجل خطة لهذا الشهر.',
     'admin.inventory.plan.region': 'مساحة خطة تجديد اليونيفورمات',
     'admin.inventory.plan.titleEn': 'Uniform Renewal Plan Schedule',
     'admin.inventory.plan.titleAr': 'خطة تجديد اليونيفورمات بالمواعيد',
@@ -1776,7 +1903,7 @@ export const dictionaries: Record<Language, Dictionary> = {
       'تتبع أصناف الموردين قيد التنفيذ حالياً.',
     'inventory.underExecution.formTitle': 'Under Execution',
     'inventory.underExecution.formTitleAr': 'تحت التنفيذ',
-    'inventory.underExecution.supplierName': 'اسم المورد',
+    'inventory.underExecution.supplierName': 'القسم',
     'inventory.underExecution.listTitle': 'Under Execution List',
     'inventory.underExecution.listTitleAr': 'قائمة تحت التنفيذ',
     'inventory.underExecution.listEmpty': 'لا توجد سجلات تحت التنفيذ بعد.',
@@ -1797,7 +1924,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     'inventory.underExecution.clearHistoryTypeDelete':
       'اكتب DELETE للتأكيد',
     'inventory.underExecution.validation.supplier': 'المورد مطلوب.',
-    'inventory.underExecution.validation.supplierName': 'اسم المورد مطلوب.',
+    'inventory.underExecution.validation.supplierName': 'القسم مطلوب.',
     'inventory.underExecution.validation.item': 'يرجى اختيار صنف.',
     'inventory.underExecution.validation.quantity':
       'يجب أن تكون الكمية 1 على الأقل.',
@@ -2077,6 +2204,8 @@ export const dictionaries: Record<Language, Dictionary> = {
     'auth.invalidCredentials': 'بيانات الدخول غير صحيحة',
     'auth.adminAccessDenied':
       'هذا الحساب لا يملك صلاحية الوصول إلى بوابة الإدارة.',
+    'auth.adminSessionExpired':
+      'انتهت جلسة الإدارة. يرجى تسجيل الدخول مرة أخرى.',
     'auth.permissionDenied': 'تم رفض الصلاحية',
     'auth.ownerProtected': 'حساب المالك محمي بشكل دائم',
     'auth.accessDeniedTitle': 'الوصول مرفوض',
