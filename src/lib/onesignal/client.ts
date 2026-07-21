@@ -4,7 +4,6 @@ import {
   removeOneSignalSubscriptionsForEmployee,
   upsertOneSignalSubscription,
 } from '@/lib/onesignal/subscriptions-repository';
-import { ONESIGNAL_SERVICE_WORKER } from '@/lib/onesignal/service-worker-config';
 
 let initPromise: Promise<boolean> | null = null;
 let changeListenerBound = false;
@@ -250,14 +249,13 @@ export function ensureOneSignalInitialized(): Promise<boolean> {
   if (!initPromise) {
     initPromise = (async () => {
       try {
-        const swConfig = ONESIGNAL_SERVICE_WORKER;
-
         logStep('init starting', {
           appIdPrefix: `${onesignalConfig.appId.slice(0, 8)}…`,
           origin: window.location.origin,
           localhost: isLocalhostOrigin(),
-          serviceWorkerPath: swConfig.path,
-          serviceWorkerScope: swConfig.scope,
+          serviceWorkerPath: 'onesignal/OneSignalSDKWorker.js',
+          serviceWorkerScope: '/onesignal/',
+          serviceWorkerOverrideForTypical: true,
         });
 
         if (import.meta.env.DEV) {
@@ -267,8 +265,11 @@ export function ensureOneSignalInitialized(): Promise<boolean> {
         await OneSignal.init({
           appId: onesignalConfig.appId,
           allowLocalhostAsSecureOrigin: isLocalhostOrigin(),
-          serviceWorkerPath: swConfig.path,
-          serviceWorkerParam: { scope: swConfig.scope },
+          // Required: without this flag the SDK ignores local SW path/scope and
+          // falls back to the dashboard Typical defaults (/OneSignalSDKWorker.js).
+          serviceWorkerOverrideForTypical: true,
+          serviceWorkerPath: 'onesignal/OneSignalSDKWorker.js',
+          serviceWorkerParam: { scope: '/onesignal/' },
           autoResubscribe: true,
           promptOptions: {
             slidedown: {
