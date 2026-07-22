@@ -4,18 +4,25 @@ import { AdminBackButton } from '@/features/admin/components/AdminBackButton';
 import { adminDashboardModules } from '@/features/admin/config/admin-dashboard-modules';
 import { isPrimaryAdminAccount } from '@/features/auth/owner-protection';
 import { useAuth, useLanguage } from '@/hooks';
+import { useDevicePermissions } from '@/hooks/useDevicePermissions';
 import '@/features/admin/admin-dashboard.css';
 
 export function AdminIndexPage() {
   const { t } = useLanguage();
   const { logout, user } = useAuth();
+  const { canManageDevices, isReady: devicePermissionsReady } =
+    useDevicePermissions();
 
   const visibleModules = adminDashboardModules.filter((module) => {
-    if (!module.ownerOnly) {
-      return true;
+    if (module.ownerOnly) {
+      return user ? isPrimaryAdminAccount(user) : false;
     }
 
-    return user ? isPrimaryAdminAccount(user) : false;
+    if (module.requiresDevicePermission) {
+      return devicePermissionsReady && canManageDevices;
+    }
+
+    return true;
   });
 
   return (

@@ -116,6 +116,12 @@ const AdminSettingsPage = lazy(() =>
   })),
 );
 
+const AdminEmployeeDevicesPage = lazy(() =>
+  import('@/features/admin/pages/AdminEmployeeDevicesPage').then((module) => ({
+    default: module.AdminEmployeeDevicesPage,
+  })),
+);
+
 export const adminRoutes = (
   <Route path="admin">
     <Route element={<AdminLoginPage />} path="login" />
@@ -144,6 +150,7 @@ export const adminRoutes = (
       <Route element={<OwnerGuard />}>
         <Route element={<AdminOwnerPushPage />} path="push-notifications" />
       </Route>
+      <Route element={<AdminEmployeeDevicesPage />} path="employee-devices" />
       <Route element={<AdminSettingsPage />} path="settings" />
     </Route>
   </Route>

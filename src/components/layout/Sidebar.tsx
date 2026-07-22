@@ -8,6 +8,7 @@ import logoUrl from '@/assets/images/logo.png';
 import { navigationItems } from '@/config/navigation';
 import { canAccessAdminPortal } from '@/features/auth/permissions';
 import { useAuth, useLanguage } from '@/hooks';
+import { useThisDeviceLinkStatus } from '@/hooks/useThisDeviceLinkStatus';
 import { cn } from '@/lib/styles';
 import { IconButton } from '@/components/ui';
 import '@/components/layout/sidebar.css';
@@ -33,6 +34,7 @@ export const Sidebar = memo(function Sidebar({
 }: SidebarProps) {
   const { canAccessPath, canSeeNav, isAuthenticated, role } = useAuth();
   const { direction, t } = useLanguage();
+  const { isLinked: isThisDeviceLinked } = useThisDeviceLinkStatus();
 
   const closedOffset = direction === 'rtl' ? '100%' : '-100%';
 
@@ -99,7 +101,15 @@ export const Sidebar = memo(function Sidebar({
       <nav aria-label={t('common.menu')} className="luxury-sidebar__nav">
         {navigationItems
           .filter((item) => {
+            if (item.requireUnlinkedDevice && isThisDeviceLinked) {
+              return false;
+            }
+
             if (item.resource === 'admin') {
+              return true;
+            }
+
+            if (item.requireUnlinkedDevice) {
               return true;
             }
 

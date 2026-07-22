@@ -743,6 +743,144 @@ export type Database = {
         };
         Relationships: [];
       };
+      admin_device_permissions: {
+        Row: {
+          user_id: string;
+          permission: string;
+          granted_at: string;
+        };
+        Insert: {
+          user_id: string;
+          permission: string;
+          granted_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          permission?: string;
+          granted_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'admin_device_permissions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'admin_users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      employee_device_pairing_sessions: {
+        Row: {
+          id: string;
+          pairing_token: string;
+          onesignal_player_id: string;
+          device_label: string;
+          status: 'pending' | 'completed' | 'expired' | 'cancelled';
+          laundry_employee_id: string | null;
+          laundry_employee_name_en: string | null;
+          laundry_employee_name_ar: string | null;
+          paired_by_admin_id: string | null;
+          created_at: string;
+          expires_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          pairing_token: string;
+          onesignal_player_id: string;
+          device_label?: string;
+          status?: 'pending' | 'completed' | 'expired' | 'cancelled';
+          laundry_employee_id?: string | null;
+          laundry_employee_name_en?: string | null;
+          laundry_employee_name_ar?: string | null;
+          paired_by_admin_id?: string | null;
+          created_at?: string;
+          expires_at: string;
+          completed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          pairing_token?: string;
+          onesignal_player_id?: string;
+          device_label?: string;
+          status?: 'pending' | 'completed' | 'expired' | 'cancelled';
+          laundry_employee_id?: string | null;
+          laundry_employee_name_en?: string | null;
+          laundry_employee_name_ar?: string | null;
+          paired_by_admin_id?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          completed_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'employee_device_pairing_sessions_paired_by_admin_id_fkey';
+            columns: ['paired_by_admin_id'];
+            isOneToOne: false;
+            referencedRelation: 'admin_users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      employee_linked_devices: {
+        Row: {
+          id: string;
+          laundry_employee_id: string;
+          laundry_employee_name_en: string | null;
+          laundry_employee_name_ar: string | null;
+          onesignal_player_id: string;
+          device_label: string;
+          status: 'active' | 'replaced' | 'removed';
+          paired_at: string;
+          last_seen_at: string;
+          paired_by_admin_id: string | null;
+          replaced_at: string | null;
+          removed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          laundry_employee_id: string;
+          laundry_employee_name_en?: string | null;
+          laundry_employee_name_ar?: string | null;
+          onesignal_player_id: string;
+          device_label?: string;
+          status?: 'active' | 'replaced' | 'removed';
+          paired_at?: string;
+          last_seen_at?: string;
+          paired_by_admin_id?: string | null;
+          replaced_at?: string | null;
+          removed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          laundry_employee_id?: string;
+          laundry_employee_name_en?: string | null;
+          laundry_employee_name_ar?: string | null;
+          onesignal_player_id?: string;
+          device_label?: string;
+          status?: 'active' | 'replaced' | 'removed';
+          paired_at?: string;
+          last_seen_at?: string;
+          paired_by_admin_id?: string | null;
+          replaced_at?: string | null;
+          removed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'employee_linked_devices_paired_by_admin_id_fkey';
+            columns: ['paired_by_admin_id'];
+            isOneToOne: false;
+            referencedRelation: 'admin_users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       onesignal_subscriptions: {
         Row: {
           id: string;

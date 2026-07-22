@@ -37,6 +37,10 @@ const routePreloaders: Record<string, () => Promise<unknown>> = {
     import('@/features/admin/pages/AdminHomeContentEditorPage'),
   '/admin/ai': () => import('@/features/admin/pages/AdminAiSettingsEditorPage'),
   '/admin/settings': () => import('@/features/admin/pages/AdminSettingsPage'),
+  '/admin/employee-devices': () =>
+    import('@/features/admin/pages/AdminEmployeeDevicesPage'),
+  '/employee-device-pairing': () =>
+    import('@/pages/EmployeeDevicePairingPage'),
 };
 
 const preloadedRoutes = new Set<string>();

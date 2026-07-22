@@ -53,6 +53,9 @@ const REALTIME_TABLES = [
   'chemical_technical_info',
   'onesignal_subscriptions',
   'push_notification_history',
+  'admin_device_permissions',
+  'employee_device_pairing_sessions',
+  'employee_linked_devices',
 ];
 
 async function connectPostgres() {

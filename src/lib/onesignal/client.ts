@@ -303,6 +303,22 @@ export function ensureOneSignalInitialized(): Promise<boolean> {
 
         return true;
       } catch (error) {
+        // Another caller (e.g. main bootstrap) may have already initialized the
+        // shared SDK. Reuse that instance instead of reporting a false failure.
+        const message =
+          error instanceof Error
+            ? error.message
+            : typeof error === 'string'
+              ? error
+              : '';
+        const alreadyInitialized = /already (been )?init/i.test(message);
+
+        if (alreadyInitialized) {
+          logStep('OneSignal already initialized — reusing shared instance');
+          bindSubscriptionChangeListener();
+          return true;
+        }
+
         initPromise = null;
         logFail('OneSignal.init()', error);
         return false;

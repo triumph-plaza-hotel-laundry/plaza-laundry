@@ -3,7 +3,11 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { canAccessRoute } from '@/features/auth/permissions';
 import { useAuth } from '@/hooks/useAuth';
 
-const PUBLIC_PATHS = new Set(['/', '/access-denied']);
+const PUBLIC_PATHS = new Set([
+  '/',
+  '/access-denied',
+  '/employee-device-pairing',
+]);
 
 type RouteGuardProps = {
   children: ReactNode;

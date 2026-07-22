@@ -17,6 +17,12 @@ import {
   setInventoryPermissions as saveInventoryPermissions,
   type InventoryPermission,
 } from '@/features/inventory/inventory-permissions-service';
+import {
+  allDevicePermissions,
+  listDevicePermissions,
+  setDevicePermissions as saveDevicePermissions,
+  type DevicePermission,
+} from '@/features/employee-devices/device-permissions-service';
 import { useInventoryPermissions } from '@/hooks/useInventoryPermissions';
 import { useAuth, useLanguage } from '@/hooks';
 import '@/features/admin/admin-editor.css';
@@ -56,6 +62,9 @@ export function AdminSettingsPage() {
   const [inventoryPermissions, setInventoryPermissions] = useState<
     InventoryPermission[]
   >([]);
+  const [devicePermissions, setDevicePermissions] = useState<DevicePermission[]>(
+    [],
+  );
 
   const inventoryPermissionFlags = useInventoryPermissions();
 
@@ -78,6 +87,7 @@ export function AdminSettingsPage() {
     if (!selected) {
       setForm(emptyForm());
       setInventoryPermissions([]);
+      setDevicePermissions([]);
       return;
     }
 
@@ -93,6 +103,20 @@ export function AdminSettingsPage() {
     void listInventoryPermissions(selected.id)
       .then(setInventoryPermissions)
       .catch(() => setInventoryPermissions([]));
+
+    void listDevicePermissions(selected.id)
+      .then((permissions) => {
+        setDevicePermissions(
+          isPrimaryAdminAccount(selected)
+            ? allDevicePermissions()
+            : permissions,
+        );
+      })
+      .catch(() =>
+        setDevicePermissions(
+          isPrimaryAdminAccount(selected) ? allDevicePermissions() : [],
+        ),
+      );
   }, [selected]);
 
   const handleCreate = async (event: FormEvent) => {
@@ -341,6 +365,48 @@ export function AdminSettingsPage() {
     );
   };
 
+  const handleSaveDevicePermissions = async () => {
+    if (!user || !selected) {
+      return;
+    }
+
+    setIsSaving(true);
+    setError(null);
+    setMessage(null);
+
+    try {
+      await saveDevicePermissions(
+        user.id,
+        selected.id,
+        devicePermissions,
+        user,
+      );
+      logAction({
+        action: 'admin.updateDevicePermissions',
+        page: 'admin/settings',
+        newValue: { userId: selected.id, permissions: devicePermissions },
+      });
+      setMessage(t('admin.settings.devicePermissionsSaved'));
+      await refreshAdmins();
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : t('admin.settings.saveFailed'),
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const toggleDevicePermission = (permission: DevicePermission) => {
+    setDevicePermissions((current) =>
+      current.includes(permission)
+        ? current.filter((entry) => entry !== permission)
+        : [...current, permission],
+    );
+  };
+
   return (
     <section className="admin-settings-page admin-editor-page mx-auto">
       <AdminPageHeader
@@ -533,6 +599,36 @@ export function AdminSettingsPage() {
                 className="admin-edit-toolbar__btn admin-edit-toolbar__btn--save"
                 disabled={isSaving}
                 onClick={() => void handleSaveInventoryPermissions()}
+                type="button"
+              >
+                {t('admin.editor.save')}
+              </button>
+
+              <hr className="admin-settings-divider" />
+
+              <h3 className="admin-settings-subsection-title">
+                {t('admin.settings.devicePermission')}
+              </h3>
+              <p className="admin-settings-subsection-copy">
+                {t('admin.settings.devicePermissionSubtitle')}
+              </p>
+              {allDevicePermissions().map((permission) => (
+                <label
+                  className="admin-editor-field admin-editor-field--checkbox"
+                  key={permission}
+                >
+                  <input
+                    checked={devicePermissions.includes(permission)}
+                    onChange={() => toggleDevicePermission(permission)}
+                    type="checkbox"
+                  />
+                  <span>{t('admin.settings.devicePermission')}</span>
+                </label>
+              ))}
+              <button
+                className="admin-edit-toolbar__btn admin-edit-toolbar__btn--save"
+                disabled={isSaving}
+                onClick={() => void handleSaveDevicePermissions()}
                 type="button"
               >
                 {t('admin.editor.save')}

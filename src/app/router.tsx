@@ -73,6 +73,12 @@ const TrainingPage = lazy(() =>
   })),
 );
 
+const EmployeeDevicePairingPage = lazy(() =>
+  import('@/pages/EmployeeDevicePairingPage').then((module) => ({
+    default: module.EmployeeDevicePairingPage,
+  })),
+);
+
 const ReportsPage = lazy(() =>
   import('@/pages/ReportsPage').then((module) => ({
     default: module.ReportsPage,
@@ -94,6 +100,10 @@ export function AppRouter() {
         <Route element={<EmployeesPage />} path="employees" />
         <Route element={<ShiftsPage />} path="shifts" />
         <Route element={<TrainingPage />} path="training" />
+        <Route
+          element={<EmployeeDevicePairingPage />}
+          path="employee-device-pairing"
+        />
         <Route element={<ReportsPage />} path="inventory" />
         {adminRoutes}
         <Route path="*" element={<NotFoundPage />} />

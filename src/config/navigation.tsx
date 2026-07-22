@@ -5,6 +5,7 @@ import {
   GraduationCap,
   Home,
   Package,
+  QrCode,
   Receipt,
   Shirt,
   Tags,
@@ -22,6 +23,8 @@ export type NavigationItem = {
   icon: LucideIcon;
   end?: boolean;
   resource: PermissionResource;
+  /** Show only while this browser/PWA is not linked to an employee. */
+  requireUnlinkedDevice?: boolean;
 };
 
 export const navigationItems: NavigationItem[] = [
@@ -31,6 +34,13 @@ export const navigationItems: NavigationItem[] = [
     icon: Home,
     end: true,
     resource: 'dashboard',
+  },
+  {
+    labelKey: 'nav.devicePairing',
+    path: '/employee-device-pairing',
+    icon: QrCode,
+    resource: 'dashboard',
+    requireUnlinkedDevice: true,
   },
   {
     labelKey: 'nav.programs',

@@ -10,6 +10,7 @@ import {
   Receipt,
   Settings,
   Shirt,
+  Smartphone,
   Sparkles,
   Tags,
   Users,
@@ -25,6 +26,8 @@ export type AdminDashboardModule = {
   path: string;
   descriptionKey: TranslationKey;
   ownerOnly?: boolean;
+  /** Requires admin_device_permissions devices.manage (or primary admin). */
+  requiresDevicePermission?: boolean;
 };
 
 export const adminDashboardModules: AdminDashboardModule[] = [
@@ -118,6 +121,13 @@ export const adminDashboardModules: AdminDashboardModule[] = [
     path: '/admin/push-notifications',
     descriptionKey: 'admin.dashboard.pushNotificationsDesc',
     ownerOnly: true,
+  },
+  {
+    icon: Smartphone,
+    labelKey: 'admin.dashboard.employeeDevices',
+    path: '/admin/employee-devices',
+    descriptionKey: 'admin.dashboard.employeeDevicesDesc',
+    requiresDevicePermission: true,
   },
   {
     icon: Settings,
