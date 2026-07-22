@@ -27,7 +27,6 @@ const DEPARTMENT_NAME_AR: Record<string, string> = {
   Maintenance: 'الصيانة',
   Purchasing: 'المشتريات',
   Gym: 'الجيم',
-  Engineering: 'الهندسة',
 };
 
 const ITEM_NAME_AR: Record<string, string> = {
@@ -71,7 +70,7 @@ const ITEM_NAME_AR: Record<string, string> = {
   'Tan Apron': 'مريلة بيج',
   "Men's HK Kit": 'طقم إشراف داخلي رجالي',
   "Women's HK Kit": 'طقم إشراف داخلي حريمي',
-  'Head Cover': 'غطاء رأس',
+  'Head Cover': 'غطاء ,رأس',
   'Black Coat': 'معطف أسود',
   'Navy Coat': 'معطف كحلي',
   "Men's Supervision Kit": 'طقم إشراف رجالي',
