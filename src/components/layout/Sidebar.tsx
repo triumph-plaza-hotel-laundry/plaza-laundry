@@ -18,7 +18,10 @@ type SidebarProps = {
   isDesktop: boolean;
   isDesktopCollapsed?: boolean;
   isOpen: boolean;
+  /** Close drawer only (e.g. after choosing a nav item). */
   onClose: () => void;
+  /** Dismiss drawer via backdrop / X / Escape. */
+  onDismiss: () => void;
 };
 
 export const Sidebar = memo(function Sidebar({
@@ -26,6 +29,7 @@ export const Sidebar = memo(function Sidebar({
   isDesktopCollapsed = false,
   isOpen,
   onClose,
+  onDismiss,
 }: SidebarProps) {
   const { canAccessPath, canSeeNav, isAuthenticated, role } = useAuth();
   const { direction, t } = useLanguage();
@@ -55,13 +59,13 @@ export const Sidebar = memo(function Sidebar({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onClose();
+        onDismiss();
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isDesktop, isOpen, onClose]);
+  }, [isDesktop, isOpen, onDismiss]);
 
   const sidebarContent = (
     <aside className="luxury-sidebar">
@@ -70,7 +74,7 @@ export const Sidebar = memo(function Sidebar({
           <IconButton
             className="luxury-sidebar__close"
             label={t('common.closeMenu')}
-            onClick={onClose}
+            onClick={onDismiss}
           >
             <X className="luxury-icon" strokeWidth={1.75} />
           </IconButton>
@@ -154,7 +158,7 @@ export const Sidebar = memo(function Sidebar({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                onClick={onClose}
+                onClick={onDismiss}
                 transition={{ duration: 0.16 }}
                 type="button"
               />

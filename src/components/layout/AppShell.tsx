@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useRef, useState, Suspense } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState, Suspense } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/styles';
 import {
   readSidebarCollapsed,
   writeSidebarCollapsed,
 } from '@/lib/sidebar-state';
+import { MobileNavContext } from '@/context/mobile-nav-context';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { PageBackBar } from '@/components/layout/PageBackBar';
@@ -75,10 +76,12 @@ export function AppShell() {
   );
   const isDesktopSidebar = useMediaQuery(DESKTOP_SIDEBAR_QUERY);
   const location = useLocation();
+  const navigate = useNavigate();
   const isHome = location.pathname === '/';
   const isAdminRoute = location.pathname.startsWith('/admin');
   const prevPathnameRef = useRef(location.pathname);
   const wasDesktopRef = useRef(isDesktopSidebar);
+  const sidebarOpenedFromBackRef = useRef(false);
 
   useAdminLeaveLogout();
 
@@ -88,11 +91,13 @@ export function AppShell() {
     }
 
     prevPathnameRef.current = location.pathname;
+    sidebarOpenedFromBackRef.current = false;
     setIsSidebarOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
     if (isDesktopSidebar && !wasDesktopRef.current) {
+      sidebarOpenedFromBackRef.current = false;
       setIsSidebarOpen(false);
     }
 
@@ -127,57 +132,97 @@ export function AppShell() {
       return;
     }
 
+    sidebarOpenedFromBackRef.current = false;
     setIsSidebarOpen((open) => !open);
   }, [isDesktopSidebar]);
 
   const handleCloseSidebar = useCallback(() => {
+    sidebarOpenedFromBackRef.current = false;
     setIsSidebarOpen(false);
   }, []);
+
+  const handleDismissSidebar = useCallback(() => {
+    const openedFromBack = sidebarOpenedFromBackRef.current;
+    sidebarOpenedFromBackRef.current = false;
+    setIsSidebarOpen(false);
+
+    if (openedFromBack && location.pathname !== '/') {
+      navigate('/', { replace: true });
+    }
+  }, [location.pathname, navigate]);
+
+  const openMobileSidebar = useCallback(() => {
+    if (isDesktopSidebar) {
+      return;
+    }
+
+    sidebarOpenedFromBackRef.current = false;
+    setIsSidebarOpen(true);
+  }, [isDesktopSidebar]);
+
+  const openMobileSidebarFromBack = useCallback(() => {
+    if (isDesktopSidebar) {
+      return;
+    }
+
+    sidebarOpenedFromBackRef.current = true;
+    setIsSidebarOpen(true);
+  }, [isDesktopSidebar]);
+
+  const mobileNavValue = useMemo(
+    () => ({ openMobileSidebar, openMobileSidebarFromBack }),
+    [openMobileSidebar, openMobileSidebarFromBack],
+  );
 
   const showDesktopSidebar = isDesktopSidebar && !isDesktopCollapsed;
 
   return (
-    <div
-      className={cn(
-        'min-h-dvh text-[var(--app-text)]',
-        isHome ? 'bg-[var(--home-shell-bg)]' : 'bg-[var(--app-bg)]',
-      )}
-    >
-      <ScrollRestoration />
-      <Sidebar
-        isDesktop={isDesktopSidebar}
-        isDesktopCollapsed={isDesktopCollapsed}
-        isOpen={isSidebarOpen}
-        onClose={handleCloseSidebar}
-      />
+    <MobileNavContext.Provider value={mobileNavValue}>
       <div
         className={cn(
-          'flex min-h-dvh flex-col transition-[padding] duration-200 ease-out',
-          showDesktopSidebar && 'lg:ps-72',
+          'min-h-dvh text-[var(--app-text)]',
+          isHome ? 'bg-[var(--home-shell-bg)]' : 'bg-[var(--app-bg)]',
         )}
       >
-        <Header
-          isMenuExpanded={isDesktopSidebar ? showDesktopSidebar : isSidebarOpen}
-          onToggleSidebar={handleToggleSidebar}
+        <ScrollRestoration />
+        <Sidebar
+          isDesktop={isDesktopSidebar}
+          isDesktopCollapsed={isDesktopCollapsed}
+          isOpen={isSidebarOpen}
+          onClose={handleCloseSidebar}
+          onDismiss={handleDismissSidebar}
         />
-        <main
+        <div
           className={cn(
-            'flex flex-1 flex-col',
-            isHome
-              ? 'home-shell-main bg-transparent'
-              : 'px-4 pt-4 pb-5 sm:px-6',
+            'flex min-h-dvh flex-col transition-[padding] duration-200 ease-out',
+            showDesktopSidebar && 'lg:ps-72',
           )}
         >
-          {!isHome && !isAdminRoute ? <PageBackBar /> : null}
-          <RouteGuard>
-            <Suspense fallback={<PageLoader />}>
-              <Outlet />
-            </Suspense>
-          </RouteGuard>
-        </main>
-        <Footer />
-        <InstallPrompt />
+          <Header
+            isMenuExpanded={
+              isDesktopSidebar ? showDesktopSidebar : isSidebarOpen
+            }
+            onToggleSidebar={handleToggleSidebar}
+          />
+          <main
+            className={cn(
+              'flex flex-1 flex-col',
+              isHome
+                ? 'home-shell-main bg-transparent'
+                : 'px-4 pt-4 pb-5 sm:px-6',
+            )}
+          >
+            {!isHome && !isAdminRoute ? <PageBackBar /> : null}
+            <RouteGuard>
+              <Suspense fallback={<PageLoader />}>
+                <Outlet />
+              </Suspense>
+            </RouteGuard>
+          </main>
+          <Footer />
+          <InstallPrompt />
+        </div>
       </div>
-    </div>
+    </MobileNavContext.Provider>
   );
 }
