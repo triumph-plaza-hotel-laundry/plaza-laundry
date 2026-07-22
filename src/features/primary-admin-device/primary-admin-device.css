@@ -1,0 +1,111 @@
+.primary-admin-device {
+  width: 100%;
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgb(214 183 110 / 28%);
+  border-radius: 1rem;
+  background: rgb(20 18 14 / 35%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  text-align: center;
+}
+
+.primary-admin-device__title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--app-gold, #d6b76e);
+}
+
+.primary-admin-device__copy,
+.primary-admin-device__note,
+.primary-admin-device__confirm-text {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgb(244 239 228 / 78%);
+}
+
+.primary-admin-device__note {
+  font-size: 0.75rem;
+  color: rgb(244 239 228 / 68%);
+}
+
+.primary-admin-device__confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.primary-admin-device__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.primary-admin-device__button {
+  min-height: 2.75rem;
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgb(214 183 110 / 45%);
+  background: rgb(214 183 110 / 14%);
+  color: var(--app-gold, #d6b76e);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary-admin-device__button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.primary-admin-device__button--primary {
+  background: rgb(214 183 110 / 24%);
+}
+
+.primary-admin-device__button--ghost {
+  background: transparent;
+  border-color: rgb(244 239 228 / 22%);
+  color: rgb(244 239 228 / 80%);
+}
+
+.primary-admin-device__message {
+  margin: 0;
+  padding: 0.5rem 0.7rem;
+  border-radius: 0.65rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.primary-admin-device__message--error {
+  border: 1px solid rgb(239 68 68 / 35%);
+  color: #fecaca;
+  background: rgb(127 29 29 / 28%);
+}
+
+.primary-admin-device__message--success {
+  border: 1px solid rgb(34 197 94 / 35%);
+  color: #bbf7d0;
+  background: rgb(20 83 45 / 28%);
+}
+
+@media (max-width: 640px) {
+  .primary-admin-device {
+    max-width: none;
+    padding: 0.9rem 0.85rem;
+  }
+
+  .primary-admin-device__button {
+    width: 100%;
+  }
+
+  .primary-admin-device__actions {
+    flex-direction: column;
+  }
+}

@@ -1,7 +1,7 @@
 import desktopAvif from '@/assets/images/home/triumph-home-desktop.avif';
 import mobileAvif from '@/assets/images/home/triumph-home-mobile.avif';
-import darkBgPng from '@/assets/images/home-luxury-laundry.png';
-import lightBgUrl from '@/assets/images/luxury-light.png';
+import darkBgPng from '@/assets/images/home-luxury-laundry.webp';
+import lightBgUrl from '@/assets/images/luxury-light.webp';
 import '@/components/home/home-cinematic-background.css';
 
 export function HomeCinematicBackground() {
@@ -18,7 +18,7 @@ export function HomeCinematicBackground() {
             <source
               media="(max-width: 768px)"
               srcSet={darkBgPng}
-              type="image/png"
+              type="image/webp"
             />
             <source
               media="(min-width: 769px)"

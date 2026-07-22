@@ -85,6 +85,12 @@ const ReportsPage = lazy(() =>
   })),
 );
 
+const HotelEmployeeAssetsPage = lazy(() =>
+  import('@/features/hotel-employee-assets').then((module) => ({
+    default: module.HotelEmployeeAssetsPage,
+  })),
+);
+
 export function AppRouter() {
   return (
     <Routes>
@@ -105,6 +111,10 @@ export function AppRouter() {
           path="employee-device-pairing"
         />
         <Route element={<ReportsPage />} path="inventory" />
+        <Route
+          element={<HotelEmployeeAssetsPage />}
+          path="hotel-employee-assets"
+        />
         {adminRoutes}
         <Route path="*" element={<NotFoundPage />} />
       </Route>

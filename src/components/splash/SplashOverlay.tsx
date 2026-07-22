@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import logoUrl from '@/assets/images/logo.png';
+import logoUrl from '@/assets/images/logo.webp';
 import { splashTiming, splashTotalMs } from '@/components/splash/splash.config';
 import '@/components/splash/splash.css';
 

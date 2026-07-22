@@ -122,6 +122,12 @@ const AdminEmployeeDevicesPage = lazy(() =>
   })),
 );
 
+const AdminHotelEmployeeAssetsPage = lazy(() =>
+  import('@/features/hotel-employee-assets').then((module) => ({
+    default: module.AdminHotelEmployeeAssetsPage,
+  })),
+);
+
 export const adminRoutes = (
   <Route path="admin">
     <Route element={<AdminLoginPage />} path="login" />
@@ -151,6 +157,10 @@ export const adminRoutes = (
         <Route element={<AdminOwnerPushPage />} path="push-notifications" />
       </Route>
       <Route element={<AdminEmployeeDevicesPage />} path="employee-devices" />
+      <Route
+        element={<AdminHotelEmployeeAssetsPage />}
+        path="hotel-employee-assets"
+      />
       <Route element={<AdminSettingsPage />} path="settings" />
     </Route>
   </Route>

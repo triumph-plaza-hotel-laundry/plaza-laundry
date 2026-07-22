@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { AdminBackButton } from '@/features/admin/components/AdminBackButton';
 import { AdminEditToolbar } from '@/features/admin/components/AdminEditToolbar';
 import { AdminLeavePanel } from '@/features/admin/components/AdminLeavePanel';
 import { useDraftState } from '@/features/admin/hooks/useDraftState';
@@ -43,9 +42,6 @@ export function AdminLeavesPage() {
 
   return (
     <section className="admin-leaves-page mx-auto">
-      <div className="admin-page-header__back-row">
-        <AdminBackButton />
-      </div>
       <header className="admin-leaves-page__header">
         <span aria-hidden="true" className="admin-leaves-page__emoji">
           ✦

@@ -42,6 +42,7 @@ export const routeResourceMap: Record<string, PermissionResource> = {
   '/shifts': 'shifts',
   '/training': 'training',
   '/inventory': 'inventory',
+  '/hotel-employee-assets': 'inventory',
   '/admin': 'admin',
   '/admin/leaves': 'leaves',
 };

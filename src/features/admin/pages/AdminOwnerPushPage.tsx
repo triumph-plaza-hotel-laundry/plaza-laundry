@@ -176,8 +176,6 @@ export function AdminOwnerPushPage() {
   return (
     <section className="admin-editor-page mx-auto">
       <AdminPageHeader
-        backFallbackPath="/admin"
-        showBack
         subtitle={t('admin.push.subtitle')}
         titleAr={t('admin.push.titleAr')}
         titleEn={t('admin.push.titleEn')}

@@ -25,3 +25,6 @@ dev-dist
 Thumbs.db
 .vercel
 .env*
+
+# Local image optimization backups (original PNGs)
+image-backups/

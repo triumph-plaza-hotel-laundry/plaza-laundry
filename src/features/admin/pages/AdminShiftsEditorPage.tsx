@@ -12,6 +12,7 @@ import { useDraftState } from '@/features/admin/hooks/useDraftState';
 import { findDuplicateEmployeeIds } from '@/lib/admin-shift-validation';
 import { getShiftEligibleEmployees } from '@/lib/employee-roles';
 import { useAuth, useLanguage, useSyncStore } from '@/hooks';
+import '@/features/admin/admin-editor.css';
 
 export function AdminShiftsEditorPage() {
   const { t } = useLanguage();
@@ -115,17 +116,19 @@ export function AdminShiftsEditorPage() {
   }, [resetDraft]);
 
   return (
-    <WeeklyShiftScheduleTable
-      editable
-      employees={employees}
-      isDirty={isDirty}
-      isSaving={isSaving}
-      onReset={handleReset}
-      onSave={handleSave}
-      onSlotChange={handleSlotChange}
-      selectableEmployees={selectableEmployees}
-      toast={toast}
-      weeklySchedule={draft.weeklySchedule}
-    />
+    <section className="admin-editor-page mx-auto">
+      <WeeklyShiftScheduleTable
+        editable
+        employees={employees}
+        isDirty={isDirty}
+        isSaving={isSaving}
+        onReset={handleReset}
+        onSave={handleSave}
+        onSlotChange={handleSlotChange}
+        selectableEmployees={selectableEmployees}
+        toast={toast}
+        weeklySchedule={draft.weeklySchedule}
+      />
+    </section>
   );
 }

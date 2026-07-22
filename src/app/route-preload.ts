@@ -39,6 +39,9 @@ const routePreloaders: Record<string, () => Promise<unknown>> = {
   '/admin/settings': () => import('@/features/admin/pages/AdminSettingsPage'),
   '/admin/employee-devices': () =>
     import('@/features/admin/pages/AdminEmployeeDevicesPage'),
+  '/admin/hotel-employee-assets': () =>
+    import('@/features/hotel-employee-assets'),
+  '/hotel-employee-assets': () => import('@/features/hotel-employee-assets'),
   '/employee-device-pairing': () =>
     import('@/pages/EmployeeDevicePairingPage'),
 };

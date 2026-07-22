@@ -2,7 +2,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import type { ReactNode } from 'react';
 import { ChevronDown, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { AdminBackButton } from '@/features/admin/components/AdminBackButton';
 import { AdminOnlyGuard } from '@/features/admin/guards/AdminOnlyGuard';
 import {
   createDepartmentItemCategory,
@@ -700,10 +699,6 @@ function AdminDepartmentItemsContent() {
       aria-label={t('admin.departmentItems.titleAr')}
       className="admin-editor-page mx-auto"
     >
-      <div className="admin-page-header__back-row">
-        <AdminBackButton fallbackPath="/admin" />
-      </div>
-
       <header className="admin-page-header">
         <div className="admin-page-header__titles">
           <span aria-hidden="true" className="admin-page-header__emoji">

@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import logoUrl from '@/assets/images/logo.png';
+import logoUrl from '@/assets/images/logo.webp';
 import { canAccessAdminPortal } from '@/features/auth/permissions';
 import { resetForgottenAdminPassword } from '@/features/auth/users';
 import { useAuth, useLanguage } from '@/hooks';

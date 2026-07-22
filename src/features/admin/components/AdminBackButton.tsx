@@ -1,36 +1,25 @@
 import { ArrowLeft } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useLanguage } from '@/hooks';
+import { useNavigate } from 'react-router-dom';
 
-type AdminBackButtonProps = {
-  fallbackPath?: string;
-};
+const ADMIN_DASHBOARD_PATH = '/admin';
 
-export function AdminBackButton({
-  fallbackPath = '/admin',
-}: AdminBackButtonProps) {
+/**
+ * Shared Admin Back control.
+ * Always navigates to the Admin Dashboard — never browser history.
+ * Label is always Arabic "رجوع" per product requirement.
+ */
+export function AdminBackButton() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { t } = useLanguage();
-
-  const handleBack = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
-      return;
-    }
-
-    if (location.pathname === fallbackPath) {
-      navigate('/');
-      return;
-    }
-
-    navigate(fallbackPath);
-  };
 
   return (
-    <button className="admin-back-btn" onClick={handleBack} type="button">
+    <button
+      aria-label="رجوع"
+      className="admin-back-btn"
+      onClick={() => navigate(ADMIN_DASHBOARD_PATH)}
+      type="button"
+    >
       <ArrowLeft aria-hidden="true" size={16} strokeWidth={1.75} />
-      {t('admin.back')}
+      رجوع
     </button>
   );
 }

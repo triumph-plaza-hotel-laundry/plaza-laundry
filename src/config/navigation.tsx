@@ -1,5 +1,6 @@
 import {
   CalendarClock,
+  ClipboardList,
   Droplets,
   FlaskConical,
   GraduationCap,
@@ -100,6 +101,12 @@ export const navigationItems: NavigationItem[] = [
     labelKey: 'nav.inventory',
     path: '/inventory',
     icon: Package,
+    resource: 'inventory',
+  },
+  {
+    labelKey: 'nav.hotelEmployeeAssets',
+    path: '/hotel-employee-assets',
+    icon: ClipboardList,
     resource: 'inventory',
   },
   {

@@ -1,3 +1,3 @@
-import logoUrl from './logo.png';
+import logoUrl from './logo.webp';
 
 export { logoUrl };

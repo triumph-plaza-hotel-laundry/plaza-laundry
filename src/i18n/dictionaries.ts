@@ -57,6 +57,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     'nav.shifts': 'Shifts',
     'nav.training': 'Training',
     'nav.inventory': 'Inventory',
+    'nav.hotelEmployeeAssets': 'Hotel Employee Assets (View)',
     'nav.admin': 'Admin',
     'nav.leaves': 'Leave Management',
     'nav.devicePairing': 'Employee Device Pairing',
@@ -261,6 +262,23 @@ export const dictionaries: Record<Language, Dictionary> = {
       'Manage every editable area of the application from one place.',
     'admin.dashboard.welcome': 'Welcome back, {name}',
     'admin.dashboard.logout': 'Sign Out',
+    'admin.primaryDevice.title': 'Primary Admin Device',
+    'admin.primaryDevice.copy':
+      'Register this browser once as the primary admin device for secure notifications.',
+    'admin.primaryDevice.registerButton':
+      'Register this device as Primary Admin Device',
+    'admin.primaryDevice.confirmPrompt':
+      'Confirm registration? This can only be done once.',
+    'admin.primaryDevice.confirmButton': 'Confirm registration',
+    'admin.primaryDevice.registering': 'Registering…',
+    'admin.primaryDevice.alreadyConfigured':
+      'Primary admin device already configured.',
+    'admin.primaryDevice.registered':
+      'This device is now registered as the primary admin device.',
+    'admin.primaryDevice.loadFailed':
+      'Unable to check primary admin device status.',
+    'admin.primaryDevice.registerFailed':
+      'Unable to register the primary admin device.',
     'admin.dashboard.inventory': 'Inventory',
     'admin.dashboard.inventoryDesc':
       'Stock levels, receive and withdrawal records, and archive.',
@@ -392,6 +410,63 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.dashboard.employeeDevices': 'Employee Device Management',
     'admin.dashboard.employeeDevicesDesc':
       'Scan pairing codes and manage linked employee devices.',
+    'admin.dashboard.hotelEmployeeAssets': 'Hotel Employee Assets',
+    'admin.dashboard.hotelEmployeeAssetsDesc':
+      'Manage hotel staff custody receipts by department.',
+    'hotelAssets.adminSubtitle':
+      'Independent custody records for hotel employees by department.',
+    'hotelAssets.viewSubtitle': 'View employee custody receipts by department.',
+    'hotelAssets.loadFailed': 'Unable to load hotel employee assets.',
+    'hotelAssets.saveFailed': 'Unable to save hotel employee assets.',
+    'hotelAssets.addEmployee': 'Add Employee',
+    'hotelAssets.employeeName': 'Employee Name',
+    'hotelAssets.employeeNumberAuto':
+      'Employee number is generated automatically for this department.',
+    'hotelAssets.employeeCreated': 'Employee created.',
+    'hotelAssets.employeeDeleted': 'Employee and related receipts deleted.',
+    'hotelAssets.confirmDeleteEmployee':
+      'Delete {name}? All receipts for this employee will be removed.',
+    'hotelAssets.deleteEmployee': 'Delete Employee',
+    'hotelAssets.noEmployees': 'No employees in this department yet.',
+    'hotelAssets.receiptHistory': 'Receipt History',
+    'hotelAssets.addReceipt': 'Add Receipt',
+    'hotelAssets.editReceipt': 'Edit Receipt',
+    'hotelAssets.deleteReceipt': 'Delete',
+    'hotelAssets.confirmDeleteReceipt': 'Delete this receipt?',
+    'hotelAssets.receiptCreated': 'Receipt saved.',
+    'hotelAssets.receiptUpdated': 'Receipt updated.',
+    'hotelAssets.receiptDeleted': 'Receipt deleted.',
+    'hotelAssets.noReceipts':
+      'No custody receipts recorded for this employee yet.',
+    'hotelAssets.receiptDate': 'Receipt Date',
+    'hotelAssets.item': 'Item',
+    'hotelAssets.selectItem': 'Select item',
+    'hotelAssets.quantity': 'Quantity',
+    'hotelAssets.addItem': 'Add Item',
+    'hotelAssets.removeItem': 'Remove',
+    'hotelAssets.notes': 'Notes',
+    'hotelAssets.notesPlaceholder': 'Optional notes…',
+    'hotelAssets.saveReceipt': 'Save Receipt',
+    'hotelAssets.receiptDateRequired': 'Receipt date is required.',
+    'hotelAssets.receiptItemsRequired':
+      'Add at least one item to the receipt.',
+    'hotelAssets.employeeNumber': 'Employee Number',
+    'hotelAssets.department': 'Department',
+    'hotelAssets.statsDepartments': 'Departments',
+    'hotelAssets.statsEmployees': 'Employees',
+    'hotelAssets.statsReceipts': 'Total Receipts',
+    'hotelAssets.statsLastActivity': 'Last Added',
+    'hotelAssets.statsNone': '—',
+    'hotelAssets.search': 'Search',
+    'hotelAssets.searchPlaceholder': 'Search by employee number or name…',
+    'hotelAssets.noSearchResults': 'No matching employees or departments.',
+    'hotelAssets.searchReceipts': 'Search receipts',
+    'hotelAssets.searchReceiptsPlaceholder':
+      'Search by item, notes, or date…',
+    'hotelAssets.filterDateFrom': 'From date',
+    'hotelAssets.filterDateTo': 'To date',
+    'hotelAssets.noReceiptMatches': 'No receipts match the current filters.',
+    'hotelAssets.receiptItemsCount': '{count} items',
     'admin.employeeDevices.subtitle':
       'Pair employee phones with secure QR codes for notifications.',
     'admin.employeeDevices.pairSection': 'Pair a device',
@@ -428,6 +503,17 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.employeeDevices.removed': 'Device removed successfully.',
     'admin.employeeDevices.loadFailed': 'Unable to load linked devices.',
     'admin.employeeDevices.saveFailed': 'Unable to update device pairing.',
+    'admin.employeeDevices.statusPaired': 'Paired',
+    'admin.employeeDevices.statusUnpaired': 'Not paired',
+    'admin.employeeDevices.department': 'Department',
+    'admin.employeeDevices.employeeDetails': 'Employee details',
+    'admin.employeeDevices.deviceInfo': 'Device information',
+    'admin.employeeDevices.noDeviceForEmployee':
+      'No active device linked to this employee.',
+    'admin.employeeDevices.unpairDevice': 'Unpair',
+    'admin.employeeDevices.employeesAccordion': 'Employees',
+    'admin.employeeDevices.orphanedDevice':
+      'Employee removed or inactive — safe to unpair.',
     'devicePairing.eyebrow': 'Secure pairing',
     'devicePairing.preparing': 'Preparing this device…',
     'devicePairing.showQr':
@@ -1225,6 +1311,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     'nav.shifts': 'المناوبات',
     'nav.training': 'التدريب',
     'nav.inventory': 'المخزن',
+    'nav.hotelEmployeeAssets': 'عهدة موظفي الفندق (عرض)',
     'nav.admin': 'الإدارة',
     'nav.leaves': 'إدارة الإجازات',
     'nav.devicePairing': 'ربط جهاز الموظف',
@@ -1427,6 +1514,23 @@ export const dictionaries: Record<Language, Dictionary> = {
       'إدارة كل المحتوى القابل للتعديل في التطبيق من مكان واحد.',
     'admin.dashboard.welcome': 'مرحباً بعودتك، {name}',
     'admin.dashboard.logout': 'تسجيل الخروج',
+    'admin.primaryDevice.title': 'جهاز المدير الأساسي',
+    'admin.primaryDevice.copy':
+      'سجّل هذا المتصفح مرة واحدة كجهاز المدير الأساسي للإشعارات الآمنة.',
+    'admin.primaryDevice.registerButton':
+      'تسجيل هذا الجهاز كجهاز المدير الأساسي',
+    'admin.primaryDevice.confirmPrompt':
+      'تأكيد التسجيل؟ يمكن تنفيذ ذلك مرة واحدة فقط.',
+    'admin.primaryDevice.confirmButton': 'تأكيد التسجيل',
+    'admin.primaryDevice.registering': 'جاري التسجيل…',
+    'admin.primaryDevice.alreadyConfigured':
+      'تم تكوين جهاز المدير الأساسي بالفعل.',
+    'admin.primaryDevice.registered':
+      'تم تسجيل هذا الجهاز كجهاز المدير الأساسي.',
+    'admin.primaryDevice.loadFailed':
+      'تعذر التحقق من حالة جهاز المدير الأساسي.',
+    'admin.primaryDevice.registerFailed':
+      'تعذر تسجيل جهاز المدير الأساسي.',
     'admin.dashboard.inventory': 'المخزون',
     'admin.dashboard.inventoryDesc':
       'مستويات المخزون وسجلات الاستلام والصرف والأرشيف.',
@@ -1547,6 +1651,63 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.dashboard.employeeDevices': 'إدارة أجهزة الموظفين',
     'admin.dashboard.employeeDevicesDesc':
       'مسح رموز الربط وإدارة أجهزة الموظفين المرتبطة.',
+    'admin.dashboard.hotelEmployeeAssets': 'عهدة موظفي الفندق',
+    'admin.dashboard.hotelEmployeeAssetsDesc':
+      'إدارة عهدة موظفي الفندق حسب الأقسام.',
+    'hotelAssets.adminSubtitle':
+      'سجلات عهدة مستقلة لموظفي الفندق حسب القسم.',
+    'hotelAssets.viewSubtitle': 'عرض عهدة الموظفين حسب القسم.',
+    'hotelAssets.loadFailed': 'تعذر تحميل عهدة موظفي الفندق.',
+    'hotelAssets.saveFailed': 'تعذر حفظ عهدة موظفي الفندق.',
+    'hotelAssets.addEmployee': 'إضافة موظف',
+    'hotelAssets.employeeName': 'اسم الموظف',
+    'hotelAssets.employeeNumberAuto':
+      'يتم توليد رقم الموظف تلقائياً لهذا القسم.',
+    'hotelAssets.employeeCreated': 'تم إنشاء الموظف.',
+    'hotelAssets.employeeDeleted': 'تم حذف الموظف والعهد المرتبطة.',
+    'hotelAssets.confirmDeleteEmployee':
+      'حذف {name}؟ سيتم حذف جميع العهد الخاصة بهذا الموظف.',
+    'hotelAssets.deleteEmployee': 'حذف الموظف',
+    'hotelAssets.noEmployees':
+      'لا يوجد موظفون في هذا القسم حتى الآن.',
+    'hotelAssets.receiptHistory': 'سجل العهد',
+    'hotelAssets.addReceipt': 'إضافة عهدة',
+    'hotelAssets.editReceipt': 'تعديل العهدة',
+    'hotelAssets.deleteReceipt': 'حذف',
+    'hotelAssets.confirmDeleteReceipt': 'حذف هذه العهدة؟',
+    'hotelAssets.receiptCreated': 'تم حفظ العهدة.',
+    'hotelAssets.receiptUpdated': 'تم تحديث العهدة.',
+    'hotelAssets.receiptDeleted': 'تم حذف العهدة.',
+    'hotelAssets.noReceipts':
+      'لا توجد عهد مسجلة لهذا الموظف حتى الآن.',
+    'hotelAssets.receiptDate': 'تاريخ العهدة',
+    'hotelAssets.item': 'الصنف',
+    'hotelAssets.selectItem': 'اختر صنفاً',
+    'hotelAssets.quantity': 'الكمية',
+    'hotelAssets.addItem': 'إضافة صنف',
+    'hotelAssets.removeItem': 'إزالة',
+    'hotelAssets.notes': 'ملاحظات',
+    'hotelAssets.notesPlaceholder': 'ملاحظات اختيارية…',
+    'hotelAssets.saveReceipt': 'حفظ العهدة',
+    'hotelAssets.receiptDateRequired': 'تاريخ العهدة مطلوب.',
+    'hotelAssets.receiptItemsRequired': 'أضف صنفاً واحداً على الأقل للعهدة.',
+    'hotelAssets.employeeNumber': 'رقم الموظف',
+    'hotelAssets.department': 'القسم',
+    'hotelAssets.statsDepartments': 'عدد الأقسام',
+    'hotelAssets.statsEmployees': 'عدد الموظفين',
+    'hotelAssets.statsReceipts': 'إجمالي العهد',
+    'hotelAssets.statsLastActivity': 'آخر عملية إضافة',
+    'hotelAssets.statsNone': '—',
+    'hotelAssets.search': 'بحث',
+    'hotelAssets.searchPlaceholder': 'ابحث برقم الموظف أو الاسم…',
+    'hotelAssets.noSearchResults': 'لا توجد نتائج مطابقة.',
+    'hotelAssets.searchReceipts': 'بحث في العهد',
+    'hotelAssets.searchReceiptsPlaceholder':
+      'ابحث بالصنف أو الملاحظات أو التاريخ…',
+    'hotelAssets.filterDateFrom': 'من تاريخ',
+    'hotelAssets.filterDateTo': 'إلى تاريخ',
+    'hotelAssets.noReceiptMatches': 'لا توجد عهد مطابقة للفلاتر الحالية.',
+    'hotelAssets.receiptItemsCount': '{count} أصناف',
     'admin.employeeDevices.subtitle':
       'اربط هواتف الموظفين برموز QR آمنة للإشعارات.',
     'admin.employeeDevices.pairSection': 'ربط جهاز',
@@ -1581,6 +1742,17 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.employeeDevices.removed': 'تمت إزالة الجهاز بنجاح.',
     'admin.employeeDevices.loadFailed': 'تعذر تحميل الأجهزة المرتبطة.',
     'admin.employeeDevices.saveFailed': 'تعذر تحديث ربط الجهاز.',
+    'admin.employeeDevices.statusPaired': 'مرتبط',
+    'admin.employeeDevices.statusUnpaired': 'غير مرتبط',
+    'admin.employeeDevices.department': 'القسم',
+    'admin.employeeDevices.employeeDetails': 'بيانات الموظف',
+    'admin.employeeDevices.deviceInfo': 'معلومات الجهاز',
+    'admin.employeeDevices.noDeviceForEmployee':
+      'لا يوجد جهاز نشط مرتبط بهذا الموظف.',
+    'admin.employeeDevices.unpairDevice': 'إلغاء الربط',
+    'admin.employeeDevices.employeesAccordion': 'الموظفون',
+    'admin.employeeDevices.orphanedDevice':
+      'الموظف محذوف أو غير نشط — يمكن إلغاء الربط بأمان.',
     'devicePairing.eyebrow': 'ربط آمن',
     'devicePairing.preparing': 'جاري تجهيز هذا الجهاز…',
     'devicePairing.showQr':

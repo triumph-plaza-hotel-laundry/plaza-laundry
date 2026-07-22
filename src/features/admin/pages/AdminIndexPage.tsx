@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { preloadRoute } from '@/app/route-preload';
-import { AdminBackButton } from '@/features/admin/components/AdminBackButton';
 import { adminDashboardModules } from '@/features/admin/config/admin-dashboard-modules';
+import { PrimaryAdminDevicePanel } from '@/features/primary-admin-device';
 import { isPrimaryAdminAccount } from '@/features/auth/owner-protection';
 import { useAuth, useLanguage } from '@/hooks';
 import { useDevicePermissions } from '@/hooks/useDevicePermissions';
@@ -30,9 +30,6 @@ export function AdminIndexPage() {
       aria-label={t('admin.dashboard.title')}
       className="admin-dashboard mx-auto"
     >
-      <div className="admin-page-header__back-row admin-dashboard__back-row">
-        <AdminBackButton />
-      </div>
       <header className="admin-dashboard__header">
         <span aria-hidden="true" className="admin-dashboard__emoji">
           ✦
@@ -50,6 +47,8 @@ export function AdminIndexPage() {
           </p>
         ) : null}
       </header>
+
+      <PrimaryAdminDevicePanel />
 
       <nav
         aria-label={t('admin.dashboard.title')}

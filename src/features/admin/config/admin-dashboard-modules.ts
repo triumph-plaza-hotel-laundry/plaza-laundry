@@ -1,4 +1,5 @@
 import {
+  Briefcase,
   CalendarClock,
   CalendarOff,
   ClipboardList,
@@ -128,6 +129,12 @@ export const adminDashboardModules: AdminDashboardModule[] = [
     path: '/admin/employee-devices',
     descriptionKey: 'admin.dashboard.employeeDevicesDesc',
     requiresDevicePermission: true,
+  },
+  {
+    icon: Briefcase,
+    labelKey: 'admin.dashboard.hotelEmployeeAssets',
+    path: '/admin/hotel-employee-assets',
+    descriptionKey: 'admin.dashboard.hotelEmployeeAssetsDesc',
   },
   {
     icon: Settings,

@@ -7,6 +7,7 @@ const PUBLIC_PATHS = new Set([
   '/',
   '/access-denied',
   '/employee-device-pairing',
+  '/hotel-employee-assets',
 ]);
 
 type RouteGuardProps = {

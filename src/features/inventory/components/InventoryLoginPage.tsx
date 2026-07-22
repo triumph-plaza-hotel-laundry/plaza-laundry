@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import logoUrl from '@/assets/images/logo.png';
+import logoUrl from '@/assets/images/logo.webp';
 import { useLanguage } from '@/hooks';
 import '@/features/inventory/inventory-login.css';
 

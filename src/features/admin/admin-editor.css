@@ -1,3 +1,14 @@
+.admin-layout__back-bar {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding: 0.85rem 1rem 0;
+  display: flex;
+  /* Logical start: top-left in LTR, top-right in Arabic RTL */
+  justify-content: flex-start;
+  box-sizing: border-box;
+}
+
 .admin-page-header {
   display: flex;
   flex-direction: column;
@@ -41,6 +52,10 @@
     rgb(10 10 10 / 92%)
   );
   transform: translateY(-1px);
+}
+
+[dir='rtl'] .admin-back-btn svg {
+  transform: scaleX(-1);
 }
 
 .admin-page-header__titles {

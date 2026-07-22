@@ -4,7 +4,7 @@ import { memo, useCallback } from 'react';
 import { NavLink } from 'react-router-dom';
 import { preloadRoute } from '@/app/route-preload';
 import { X } from 'lucide-react';
-import logoUrl from '@/assets/images/logo.png';
+import logoUrl from '@/assets/images/logo.webp';
 import { navigationItems } from '@/config/navigation';
 import { canAccessAdminPortal } from '@/features/auth/permissions';
 import { useAuth, useLanguage } from '@/hooks';

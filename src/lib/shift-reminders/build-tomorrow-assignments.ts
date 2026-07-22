@@ -140,14 +140,17 @@ export function buildTomorrowShiftAssignments(
 }
 
 export function formatShiftReminderNotification(assignment: TomorrowShiftAssignment) {
-  const title = "Tomorrow's Shift";
+  const employeeName =
+    assignment.employeeNameAr.trim() || assignment.employeeNameEn.trim();
+  const shiftPeriodAr = assignment.period === 'morning' ? 'صباحي' : 'مسائي';
+
+  const title = '📅 تذكير بشفت الغد';
   const body = [
-    `Hello ${assignment.employeeNameEn},`,
-    'Your shift for tomorrow is:',
-    assignment.shiftLabelEn,
-    `Department: ${assignment.departmentEn}`,
-    `Start: ${assignment.startTimeEn}`,
-    'Please arrive on time.',
+    `عزيزي ${employeeName}،`,
+    '',
+    `نود تذكيرك بأن لديك غدًا شفت ${shiftPeriodAr}.`,
+    '',
+    'نتمنى لك يومًا موفقًا.',
   ].join('\n');
 
   return { title, body };

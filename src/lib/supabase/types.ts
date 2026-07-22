@@ -881,6 +881,41 @@ export type Database = {
           },
         ];
       };
+      primary_admin_device: {
+        Row: {
+          id: string;
+          singleton: boolean;
+          device_id: string;
+          onesignal_subscription_id: string;
+          registered_at: string;
+          registered_by_admin_id: string | null;
+        };
+        Insert: {
+          id?: string;
+          singleton?: boolean;
+          device_id: string;
+          onesignal_subscription_id: string;
+          registered_at?: string;
+          registered_by_admin_id?: string | null;
+        };
+        Update: {
+          id?: string;
+          singleton?: boolean;
+          device_id?: string;
+          onesignal_subscription_id?: string;
+          registered_at?: string;
+          registered_by_admin_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'primary_admin_device_registered_by_admin_id_fkey';
+            columns: ['registered_by_admin_id'];
+            isOneToOne: false;
+            referencedRelation: 'admin_users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       onesignal_subscriptions: {
         Row: {
           id: string;
@@ -996,9 +1031,154 @@ export type Database = {
           },
         ];
       };
+      asset_departments: {
+        Row: {
+          id: string;
+          name: string;
+          next_employee_seq: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          next_employee_seq?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          next_employee_seq?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      asset_items: {
+        Row: {
+          id: string;
+          name: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      asset_employees: {
+        Row: {
+          id: string;
+          department_id: string;
+          employee_number: number;
+          employee_name: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          department_id: string;
+          employee_number: number;
+          employee_name: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          department_id?: string;
+          employee_number?: number;
+          employee_name?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'asset_employees_department_id_fkey';
+            columns: ['department_id'];
+            isOneToOne: false;
+            referencedRelation: 'asset_departments';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      asset_receipts: {
+        Row: {
+          id: string;
+          employee_id: string;
+          receipt_date: string;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          employee_id: string;
+          receipt_date: string;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          employee_id?: string;
+          receipt_date?: string;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'asset_receipts_employee_id_fkey';
+            columns: ['employee_id'];
+            isOneToOne: false;
+            referencedRelation: 'asset_employees';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      asset_receipt_items: {
+        Row: {
+          id: string;
+          receipt_id: string;
+          item_id: string;
+          quantity: number;
+        };
+        Insert: {
+          id?: string;
+          receipt_id: string;
+          item_id: string;
+          quantity: number;
+        };
+        Update: {
+          id?: string;
+          receipt_id?: string;
+          item_id?: string;
+          quantity?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'asset_receipt_items_receipt_id_fkey';
+            columns: ['receipt_id'];
+            isOneToOne: false;
+            referencedRelation: 'asset_receipts';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'asset_receipt_items_item_id_fkey';
+            columns: ['item_id'];
+            isOneToOne: false;
+            referencedRelation: 'asset_items';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
+      allocate_asset_employee_number: {
+        Args: {
+          p_department_id: string;
+        };
+        Returns: number;
+      };
       admin_clear_inventory_under_execution_history: {
         Args: {
           p_actor_id: string;
