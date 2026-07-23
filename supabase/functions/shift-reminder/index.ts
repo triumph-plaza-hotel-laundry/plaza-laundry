@@ -7,6 +7,7 @@ import {
   buildTomorrowShiftAssignments,
   formatShiftReminderNotification,
   getTomorrowCairoDateKey,
+  getTomorrowWeekDayId,
   normalizeShiftsState,
   type LaundryEmployee,
   type TomorrowShiftAssignment,
@@ -861,16 +862,85 @@ Deno.serve(async (request) => {
       mode === 'cron' ? 'cron' : (body.triggeredBy ?? PRIMARY_ADMIN_ID);
     const audience = body.audience ?? 'shift_tomorrow';
 
+    console.log('[shift-reminder] schedule loaded', {
+      employeesLoaded: employees.length,
+      employeeIds: employees.map((entry) => entry.id),
+      shiftsUpdatedAt,
+      audience,
+      mode,
+      requestTitle: body.title ?? null,
+      requestBodyPreview: body.body?.slice(0, 80) ?? null,
+    });
+
     let assignments = buildTomorrowShiftAssignments(shifts, employees);
+    const builtTargetDate =
+      assignments[0]?.targetDateKey ?? getTomorrowCairoDateKey();
+    const builtWeekDayId =
+      assignments[0]?.weekDayId ?? getTomorrowWeekDayId();
+
+    const inclusion = employees.map((employee) => {
+      const assigned = assignments.find((row) => row.employeeId === employee.id);
+      if (assigned) {
+        return {
+          employeeId: employee.id,
+          included: true,
+          reason: `on_shift_${assigned.period}_${assigned.role}`,
+        };
+      }
+
+      let reason = 'not_in_assignments';
+      if (employee.status !== 'active') {
+        reason = `status_${employee.status}`;
+      } else if (
+        employee.id === 'gm-01' ||
+        employee.id === 'dm-01' ||
+        employee.tier === 'generalManager' ||
+        employee.tier === 'departmentManager'
+      ) {
+        reason = 'manager_excluded';
+      } else {
+        reason = 'day_off_or_leave';
+      }
+
+      return {
+        employeeId: employee.id,
+        included: false,
+        reason,
+      };
+    });
+
+    console.log('[shift-reminder] tomorrow targeting', {
+      targetDate: builtTargetDate,
+      weekDayId: builtWeekDayId,
+      assignmentCount: assignments.length,
+      assignmentEmployeeIds: assignments.map((row) => row.employeeId),
+      wts01: inclusion.find((row) => row.employeeId === 'wts-01') ?? {
+        employeeId: 'wts-01',
+        included: false,
+        reason: 'employee_missing_from_tpl_employees_v1',
+      },
+    });
 
     if (mode === 'manual') {
-      const targetDateKey = assignments[0]?.targetDateKey ?? getTomorrowCairoDateKey();
+      const manualTargetDateKey = builtTargetDate;
 
       if (audience === 'shift_tomorrow') {
-        // assignments already filtered to tomorrow shift holders
+        console.log(
+          '[shift-reminder] audience=shift_tomorrow — keeping tomorrow assignments',
+          {
+            count: assignments.length,
+            ids: assignments.map((row) => row.employeeId),
+          },
+        );
       } else if (audience === 'employee' && body.employeeId) {
         const employee = employees.find((entry) => entry.id === body.employeeId);
         const existing = assignments.find((a) => a.employeeId === body.employeeId);
+        console.log('[shift-reminder] audience=employee', {
+          employeeId: body.employeeId,
+          foundInEmployees: Boolean(employee),
+          foundInTomorrowAssignments: Boolean(existing),
+          hasCustomCopy: Boolean(body.title && body.body),
+        });
         if (existing) {
           assignments = [existing];
         } else if (employee && body.title && body.body) {
@@ -887,10 +957,20 @@ Deno.serve(async (request) => {
               role: 'washer',
               startTimeEn: '—',
               startTimeAr: '—',
-              targetDateKey,
+              targetDateKey: manualTargetDateKey,
+              weekDayId: builtWeekDayId,
             },
           ];
         } else {
+          console.warn(
+            '[shift-reminder] employee audience produced zero assignments',
+            {
+              employeeId: body.employeeId,
+              reason: !employee
+                ? 'employee_not_found'
+                : 'missing_title_or_body_and_not_on_tomorrow_shift',
+            },
+          );
           assignments = [];
         }
       } else if (audience === 'department' && body.departmentId) {
@@ -901,6 +981,12 @@ Deno.serve(async (request) => {
 
         const departmentLabel =
           getDepartmentTargetLabel(employees, body.departmentId) ?? body.departmentId;
+
+        console.log('[shift-reminder] audience=department', {
+          departmentId: body.departmentId,
+          deptEmployeeIds: deptEmployees.map((entry) => entry.id),
+          hasCustomCopy: Boolean(body.title && body.body),
+        });
 
         if (body.title && body.body) {
           assignments = deptEmployees.map((employee) => ({
@@ -915,7 +1001,8 @@ Deno.serve(async (request) => {
             role: 'washer' as const,
             startTimeEn: '—',
             startTimeAr: '—',
-            targetDateKey,
+            targetDateKey: manualTargetDateKey,
+            weekDayId: builtWeekDayId,
           }));
         } else {
           const deptEmployeeIds = new Set(deptEmployees.map((entry) => entry.id));
@@ -924,6 +1011,11 @@ Deno.serve(async (request) => {
           );
         }
       } else if (audience === 'everyone') {
+        console.log('[shift-reminder] audience=everyone', {
+          hasCustomCopy: Boolean(body.title && body.body),
+          activeEmployees: employees.filter((entry) => entry.status === 'active')
+            .length,
+        });
         if (body.title && body.body) {
           assignments = employees
             .filter((entry) => entry.status === 'active')
@@ -939,11 +1031,30 @@ Deno.serve(async (request) => {
               role: 'washer' as const,
               startTimeEn: '—',
               startTimeAr: '—',
-              targetDateKey,
+              targetDateKey: manualTargetDateKey,
+              weekDayId: builtWeekDayId,
             }));
+        } else {
+          console.warn(
+            '[shift-reminder] everyone without title/body — falling through to tomorrow shift assignments',
+            { count: assignments.length },
+          );
         }
+      } else {
+        console.warn('[shift-reminder] unrecognized manual audience', {
+          audience,
+          body,
+        });
       }
     }
+
+    console.log('[shift-reminder] final assignments before delivery', {
+      audience,
+      targetDate: builtTargetDate,
+      count: assignments.length,
+      ids: assignments.map((row) => row.employeeId),
+      wts01Included: assignments.some((row) => row.employeeId === 'wts-01'),
+    });
 
     let sent = 0;
     let failed = 0;
@@ -951,12 +1062,24 @@ Deno.serve(async (request) => {
 
     for (const assignment of assignments) {
       const custom =
-        mode === 'manual' && body.title && body.body
+        mode === 'manual' &&
+        audience !== 'shift_tomorrow' &&
+        body.title &&
+        body.body
           ? {
               title: body.title,
               body: body.body.replace(/\{name\}/g, assignment.employeeNameEn),
             }
           : undefined;
+
+      console.log('[shift-reminder] delivering assignment', {
+        employeeId: assignment.employeeId,
+        period: assignment.period,
+        role: assignment.role,
+        targetDateKey: assignment.targetDateKey,
+        usingCustomCopy: Boolean(custom),
+        title: (custom?.title ?? 'template:📅 تذكير بشفت الغد').slice(0, 40),
+      });
 
       const result = await deliverAssignment(
         supabase,
@@ -971,12 +1094,17 @@ Deno.serve(async (request) => {
       sent += result.sent;
       failed += result.failed;
       skipped += result.skipped;
+      console.log('[shift-reminder] assignment result', {
+        employeeId: assignment.employeeId,
+        ...result,
+      });
     }
 
     return jsonResponse({
       ok: true,
       mode,
       audience,
+      targetDate: builtTargetDate,
       shiftsUpdatedAt,
       reminderTime,
       cairoTime: cairoNow,
@@ -985,8 +1113,11 @@ Deno.serve(async (request) => {
       sent,
       failed,
       skipped,
+      assignmentEmployeeIds: assignments.map((row) => row.employeeId),
+      inclusion,
     });
   } catch (error) {
+    console.error('[shift-reminder] fatal catch', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
     return jsonResponse({ error: message }, 500);
   }

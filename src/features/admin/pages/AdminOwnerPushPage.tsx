@@ -113,7 +113,7 @@ export function AdminOwnerPushPage() {
   const [employees, setEmployees] = useState<LaundryEmployee[]>([]);
   const [shiftTomorrowCount, setShiftTomorrowCount] = useState(0);
   const [history, setHistory] = useState<PushNotificationHistoryRow[]>([]);
-  const [audience, setAudience] = useState<ManualPushAudience>('everyone');
+  const [audience, setAudience] = useState<ManualPushAudience>('shift_tomorrow');
   const [departmentId, setDepartmentId] = useState('');
   const [employeeId, setEmployeeId] = useState('');
   const [title, setTitle] = useState('');
@@ -350,28 +350,53 @@ export function AdminOwnerPushPage() {
     setIsSending(true);
     setConfirmSendOpen(false);
 
+    const request = {
+      ownerId: user.id,
+      audience,
+      departmentId: audience === 'department' ? departmentId : undefined,
+      employeeId: audience === 'employee' ? employeeId : undefined,
+      title: title.trim() || undefined,
+      body: body.trim() || undefined,
+    };
+
+    console.info('[AdminOwnerPush] Send button → shift-reminder', {
+      button: 'إرسال الإشعار / Send notification',
+      callsShiftReminder: true,
+      request,
+      shiftTomorrowCount,
+      tomorrowKey,
+    });
+
     try {
-      const result = await sendManualShiftPush({
-        ownerId: user.id,
-        audience,
-        departmentId: audience === 'department' ? departmentId : undefined,
-        employeeId: audience === 'employee' ? employeeId : undefined,
-        title: title.trim() || undefined,
-        body: body.trim() || undefined,
-      });
+      const result = await sendManualShiftPush(request);
+
+      console.info('[AdminOwnerPush] shift-reminder result', result);
 
       if (!result.ok) {
         throw new Error(result.error ?? t('admin.push.saveFailed'));
       }
 
+      const wtsInclusion = result.inclusion?.find(
+        (row) => row.employeeId === 'wts-01',
+      );
+      const targetingHint =
+        audience === 'shift_tomorrow'
+          ? ` · غدًا ${result.targetDate ?? tomorrowKey} · مستهدفون ${result.targeted ?? 0}${
+              wtsInclusion
+                ? ` · wts-01: ${wtsInclusion.included ? 'مشمول' : `مستبعد (${wtsInclusion.reason})`}`
+                : ''
+            }`
+          : '';
+
       setMessage(
-        t('admin.push.sendSuccess')
+        `${t('admin.push.sendSuccess')
           .replace('{sent}', String(result.sent ?? 0))
           .replace('{failed}', String(result.failed ?? 0))
-          .replace('{skipped}', String(result.skipped ?? 0)),
+          .replace('{skipped}', String(result.skipped ?? 0))}${targetingHint}`,
       );
       await refresh();
     } catch (sendError) {
+      console.error('[AdminOwnerPush] send failed', sendError);
       setError(
         sendError instanceof Error
           ? sendError.message
@@ -615,7 +640,17 @@ export function AdminOwnerPushPage() {
               <button
                 className={`ap-audience__chip${audience === option.value ? ' is-active' : ''}`}
                 key={option.value}
-                onClick={() => setAudience(option.value)}
+                onClick={() => {
+                  setAudience(option.value);
+                  console.info('[AdminOwnerPush] audience selected', {
+                    audience: option.value,
+                  });
+                  if (option.value === 'shift_tomorrow') {
+                    // Avoid sending leftover direct-notification copy with shift template sends.
+                    setTitle('');
+                    setBody('');
+                  }
+                }}
                 type="button"
               >
                 {option.label}
