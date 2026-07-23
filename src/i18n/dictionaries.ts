@@ -681,6 +681,10 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.inventory.history.empty': 'No monthly archive available yet.',
     'admin.inventory.history.readOnly': 'Read-only archive',
     'admin.inventory.history.exit': 'Return to current month',
+    'admin.inventory.history.deleteArchive': 'Delete Archive',
+    'admin.inventory.history.deleteConfirmTitle': 'Delete monthly archive?',
+    'admin.inventory.history.deleteConfirmMessage':
+      'Permanently delete "{archive}"? This removes only that archive. Inventory stock and the other archive for this month are not changed.',
     'admin.inventory.history.planTitle': 'Plan History',
     'admin.inventory.history.planTitleAr': 'سجل الخطة',
     'admin.inventory.history.planEmpty': 'No plan history for this month.',
@@ -729,6 +733,8 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.inventory.plan.sections.maintenance': 'Maintenance',
     'admin.inventory.plan.sections.purchasing': 'Purchasing',
     'admin.inventory.plan.sections.gym': 'Gym',
+    'admin.inventory.plan.sections.occupationalSafetyHealth':
+      'Occupational Safety and Health (OSH)',
     'admin.inventory.plan.directorsSub.frontOffice': 'Front Offices',
     'admin.inventory.plan.directorsSub.personnelAffairs': 'Personnel Affairs',
     'admin.inventory.plan.directorsSub.informationTechnology':
@@ -818,6 +824,8 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.inventory.plan.items.sportsShorts.black': 'Black Sports Shorts',
     'admin.inventory.plan.items.sportsShorts.navy': 'Navy Sports Shorts',
     'admin.inventory.plan.items.sportsShorts.grey': 'Grey Sports Shorts',
+    'admin.inventory.plan.items.safetyShirt': 'Safety Shirt',
+    'admin.inventory.plan.items.safetyUniformSet': 'Safety Uniform Set',
     'admin.editor.leavesSubtitle':
       'Manage leave requests. Changes apply after Save.',
     'admin.editor.stainsSubtitle':
@@ -982,6 +990,7 @@ export const dictionaries: Record<Language, Dictionary> = {
       'This permanently removes all Under Execution history records. Active Under Execution items are not affected. Type DELETE to confirm.',
     'inventory.underExecution.clearHistoryTypeDelete':
       'Type DELETE to confirm',
+    'inventory.underExecution.hideFromLive': 'Hide from live history',
     'inventory.underExecution.validation.supplier': 'Supplier is required.',
     'inventory.underExecution.validation.supplierName':
       'Department is required.',
@@ -1121,6 +1130,14 @@ export const dictionaries: Record<Language, Dictionary> = {
     'inventory.v2.historyTitle': 'Transaction History',
     'inventory.v2.historyTitleAr': 'سجل المعاملات',
     'inventory.v2.historyEmpty': 'No transactions recorded yet.',
+    'inventory.v2.receivingHistoryTitle': 'Receiving History',
+    'inventory.v2.receivingHistoryTitleAr': 'سجل الاستلام',
+    'inventory.v2.receivingHistoryEmpty':
+      'No receiving transactions recorded yet.',
+    'inventory.v2.issueHistoryTitle': 'Issue (Dispatch) History',
+    'inventory.v2.issueHistoryTitleAr': 'سجل الصرف',
+    'inventory.v2.issueHistoryEmpty':
+      'No issue (dispatch) transactions recorded yet.',
     'inventory.v2.transactionType': 'Transaction Type',
     'inventory.v2.typeReceive': 'Receive',
     'inventory.v2.typeIssue': 'Issue',
@@ -1322,7 +1339,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     'nav.shifts': 'المناوبات',
     'nav.training': 'التدريب',
     'nav.inventory': 'المخزن',
-    'nav.hotelEmployeeAssets': 'عهدة موظفي الفندق (عرض)',
+    'nav.hotelEmployeeAssets': 'عهدة موظفي الفندق',
     'nav.admin': 'الإدارة',
     'nav.leaves': 'إدارة الإجازات',
     'nav.devicePairing': 'ربط جهاز الموظف',
@@ -1928,6 +1945,10 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.inventory.history.empty': 'لا يوجد أرشيف شهري متاح بعد.',
     'admin.inventory.history.readOnly': 'أرشيف للقراءة فقط',
     'admin.inventory.history.exit': 'العودة إلى الشهر الحالي',
+    'admin.inventory.history.deleteArchive': 'حذف الأرشيف',
+    'admin.inventory.history.deleteConfirmTitle': 'حذف الأرشيف الشهري؟',
+    'admin.inventory.history.deleteConfirmMessage':
+      'هل تريد حذف "{archive}" نهائيًا؟ سيتم حذف هذا الأرشيف فقط دون التأثير على كميات المخزون أو الأرشيف الآخر لنفس الشهر.',
     'admin.inventory.history.planTitle': 'سجل الخطة',
     'admin.inventory.history.planTitleAr': 'Plan History',
     'admin.inventory.history.planEmpty': 'لا يوجد سجل خطة لهذا الشهر.',
@@ -1976,6 +1997,8 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.inventory.plan.sections.maintenance': 'الصيانة',
     'admin.inventory.plan.sections.purchasing': 'المشتريات',
     'admin.inventory.plan.sections.gym': 'الجيم',
+    'admin.inventory.plan.sections.occupationalSafetyHealth':
+      'السلامة والصحة المهنية (OSH)',
     'admin.inventory.plan.directorsSub.frontOffice': 'المكاتب الأمامية',
     'admin.inventory.plan.directorsSub.personnelAffairs': 'شؤون العاملين',
     'admin.inventory.plan.directorsSub.informationTechnology': 'نظم المعلومات',
@@ -2055,6 +2078,8 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.inventory.plan.items.sportsShorts.black': 'شورت رياضي أسود',
     'admin.inventory.plan.items.sportsShorts.navy': 'شورت رياضي كحلي',
     'admin.inventory.plan.items.sportsShorts.grey': 'شورت رياضي رمادي',
+    'admin.inventory.plan.items.safetyShirt': 'قميص سلامة',
+    'admin.inventory.plan.items.safetyUniformSet': 'طقم زي سلامة',
     'admin.editor.leavesSubtitle':
       'إدارة طلبات الإجازات. التغييرات تُطبَّق بعد الحفظ.',
     'admin.editor.stainsSubtitle':
@@ -2220,6 +2245,7 @@ export const dictionaries: Record<Language, Dictionary> = {
       'سيؤدي هذا إلى حذف جميع سجلات تحت التنفيذ نهائياً. لن تتأثر العناصر النشطة تحت التنفيذ. اكتب DELETE للتأكيد.',
     'inventory.underExecution.clearHistoryTypeDelete':
       'اكتب DELETE للتأكيد',
+    'inventory.underExecution.hideFromLive': 'إخفاء من السجل المباشر',
     'inventory.underExecution.validation.supplier': 'المورد مطلوب.',
     'inventory.underExecution.validation.supplierName': 'القسم مطلوب.',
     'inventory.underExecution.validation.item': 'يرجى اختيار صنف.',
@@ -2355,6 +2381,12 @@ export const dictionaries: Record<Language, Dictionary> = {
     'inventory.v2.historyTitle': 'سجل المعاملات',
     'inventory.v2.historyTitleAr': 'سجل المعاملات',
     'inventory.v2.historyEmpty': 'لا توجد معاملات مسجلة بعد.',
+    'inventory.v2.receivingHistoryTitle': 'سجل الاستلام',
+    'inventory.v2.receivingHistoryTitleAr': 'سجل الاستلام',
+    'inventory.v2.receivingHistoryEmpty': 'لا توجد معاملات استلام مسجلة بعد.',
+    'inventory.v2.issueHistoryTitle': 'سجل الصرف',
+    'inventory.v2.issueHistoryTitleAr': 'سجل الصرف',
+    'inventory.v2.issueHistoryEmpty': 'لا توجد معاملات صرف مسجلة بعد.',
     'inventory.v2.transactionType': 'نوع المعاملة',
     'inventory.v2.typeReceive': 'استلام',
     'inventory.v2.typeIssue': 'صرف',

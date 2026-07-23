@@ -23,7 +23,8 @@ export type PlanDepartmentId =
   | 'stewarding'
   | 'maintenance'
   | 'purchasing'
-  | 'gym';
+  | 'gym'
+  | 'occupationalSafetyHealth';
 
 export type PlanItemKey =
   | 'suit'
@@ -54,7 +55,9 @@ export type PlanItemKey =
   | 'sportsTracksuit'
   | 'sportsTshirt'
   | 'sportsPants'
-  | 'sportsShorts';
+  | 'sportsShorts'
+  | 'safetyShirt'
+  | 'safetyUniformSet';
 
 export type PlanRowId = `${PlanDepartmentId}-${string}`;
 
@@ -79,6 +82,7 @@ export const PLAN_DEPARTMENTS: readonly PlanDepartmentId[] = [
   'maintenance',
   'purchasing',
   'gym',
+  'occupationalSafetyHealth',
 ];
 
 export const PLAN_DEPARTMENT_LABEL_KEYS: Record<
@@ -104,6 +108,8 @@ export const PLAN_DEPARTMENT_LABEL_KEYS: Record<
   maintenance: 'admin.inventory.plan.sections.maintenance',
   purchasing: 'admin.inventory.plan.sections.purchasing',
   gym: 'admin.inventory.plan.sections.gym',
+  occupationalSafetyHealth:
+    'admin.inventory.plan.sections.occupationalSafetyHealth',
 };
 
 export const PLAN_DEPARTMENT_ITEMS: Record<
@@ -166,6 +172,14 @@ export const PLAN_DEPARTMENT_ITEMS: Record<
   maintenance: ['shirt', 'pants', 'supervisionKit', 'workersKit'],
   purchasing: ['shirt', 'pants'],
   gym: ['sportsTracksuit', 'sportsTshirt', 'sportsPants', 'sportsShorts'],
+  occupationalSafetyHealth: [
+    'pants',
+    'suit',
+    'shirt',
+    'tie',
+    'safetyShirt',
+    'safetyUniformSet',
+  ],
 };
 
 const ACCOUNTS_SUIT_VARIANTS = [
@@ -319,6 +333,8 @@ const ITEM_VARIANT_KEYS: Record<PlanItemKey, readonly TranslationKey[]> = {
     'admin.inventory.plan.items.sportsShorts.navy',
     'admin.inventory.plan.items.sportsShorts.grey',
   ],
+  safetyShirt: ['admin.inventory.plan.items.safetyShirt'],
+  safetyUniformSet: ['admin.inventory.plan.items.safetyUniformSet'],
 };
 
 export const ITEM_LABEL_KEYS: Record<PlanItemKey, TranslationKey> = {
@@ -351,6 +367,8 @@ export const ITEM_LABEL_KEYS: Record<PlanItemKey, TranslationKey> = {
   sportsTshirt: 'admin.inventory.plan.items.sportsTshirt',
   sportsPants: 'admin.inventory.plan.items.sportsPants',
   sportsShorts: 'admin.inventory.plan.items.sportsShorts',
+  safetyShirt: 'admin.inventory.plan.items.safetyShirt',
+  safetyUniformSet: 'admin.inventory.plan.items.safetyUniformSet',
 };
 
 export function getDepartmentItemVariants(

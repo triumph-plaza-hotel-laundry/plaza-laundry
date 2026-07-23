@@ -1,3 +1,4 @@
+import { Trash2 } from 'lucide-react';
 import type { UnderExecutionRecord } from '@/features/inventory/under-execution-types';
 import { useLanguage } from '@/hooks';
 
@@ -5,6 +6,9 @@ type UnderExecutionHistoryTableProps = {
   disabled?: boolean;
   records: UnderExecutionRecord[];
   onClearHistory?: () => void;
+  /** Live Under Execution History only — soft-hide from this page. */
+  allowHideFromLive?: boolean;
+  onHideFromLive?: (record: UnderExecutionRecord) => void;
 };
 
 function formatDateTime(value: string, language: string) {
@@ -23,8 +27,14 @@ export function UnderExecutionHistoryTable({
   disabled = false,
   records,
   onClearHistory,
+  allowHideFromLive = false,
+  onHideFromLive,
 }: UnderExecutionHistoryTableProps) {
   const { language, t } = useLanguage();
+
+  const visibleRecords = allowHideFromLive
+    ? records.filter((record) => !record.hiddenFromLive)
+    : records;
 
   return (
     <section className="inv-panel">
@@ -40,7 +50,7 @@ export function UnderExecutionHistoryTable({
         {onClearHistory ? (
           <button
             className="admin-editor-btn admin-editor-btn--danger"
-            disabled={disabled || records.length === 0}
+            disabled={disabled || visibleRecords.length === 0}
             onClick={onClearHistory}
             type="button"
           >
@@ -49,7 +59,7 @@ export function UnderExecutionHistoryTable({
         ) : null}
       </header>
 
-      {records.length === 0 ? (
+      {visibleRecords.length === 0 ? (
         <div className="inv-empty">
           <p>{t('inventory.underExecution.historyEmpty')}</p>
         </div>
@@ -65,6 +75,9 @@ export function UnderExecutionHistoryTable({
               <col className="inv-erp-col inv-erp-col--date" />
               <col className="inv-erp-col inv-erp-col--date" />
               <col className="inv-erp-col inv-erp-col--date" />
+              {allowHideFromLive ? (
+                <col className="inv-erp-col inv-erp-col--actions" />
+              ) : null}
             </colgroup>
             <thead>
               <tr>
@@ -82,10 +95,15 @@ export function UnderExecutionHistoryTable({
                 <th scope="col">{t('inventory.v2.date')}</th>
                 <th scope="col">{t('inventory.underExecution.recordedDate')}</th>
                 <th scope="col">{t('inventory.v2.time')}</th>
+                {allowHideFromLive ? (
+                  <th className="inv-erp-table__actions" scope="col">
+                    {t('inventory.table.actions')}
+                  </th>
+                ) : null}
               </tr>
             </thead>
             <tbody>
-              {records.map((record) => {
+              {visibleRecords.map((record) => {
                 const { date, time } = formatDateTime(
                   record.createdAt,
                   language,
@@ -107,6 +125,26 @@ export function UnderExecutionHistoryTable({
                     <td>{record.date}</td>
                     <td>{date}</td>
                     <td>{time}</td>
+                    {allowHideFromLive ? (
+                      <td className="inv-erp-table__actions">
+                        <button
+                          aria-label={t(
+                            'inventory.underExecution.hideFromLive',
+                          )}
+                          className="inv-history-hide-btn"
+                          disabled={disabled}
+                          onClick={() => onHideFromLive?.(record)}
+                          title={t('inventory.underExecution.hideFromLive')}
+                          type="button"
+                        >
+                          <Trash2
+                            aria-hidden="true"
+                            size={15}
+                            strokeWidth={1.75}
+                          />
+                        </button>
+                      </td>
+                    ) : null}
                   </tr>
                 );
               })}

@@ -278,7 +278,16 @@ export function InventoryManagementPage({
             </div>
           )}
 
-          <TransactionHistoryTable transactions={transactions} />
+          <div className="inv-management-page__histories">
+            <TransactionHistoryTable
+              transactionType="receive"
+              transactions={transactions}
+            />
+            <TransactionHistoryTable
+              transactionType="issue"
+              transactions={transactions}
+            />
+          </div>
         </>
       )}
 

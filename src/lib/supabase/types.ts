@@ -373,6 +373,7 @@ export type Database = {
           quantity: number;
           date: string;
           created_at: string;
+          hidden_from_live: boolean;
         };
         Insert: {
           id?: string;
@@ -384,6 +385,7 @@ export type Database = {
           quantity: number;
           date: string;
           created_at?: string;
+          hidden_from_live?: boolean;
         };
         Update: {
           id?: string;
@@ -395,6 +397,7 @@ export type Database = {
           quantity?: number;
           date?: string;
           created_at?: string;
+          hidden_from_live?: boolean;
         };
         Relationships: [];
       };
@@ -408,6 +411,7 @@ export type Database = {
           quantity: number;
           notes: string;
           created_at: string;
+          hidden_from_live: boolean;
         };
         Insert: {
           id?: string;
@@ -418,6 +422,7 @@ export type Database = {
           quantity: number;
           notes?: string;
           created_at?: string;
+          hidden_from_live?: boolean;
         };
         Update: {
           id?: string;
@@ -428,6 +433,7 @@ export type Database = {
           quantity?: number;
           notes?: string;
           created_at?: string;
+          hidden_from_live?: boolean;
         };
         Relationships: [];
       };
@@ -440,6 +446,7 @@ export type Database = {
           quantity: number;
           reason: string;
           created_at: string;
+          hidden_from_live: boolean;
         };
         Insert: {
           id?: string;
@@ -449,6 +456,7 @@ export type Database = {
           quantity: number;
           reason?: string;
           created_at?: string;
+          hidden_from_live?: boolean;
         };
         Update: {
           id?: string;
@@ -458,6 +466,7 @@ export type Database = {
           quantity?: number;
           reason?: string;
           created_at?: string;
+          hidden_from_live?: boolean;
         };
         Relationships: [];
       };

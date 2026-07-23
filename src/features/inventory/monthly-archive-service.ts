@@ -234,7 +234,7 @@ export async function fetchUnderExecutionSnapshotForArchive(
 ): Promise<ArchivedUnderExecutionData> {
   const [records, history] = await Promise.all([
     listUnderExecutionRecords(),
-    listUnderExecutionHistory(),
+    listUnderExecutionHistory({ includeHidden: true }),
   ]);
 
   return {
@@ -367,6 +367,102 @@ export async function getMonthlyArchive(
   }
 
   return data ? mapArchiveRow(data as ArchiveRow) : null;
+}
+
+/**
+ * Removes only the given transaction type from a monthly archive snapshot.
+ * Does not modify live inventory_items, receipts, issues, or the other type.
+ */
+export async function clearMonthlyArchiveTransactions(
+  monthKey: string,
+  transactionType: InventoryTransaction['type'],
+): Promise<MonthlyArchiveRecord | null> {
+  const archive = await getMonthlyArchive(monthKey);
+  if (!archive) {
+    return null;
+  }
+
+  const nextInventoryData: ArchivedInventoryData = {
+    ...archive.inventoryData,
+    transactions: archive.inventoryData.transactions.filter(
+      (transaction) => transaction.type !== transactionType,
+    ),
+    capturedAt: archive.inventoryData.capturedAt || new Date().toISOString(),
+  };
+
+  const client = requireClient();
+  const { error } = await client
+    .from('inventory_monthly_archives')
+    .update({
+      inventory_data: nextInventoryData as unknown as Json,
+    })
+    .eq('archive_month', monthKey);
+
+  if (error) {
+    if (isMissingArchiveTable(error)) {
+      return null;
+    }
+    throw error;
+  }
+
+  return {
+    ...archive,
+    inventoryData: nextInventoryData,
+  };
+}
+
+export async function listMonthlyArchiveTransactionPresence(): Promise<
+  Array<{
+    monthKey: string;
+    hasIssue: boolean;
+    hasReceive: boolean;
+  }>
+> {
+  const client = requireClient();
+  const { data, error } = await client
+    .from('inventory_monthly_archives')
+    .select('archive_month, inventory_data')
+    .order('archive_month', { ascending: false });
+
+  if (error) {
+    if (isMissingArchiveTable(error)) {
+      return [];
+    }
+    throw error;
+  }
+
+  return (data ?? []).map((row) => {
+    const inventoryData = parseArchivedInventoryData(
+      row.inventory_data,
+      row.archive_month,
+    );
+    return {
+      monthKey: row.archive_month,
+      hasIssue: inventoryData.transactions.some(
+        (transaction) => transaction.type === 'issue',
+      ),
+      hasReceive: inventoryData.transactions.some(
+        (transaction) => transaction.type === 'receive',
+      ),
+    };
+  });
+}
+
+export function formatArchiveEntryLabel(
+  transactionType: InventoryTransaction['type'],
+  monthLabel: string,
+  language: 'ar' | 'en',
+) {
+  const prefix =
+    transactionType === 'issue'
+      ? language === 'ar'
+        ? 'صرف'
+        : 'Issue'
+      : language === 'ar'
+        ? 'استلام'
+        : 'Receiving';
+
+  return `${prefix} – ${monthLabel}`;
 }
 
 async function createMonthlyArchive(

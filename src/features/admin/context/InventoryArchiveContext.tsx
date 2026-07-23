@@ -6,11 +6,14 @@ import {
   type ReactNode,
 } from 'react';
 import type { InventoryPlanDocument } from '@/features/inventory/monthly-archive-types';
+import type { InventoryTransactionType } from '@/features/inventory/types';
 import {
   InventoryArchiveContext,
   type InventoryArchiveContextValue,
 } from '@/features/admin/context/inventory-archive-context';
 import {
+  clearMonthlyArchiveTransactions,
+  formatArchiveEntryLabel,
   formatArchiveMonthLabel,
   getMonthlyArchive,
   syncMonthlyArchiveTransition,
@@ -31,6 +34,8 @@ export function InventoryArchiveProvider({
   const [planDocument, setPlanDocument] =
     useState<InventoryPlanDocument | null>(null);
   const [viewingMonth, setViewingMonth] = useState<string | null>(null);
+  const [viewingTransactionType, setViewingTransactionType] =
+    useState<InventoryTransactionType | null>(null);
   const [viewingArchive, setViewingArchive] =
     useState<InventoryArchiveContextValue['viewingArchive']>(null);
   const [isReady, setIsReady] = useState(false);
@@ -79,26 +84,69 @@ export function InventoryArchiveProvider({
     [language],
   );
 
+  const formatArchiveTypeLabel = useCallback(
+    (monthKey: string, transactionType: InventoryTransactionType) =>
+      formatArchiveEntryLabel(
+        transactionType,
+        formatArchiveMonthLabel(monthKey, language),
+        language,
+      ),
+    [language],
+  );
+
   const openDrawer = useCallback(() => setDrawerOpen(true), []);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
-  const selectArchiveMonth = useCallback(async (monthKey: string) => {
-    const archive = await getMonthlyArchive(monthKey);
-    if (!archive) {
-      return;
-    }
+  const selectArchiveMonth = useCallback(
+    async (
+      monthKey: string,
+      transactionType: InventoryTransactionType,
+    ) => {
+      const archive = await getMonthlyArchive(monthKey);
+      if (!archive) {
+        return;
+      }
 
-    setViewingMonth(monthKey);
-    setViewingArchive(archive);
-    setDrawerOpen(false);
-  }, []);
+      setViewingMonth(monthKey);
+      setViewingTransactionType(transactionType);
+      setViewingArchive(archive);
+      setDrawerOpen(false);
+    },
+    [],
+  );
 
   const exitArchiveView = useCallback(() => {
     setViewingMonth(null);
+    setViewingTransactionType(null);
     setViewingArchive(null);
     invalidateInventoryCache();
     setLiveDataRevision((current) => current + 1);
   }, []);
+
+  const deleteArchiveTransactions = useCallback(
+    async (
+      monthKey: string,
+      transactionType: InventoryTransactionType,
+    ) => {
+      const updated = await clearMonthlyArchiveTransactions(
+        monthKey,
+        transactionType,
+      );
+
+      if (
+        viewingMonth === monthKey &&
+        viewingTransactionType === transactionType
+      ) {
+        exitArchiveView();
+        return;
+      }
+
+      if (viewingMonth === monthKey && updated) {
+        setViewingArchive(updated);
+      }
+    },
+    [exitArchiveView, viewingMonth, viewingTransactionType],
+  );
 
   const ensureArchiveSynced = useCallback(async () => {
     const result = await syncMonthlyArchiveTransition();
@@ -136,7 +184,8 @@ export function InventoryArchiveProvider({
       ensureArchiveSynced,
       exitArchiveView,
       formatMonthLabel,
-      isArchiveView: Boolean(viewingMonth),
+      formatArchiveTypeLabel,
+      isArchiveView: Boolean(viewingMonth && viewingTransactionType),
       isReady,
       liveDataRevision,
       openDrawer,
@@ -144,9 +193,11 @@ export function InventoryArchiveProvider({
       planDocument,
       savePlanDrafts,
       selectArchiveMonth,
+      deleteArchiveTransactions,
       syncError,
       viewingArchive,
       viewingMonth,
+      viewingTransactionType,
     }),
     [
       archiveMonths,
@@ -155,6 +206,7 @@ export function InventoryArchiveProvider({
       ensureArchiveSynced,
       exitArchiveView,
       formatMonthLabel,
+      formatArchiveTypeLabel,
       isReady,
       liveDataRevision,
       openDrawer,
@@ -162,9 +214,11 @@ export function InventoryArchiveProvider({
       planDocument,
       savePlanDrafts,
       selectArchiveMonth,
+      deleteArchiveTransactions,
       syncError,
       viewingArchive,
       viewingMonth,
+      viewingTransactionType,
     ],
   );
 

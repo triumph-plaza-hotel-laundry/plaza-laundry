@@ -267,6 +267,29 @@
   width: 2.75rem;
 }
 
+.inv-management-page .inv-history-hide-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid rgb(180 70 70 / 35%);
+  border-radius: 0.55rem;
+  background: rgb(180 70 70 / 8%);
+  color: #a33b3b;
+  cursor: pointer;
+}
+
+.inv-management-page .inv-history-hide-btn:hover:not(:disabled) {
+  background: rgb(180 70 70 / 16%);
+}
+
+.inv-management-page .inv-history-hide-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .inv-management-page .inv-erp-table__actions {
   text-align: center;
   padding-inline: 0.125rem !important;
@@ -864,6 +887,13 @@ html[dir='rtl']
 .inv-management-page .inv-management-page__forms {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.inv-management-page .inv-management-page__histories,
+.admin-archive-history-view .inv-management-page__histories {
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 1rem;
 }
 

@@ -132,8 +132,12 @@ export function AdminUnderExecutionPage() {
         />
 
         <UnderExecutionHistoryTable
+          allowHideFromLive
           disabled={isBusy}
           onClearHistory={() => setIsClearHistoryOpen(true)}
+          onHideFromLive={(record) => {
+            void underExecution.hideHistoryFromLive(record.id);
+          }}
           records={history}
         />
 

@@ -15,10 +15,13 @@ type DbUnderExecutionRow = {
   quantity: number;
   date: string;
   created_at: string;
+  hidden_from_live?: boolean | null;
 };
 
 const SELECT_COLUMNS =
   'id, supplier, department, supplier_name, item_code, item_name, quantity, date, created_at';
+
+const HISTORY_SELECT_COLUMNS = `${SELECT_COLUMNS}, hidden_from_live`;
 
 function requireClient() {
   const client = getSupabaseClient();
@@ -40,6 +43,7 @@ function mapRow(row: DbUnderExecutionRow): UnderExecutionRecord {
     quantity: row.quantity,
     date: row.date,
     createdAt: row.created_at,
+    hiddenFromLive: Boolean(row.hidden_from_live),
   };
 }
 
@@ -52,6 +56,17 @@ function toWritePayload(input: CreateUnderExecutionInput | UpdateUnderExecutionI
     quantity: input.quantity,
     date: input.date,
   };
+}
+
+function isMissingHiddenFromLiveColumn(error: {
+  code?: string;
+  message?: string;
+}) {
+  const message = error.message?.toLowerCase() ?? '';
+  return (
+    message.includes('hidden_from_live') ||
+    message.includes('hidden from live')
+  );
 }
 
 export async function listUnderExecutionRecords(): Promise<
@@ -70,21 +85,50 @@ export async function listUnderExecutionRecords(): Promise<
   return ((data ?? []) as DbUnderExecutionRow[]).map(mapRow);
 }
 
-/** Immutable archive — read only from the app. */
-export async function listUnderExecutionHistory(): Promise<
-  UnderExecutionRecord[]
-> {
+type ListHistoryOptions = {
+  /** When true, includes soft-hidden rows (monthly archive capture). */
+  includeHidden?: boolean;
+};
+
+/** History archive — soft-hidden rows stay in DB for monthly archives. */
+export async function listUnderExecutionHistory(
+  options?: ListHistoryOptions,
+): Promise<UnderExecutionRecord[]> {
   const client = requireClient();
-  const { data, error } = await client
+  const includeHidden = Boolean(options?.includeHidden);
+
+  let query = client
     .from('inventory_under_execution_history')
-    .select(SELECT_COLUMNS)
+    .select(HISTORY_SELECT_COLUMNS)
     .order('created_at', { ascending: false });
 
-  if (error) {
-    throw new Error(error.message);
+  if (!includeHidden) {
+    query = query.eq('hidden_from_live', false);
   }
 
-  return ((data ?? []) as DbUnderExecutionRow[]).map(mapRow);
+  const primary = await query;
+
+  if (primary.error && isMissingHiddenFromLiveColumn(primary.error)) {
+    const fallback = await client
+      .from('inventory_under_execution_history')
+      .select(SELECT_COLUMNS)
+      .order('created_at', { ascending: false });
+    if (fallback.error) {
+      throw new Error(fallback.error.message);
+    }
+    const rows = ((fallback.data ?? []) as DbUnderExecutionRow[]).map(mapRow);
+    return includeHidden ? rows : rows.filter((row) => !row.hiddenFromLive);
+  }
+
+  if (primary.error) {
+    throw new Error(primary.error.message);
+  }
+
+  const rows = ((primary.data ?? []) as DbUnderExecutionRow[]).map(mapRow);
+  if (includeHidden) {
+    return rows;
+  }
+  return rows.filter((row) => !row.hiddenFromLive);
 }
 
 export async function createUnderExecutionRecord(
@@ -116,9 +160,30 @@ export async function createUnderExecutionRecord(
       quantity: payload.quantity,
       date: payload.date,
       created_at: active.createdAt,
+      hidden_from_live: false,
     });
 
   if (historyError) {
+    // Retry without the new column if migration is not applied yet.
+    if (isMissingHiddenFromLiveColumn(historyError)) {
+      const { error: legacyHistoryError } = await client
+        .from('inventory_under_execution_history')
+        .insert({
+          supplier: payload.supplier,
+          department: payload.department,
+          item_code: payload.item_code,
+          item_name: payload.item_name,
+          quantity: payload.quantity,
+          date: payload.date,
+          created_at: active.createdAt,
+        });
+      if (legacyHistoryError) {
+        await client.from('inventory_under_execution').delete().eq('id', active.id);
+        throw new Error(legacyHistoryError.message);
+      }
+      return active;
+    }
+
     await client.from('inventory_under_execution').delete().eq('id', active.id);
     throw new Error(historyError.message);
   }
@@ -172,6 +237,24 @@ export async function deleteUnderExecutionRecord(id: string): Promise<void> {
     .from('inventory_under_execution')
     .delete()
     .eq('id', id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+/**
+ * Soft-hide a history row from the live Under Execution History UI only.
+ * Does not delete the row or change inventory quantities.
+ */
+export async function hideUnderExecutionHistoryFromLive(
+  historyId: string,
+): Promise<void> {
+  const client = requireClient();
+  const { error } = await client
+    .from('inventory_under_execution_history')
+    .update({ hidden_from_live: true })
+    .eq('id', historyId);
 
   if (error) {
     throw new Error(error.message);

@@ -40,14 +40,22 @@ function AdminInventoryLivePanel() {
   const {
     currentMonth,
     ensureArchiveSynced,
+    formatArchiveTypeLabel,
     isArchiveView,
     liveDataRevision,
     planDocument,
     viewingArchive,
+    viewingMonth,
+    viewingTransactionType,
   } = useInventoryArchive();
 
   const liveMonthKey =
     planDocument?.workingMonth || currentMonth || null;
+
+  const archiveTitle =
+    viewingMonth && viewingTransactionType
+      ? formatArchiveTypeLabel(viewingMonth, viewingTransactionType)
+      : t('admin.inventory.history.title');
 
   return (
     <>
@@ -70,14 +78,19 @@ function AdminInventoryLivePanel() {
         />
       </div>
 
-      {isArchiveView ? (
+      {isArchiveView && viewingTransactionType ? (
         <ArchiveHistoryViewShell
-          titleAr={t('inventory.v2.historyTitleAr')}
-          titleEn={t('inventory.v2.historyTitle')}
+          titleAr={archiveTitle}
+          titleEn={archiveTitle}
         >
-          <TransactionHistoryTable
-            transactions={viewingArchive?.inventoryData.transactions ?? []}
-          />
+          <div className="inv-management-page__histories">
+            <TransactionHistoryTable
+              transactionType={viewingTransactionType}
+              transactions={
+                viewingArchive?.inventoryData.transactions ?? []
+              }
+            />
+          </div>
         </ArchiveHistoryViewShell>
       ) : null}
     </>

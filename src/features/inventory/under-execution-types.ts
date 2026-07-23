@@ -7,6 +7,8 @@ export type UnderExecutionRecord = {
   quantity: number;
   date: string;
   createdAt: string;
+  /** Soft-hide from live Under Execution History UI only. */
+  hiddenFromLive?: boolean;
 };
 
 export type CreateUnderExecutionInput = {

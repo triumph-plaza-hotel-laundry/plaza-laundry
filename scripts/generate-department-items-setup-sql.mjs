@@ -20,6 +20,7 @@ const PLAN_DEPARTMENTS = [
   'maintenance',
   'purchasing',
   'gym',
+  'occupationalSafetyHealth',
 ];
 
 const PLAN_DEPARTMENT_ITEMS = {
@@ -41,6 +42,14 @@ const PLAN_DEPARTMENT_ITEMS = {
   maintenance: ['shirt', 'pants', 'supervisionKit', 'workersKit'],
   purchasing: ['shirt', 'pants'],
   gym: ['sportsTracksuit', 'sportsTshirt', 'sportsPants', 'sportsShorts'],
+  occupationalSafetyHealth: [
+    'pants',
+    'suit',
+    'shirt',
+    'tie',
+    'safetyShirt',
+    'safetyUniformSet',
+  ],
 };
 
 const ACCOUNTS_SUIT_VARIANTS = [
@@ -185,6 +194,8 @@ const ITEM_VARIANT_KEYS = {
     'admin.inventory.plan.items.sportsShorts.navy',
     'admin.inventory.plan.items.sportsShorts.grey',
   ],
+  safetyShirt: ['admin.inventory.plan.items.safetyShirt'],
+  safetyUniformSet: ['admin.inventory.plan.items.safetyUniformSet'],
 };
 
 const ITEM_LABEL_KEYS = {
@@ -217,6 +228,8 @@ const ITEM_LABEL_KEYS = {
   sportsTshirt: 'admin.inventory.plan.items.sportsTshirt',
   sportsPants: 'admin.inventory.plan.items.sportsPants',
   sportsShorts: 'admin.inventory.plan.items.sportsShorts',
+  safetyShirt: 'admin.inventory.plan.items.safetyShirt',
+  safetyUniformSet: 'admin.inventory.plan.items.safetyUniformSet',
 };
 
 function getDepartmentItemVariants(departmentId, itemKey) {

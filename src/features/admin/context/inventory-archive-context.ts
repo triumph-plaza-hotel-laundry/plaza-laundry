@@ -3,6 +3,7 @@ import type {
   InventoryPlanDocument,
   MonthlyArchiveRecord,
 } from '@/features/inventory/monthly-archive-types';
+import type { InventoryTransactionType } from '@/features/inventory/types';
 
 export type InventoryArchiveContextValue = {
   archiveMonths: string[];
@@ -11,6 +12,10 @@ export type InventoryArchiveContextValue = {
   ensureArchiveSynced: () => Promise<void>;
   exitArchiveView: () => void;
   formatMonthLabel: (monthKey: string) => string;
+  formatArchiveTypeLabel: (
+    monthKey: string,
+    transactionType: InventoryTransactionType,
+  ) => string;
   isArchiveView: boolean;
   isReady: boolean;
   /** Bumps when leaving archive view so live history reloads from the database. */
@@ -21,10 +26,18 @@ export type InventoryArchiveContextValue = {
   savePlanDrafts: (
     rowDrafts: InventoryPlanDocument['rowDrafts'],
   ) => Promise<void>;
-  selectArchiveMonth: (monthKey: string) => Promise<void>;
+  selectArchiveMonth: (
+    monthKey: string,
+    transactionType: InventoryTransactionType,
+  ) => Promise<void>;
+  deleteArchiveTransactions: (
+    monthKey: string,
+    transactionType: InventoryTransactionType,
+  ) => Promise<void>;
   syncError: string | null;
   viewingArchive: MonthlyArchiveRecord | null;
   viewingMonth: string | null;
+  viewingTransactionType: InventoryTransactionType | null;
 };
 
 export const InventoryArchiveContext =

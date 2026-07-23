@@ -1,8 +1,15 @@
-import type { InventoryTransaction } from '@/features/inventory';
+import type {
+  InventoryTransaction,
+  InventoryTransactionType,
+} from '@/features/inventory';
 import { useLanguage } from '@/hooks';
+import type { TranslationKey } from '@/types/language';
+import { useMemo } from 'react';
 
 type TransactionHistoryTableProps = {
   transactions: InventoryTransaction[];
+  /** When set, shows only that transaction type with matching columns/title. */
+  transactionType: InventoryTransactionType;
 };
 
 function formatDateTime(value: string, language: string) {
@@ -19,29 +26,52 @@ function formatDateTime(value: string, language: string) {
 
 export function TransactionHistoryTable({
   transactions,
+  transactionType,
 }: TransactionHistoryTableProps) {
   const { language, t } = useLanguage();
 
+  const filteredTransactions = useMemo(
+    () =>
+      transactions.filter((transaction) => transaction.type === transactionType),
+    [transactionType, transactions],
+  );
+
+  const isReceive = transactionType === 'receive';
+
+  const titleEnKey: TranslationKey = isReceive
+    ? 'inventory.v2.receivingHistoryTitle'
+    : 'inventory.v2.issueHistoryTitle';
+  const titleArKey: TranslationKey = isReceive
+    ? 'inventory.v2.receivingHistoryTitleAr'
+    : 'inventory.v2.issueHistoryTitleAr';
+  const emptyKey: TranslationKey = isReceive
+    ? 'inventory.v2.receivingHistoryEmpty'
+    : 'inventory.v2.issueHistoryEmpty';
+  const secondaryColumnKey: TranslationKey = isReceive
+    ? 'inventory.stockEntry.supplier'
+    : 'inventory.history.department';
+  const tertiaryColumnKey: TranslationKey = isReceive
+    ? 'inventory.v2.receiver'
+    : 'inventory.v2.issueReason';
+
   return (
-    <section className="inv-panel">
+    <section
+      aria-label={`${t(titleEnKey)} / ${t(titleArKey)}`}
+      className={`inv-panel inv-panel--history inv-panel--history-${transactionType}`}
+    >
       <header className="inv-panel__header">
-        <h2 className="inv-panel__title-en">
-          {t('inventory.v2.historyTitle')}
-        </h2>
-        <h2 className="inv-panel__title-ar">
-          {t('inventory.v2.historyTitleAr')}
-        </h2>
+        <h2 className="inv-panel__title-en">{t(titleEnKey)}</h2>
+        <h2 className="inv-panel__title-ar">{t(titleArKey)}</h2>
       </header>
 
-      {transactions.length === 0 ? (
+      {filteredTransactions.length === 0 ? (
         <div className="inv-empty">
-          <p>{t('inventory.v2.historyEmpty')}</p>
+          <p>{t(emptyKey)}</p>
         </div>
       ) : (
         <div className="inv-table-wrap inv-table-wrap--erp">
           <table className="luxury-table inv-erp-table inv-erp-table--history">
             <colgroup>
-              <col className="inv-erp-col inv-erp-col--type" />
               <col className="inv-erp-col inv-erp-col--code" />
               <col className="inv-erp-col inv-erp-col--name" />
               <col className="inv-erp-col inv-erp-col--num" />
@@ -53,7 +83,6 @@ export function TransactionHistoryTable({
             </colgroup>
             <thead>
               <tr>
-                <th scope="col">{t('inventory.v2.transactionType')}</th>
                 <th className="inv-erp-table__code" scope="col">
                   {t('inventory.table.code')}
                 </th>
@@ -63,30 +92,21 @@ export function TransactionHistoryTable({
                 <th className="inv-erp-table__num" scope="col">
                   {t('inventory.v2.quantity')}
                 </th>
-                <th scope="col">{t('inventory.history.department')}</th>
-                <th scope="col">{t('inventory.v2.issueReason')}</th>
+                <th scope="col">{t(secondaryColumnKey)}</th>
+                <th scope="col">{t(tertiaryColumnKey)}</th>
                 <th scope="col">{t('inventory.v2.employee')}</th>
                 <th scope="col">{t('inventory.v2.date')}</th>
                 <th scope="col">{t('inventory.v2.time')}</th>
               </tr>
             </thead>
             <tbody>
-              {transactions.map((transaction) => {
+              {filteredTransactions.map((transaction) => {
                 const { date, time } = formatDateTime(
                   transaction.createdAt,
                   language,
                 );
                 return (
                   <tr key={`${transaction.type}-${transaction.id}`}>
-                    <td>
-                      <span
-                        className={`inv-transaction-badge inv-transaction-badge--${transaction.type}`}
-                      >
-                        {transaction.type === 'receive'
-                          ? t('inventory.v2.typeReceive')
-                          : t('inventory.v2.typeIssue')}
-                      </span>
-                    </td>
                     <td className="inv-erp-table__code">
                       {transaction.itemCode || '—'}
                     </td>

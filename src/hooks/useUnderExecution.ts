@@ -3,6 +3,7 @@ import {
   clearUnderExecutionHistory,
   createUnderExecutionRecord,
   deleteUnderExecutionRecord,
+  hideUnderExecutionHistoryFromLive,
   listUnderExecutionHistory,
   listUnderExecutionRecords,
   subscribeUnderExecutionChanges,
@@ -181,6 +182,29 @@ export function useUnderExecution() {
     }
   }, [refresh, showToast, user]);
 
+  const hideHistoryFromLive = useCallback(
+    async (historyId: string) => {
+      setIsBusy(true);
+      setError(null);
+      try {
+        await hideUnderExecutionHistoryFromLive(historyId);
+        await refresh();
+        showToast('Removed from live history.', 'success');
+      } catch (caught) {
+        const message =
+          caught instanceof Error
+            ? caught.message
+            : 'Failed to hide history row.';
+        setError(message);
+        showToast(message, 'error');
+        throw caught;
+      } finally {
+        setIsBusy(false);
+      }
+    },
+    [refresh, showToast],
+  );
+
   return {
     records,
     history,
@@ -192,6 +216,7 @@ export function useUnderExecution() {
     updateRecord,
     deleteRecord,
     clearHistory,
+    hideHistoryFromLive,
     refresh,
   };
 }
