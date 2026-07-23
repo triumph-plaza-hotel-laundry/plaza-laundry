@@ -52,7 +52,7 @@ type ReceiptDraft = {
 const emptyDraft = (): ReceiptDraft => ({
   receiptDate: new Date().toISOString().slice(0, 10),
   notes: '',
-  items: [{ itemId: '', quantity: 1 }],
+  items: [{ itemId: '', quantity: 0 }],
 });
 
 export function AdminHotelEmployeeAssetsPage() {
@@ -353,7 +353,7 @@ export function AdminHotelEmployeeAssetsPage() {
               itemId: item.itemId,
               quantity: item.quantity,
             }))
-          : [{ itemId: '', quantity: 1 }],
+          : [{ itemId: '', quantity: 0 }],
     });
   };
 
@@ -903,18 +903,24 @@ function ReceiptEditorModal({
                         aria-label={t('hotelAssets.quantity')}
                         min={1}
                         onChange={(event) => {
+                          const raw = event.target.value;
                           const nextItems = [...draft.items];
+                          let quantity = 0;
+                          if (raw.trim() !== '') {
+                            const parsed = Number(raw);
+                            if (Number.isFinite(parsed) && parsed > 0) {
+                              quantity = Math.floor(parsed);
+                            }
+                          }
                           nextItems[index] = {
                             ...nextItems[index],
-                            quantity: Math.max(
-                              1,
-                              Number(event.target.value) || 1,
-                            ),
+                            quantity,
                           };
                           onChange({ ...draft, items: nextItems });
                         }}
+                        placeholder=""
                         type="number"
-                        value={row.quantity}
+                        value={row.quantity > 0 ? row.quantity : ''}
                       />
                     </label>
 
@@ -942,7 +948,7 @@ function ReceiptEditorModal({
                 onClick={() =>
                   onChange({
                     ...draft,
-                    items: [...draft.items, { itemId: '', quantity: 1 }],
+                    items: [...draft.items, { itemId: '', quantity: 0 }],
                   })
                 }
                 type="button"
