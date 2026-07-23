@@ -110,7 +110,6 @@ INSERT INTO asset_departments (name)
 SELECT d.name
 FROM (
   VALUES
-    ('Directors'),
     ('Front Offices'),
     ('Personnel Affairs'),
     ('Information Technology'),

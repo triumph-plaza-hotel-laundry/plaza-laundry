@@ -4,7 +4,6 @@
  */
 
 const DEPARTMENT_NAME_AR: Record<string, string> = {
-  Directors: 'الإدارة',
   'Front Offices': 'الاستقبال',
   'Front Office': 'الاستقبال',
   'Personnel Affairs': 'الموارد البشرية',
@@ -27,6 +26,8 @@ const DEPARTMENT_NAME_AR: Record<string, string> = {
   Maintenance: 'الصيانة',
   Purchasing: 'المشتريات',
   Gym: 'الجيم',
+  'Occupational Safety and Health': 'السلامة والصحة المهنية',
+  'Occupational Safety and Health (OSH)': 'السلامة والصحة المهنية',
 };
 
 const ITEM_NAME_AR: Record<string, string> = {
