@@ -72,11 +72,17 @@ function logStep(step: string, detail?: unknown) {
   console.info(`${LOG_PREFIX} ▶ ${step}`);
 }
 
-function readExistingPlayerId(): string | null {
+function readExistingPlayerId() {
   try {
     const id = OneSignal.User.PushSubscription.id;
-    return typeof id === 'string' && id.trim() ? id.trim() : null;
-  } catch {
+
+    console.log("================================");
+    console.log("ONESIGNAL PLAYER ID:", id);
+    console.log("================================");
+
+    return typeof id === "string" && id.trim() ? id.trim() : null;
+  } catch (error) {
+    console.log("FAILED TO READ PLAYER ID", error);
     return null;
   }
 }

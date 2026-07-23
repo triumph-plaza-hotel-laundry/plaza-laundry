@@ -147,6 +147,18 @@ async function resolveSubscriptions(
   supabase: ReturnType<typeof createClient>,
   laundryEmployeeId: string,
 ): Promise<SubscriptionRow[]> {
+  const merged = new Map<string, SubscriptionRow>();
+
+  const addRows = (rows: SubscriptionRow[]) => {
+    for (const row of rows) {
+      const playerId = row.onesignal_player_id?.trim();
+      if (!playerId) {
+        continue;
+      }
+      merged.set(playerId, { ...row, onesignal_player_id: playerId });
+    }
+  };
+
   const { data, error } = await supabase
     .from('onesignal_subscriptions')
     .select('id, employee_id, onesignal_player_id, laundry_employee_id')
@@ -158,7 +170,7 @@ async function resolveSubscriptions(
     throw new Error(error.message);
   }
 
-  const rows = (data ?? []) as SubscriptionRow[];
+  addRows((data ?? []) as SubscriptionRow[]);
 
   const { data: adminUsers } = await supabase
     .from('admin_users')
@@ -166,18 +178,44 @@ async function resolveSubscriptions(
     .eq('laundry_employee_id', laundryEmployeeId);
 
   const adminIds = (adminUsers ?? []).map((row) => row.id as string);
-  if (adminIds.length === 0) {
-    return rows.filter((row) => row.laundry_employee_id === laundryEmployeeId);
+  if (adminIds.length > 0) {
+    const { data: linkedSubs } = await supabase
+      .from('onesignal_subscriptions')
+      .select('id, employee_id, onesignal_player_id, laundry_employee_id')
+      .in('employee_id', adminIds);
+
+    addRows((linkedSubs ?? []) as SubscriptionRow[]);
   }
 
-  const { data: linkedSubs } = await supabase
-    .from('onesignal_subscriptions')
-    .select('id, employee_id, onesignal_player_id, laundry_employee_id')
-    .in('employee_id', adminIds);
+  // Active employee-linked devices are the pairing source of truth.
+  // If that device is ALSO the Primary Admin Device, still deliver —
+  // never skip solely because the player id is registered as primary admin.
+  const { data: linkedDevices, error: linkedDevicesError } = await supabase
+    .from('employee_linked_devices')
+    .select('onesignal_player_id, laundry_employee_id, paired_by_admin_id')
+    .eq('laundry_employee_id', laundryEmployeeId)
+    .eq('status', 'active');
 
-  const merged = new Map<string, SubscriptionRow>();
-  for (const row of [...rows, ...((linkedSubs ?? []) as SubscriptionRow[])]) {
-    merged.set(row.onesignal_player_id, row);
+  if (linkedDevicesError) {
+    throw new Error(linkedDevicesError.message);
+  }
+
+  for (const device of linkedDevices ?? []) {
+    const playerId =
+      typeof device.onesignal_player_id === 'string'
+        ? device.onesignal_player_id.trim()
+        : '';
+    if (!playerId || merged.has(playerId)) {
+      continue;
+    }
+
+    merged.set(playerId, {
+      id: playerId,
+      employee_id:
+        (device.paired_by_admin_id as string | null) ?? laundryEmployeeId,
+      onesignal_player_id: playerId,
+      laundry_employee_id: laundryEmployeeId,
+    });
   }
 
   return Array.from(merged.values());
