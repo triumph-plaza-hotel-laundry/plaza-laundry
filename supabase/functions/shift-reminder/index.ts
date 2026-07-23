@@ -92,7 +92,6 @@ async function sendOneSignalNotification(
   options?: {
     supabase?: ReturnType<typeof createClient>;
     historyId?: string | null;
-    idempotencyKey?: string;
   },
 ): Promise<{ ok: boolean; error?: string; invalidPlayerIds?: string[] }> {
   try {
@@ -103,7 +102,6 @@ async function sendOneSignalNotification(
       title,
       body,
       maxAttempts: 3,
-      idempotencyKey: options?.idempotencyKey,
     });
 
     if (options?.supabase) {
@@ -438,7 +436,6 @@ async function deliverAssignment(
       message.body,
       {
         supabase,
-        idempotencyKey: `${type}:${assignment.targetDateKey}:${assignment.employeeId}:${subscription.onesignal_player_id}:${triggeredBy}`,
       },
     );
 

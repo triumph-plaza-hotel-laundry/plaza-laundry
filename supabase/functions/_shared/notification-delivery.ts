@@ -1,6 +1,9 @@
 /**
  * Shared OneSignal delivery pipeline for Supabase Edge Functions.
  * Never treats HTTP 200 alone as success — inspects recipients/errors.
+ *
+ * OneSignal requires `idempotency_key` to be an RFC 9562 UUID (v4).
+ * Never send concatenated strings (type/date/employee/admin/attempt).
  */
 
 export type DeliveryAttemptResult = {
@@ -23,6 +26,10 @@ export type SmartDeliveryResult = {
 
 const DEFAULT_BACKOFF_MS = [1_000, 5_000, 15_000] as const;
 
+/** UUID v4 (RFC 4122 / 9562 variant). */
+const UUID_V4_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -32,6 +39,23 @@ function asRecord(value: unknown): Record<string, unknown> | null {
     return value as Record<string, unknown>;
   }
   return null;
+}
+
+export function isUuidV4(value: string): boolean {
+  return UUID_V4_RE.test(value.trim());
+}
+
+/**
+ * Returns a valid UUID v4 for OneSignal idempotency_key.
+ * If a candidate is provided and already valid, reuse it (safe retries).
+ * Otherwise generate a fresh crypto.randomUUID().
+ */
+export function ensureUuidV4IdempotencyKey(candidate?: string | null): string {
+  const trimmed = typeof candidate === 'string' ? candidate.trim() : '';
+  if (trimmed && isUuidV4(trimmed)) {
+    return trimmed;
+  }
+  return crypto.randomUUID();
 }
 
 function extractInvalidIds(body: Record<string, unknown> | null): string[] {
@@ -59,13 +83,6 @@ function extractInvalidIds(body: Record<string, unknown> | null): string[] {
               ids.add(value.trim());
             }
           }
-        }
-      }
-    } else if (candidate && typeof candidate === 'object') {
-      const record = candidate as Record<string, unknown>;
-      for (const value of Object.values(record)) {
-        if (typeof value === 'string' && /subscription|player|invalid/i.test(value)) {
-          // Keep textual errors; player ids collected elsewhere.
         }
       }
     }
@@ -105,18 +122,18 @@ async function sendOnce(
   title: string,
   body: string,
   attemptNumber: number,
-  idempotencyKey?: string,
+  idempotencyKey: string,
 ): Promise<DeliveryAttemptResult> {
+  const key = ensureUuidV4IdempotencyKey(idempotencyKey);
+
   const payload: Record<string, unknown> = {
     app_id: appId,
     include_subscription_ids: [playerId],
     headings: { en: title },
     contents: { en: body },
+    // OneSignal requires a UUID v4. Prefer idempotency_key (external_id alias is legacy).
+    idempotency_key: key,
   };
-
-  if (idempotencyKey) {
-    payload.external_id = idempotencyKey;
-  }
 
   const response = await fetch('https://api.onesignal.com/notifications', {
     method: 'POST',
@@ -158,11 +175,6 @@ async function sendOnce(
 
   const errorMessage = summarizeError(response.status, responseBody, rawText);
 
-  // Success rules:
-  // - HTTP ok
-  // - not explicitly zero recipients
-  // - subscription not listed as invalid
-  // - OneSignal returned a notification id OR a positive recipients count
   const hasPositiveRecipients =
     typeof recipients === 'number' && Number.isFinite(recipients) && recipients > 0;
   const hasNotificationId = Boolean(onesignalNotificationId);
@@ -186,6 +198,7 @@ async function sendOnce(
 
 /**
  * Send to a single subscription with retries and response inspection.
+ * One UUID v4 idempotency_key is generated per logical send and reused on retries.
  */
 export async function sendToSubscriptionId(options: {
   appId: string;
@@ -195,12 +208,16 @@ export async function sendToSubscriptionId(options: {
   body: string;
   maxAttempts?: number;
   backoffMs?: readonly number[];
+  /** Optional UUID v4. Non-UUID values are ignored and replaced. */
   idempotencyKey?: string;
 }): Promise<SmartDeliveryResult> {
   const maxAttempts = options.maxAttempts ?? 3;
   const backoff = options.backoffMs ?? DEFAULT_BACKOFF_MS;
   const attempts: DeliveryAttemptResult[] = [];
   const invalid = new Set<string>();
+
+  // One key per logical notification — reused across retries (OneSignal idempotency).
+  const idempotencyKey = ensureUuidV4IdempotencyKey(options.idempotencyKey);
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     let result: DeliveryAttemptResult;
@@ -212,9 +229,7 @@ export async function sendToSubscriptionId(options: {
         options.title,
         options.body,
         attempt,
-        options.idempotencyKey
-          ? `${options.idempotencyKey}:a${attempt}`
-          : undefined,
+        idempotencyKey,
       );
     } catch (error) {
       result = {
@@ -244,12 +259,10 @@ export async function sendToSubscriptionId(options: {
       };
     }
 
-    // Do not retry permanent invalid subscription ids.
     if (invalid.has(options.playerId)) {
       break;
     }
 
-    // Do not retry clear 4xx client errors except 429.
     if (
       result.httpStatus >= 400 &&
       result.httpStatus < 500 &&
@@ -288,6 +301,7 @@ export async function sendOneSignalNotificationLegacy(
       title,
       body,
       1,
+      crypto.randomUUID(),
     );
     return result.ok
       ? { ok: true }

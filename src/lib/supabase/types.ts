@@ -1325,20 +1325,7 @@ export type Database = {
           p_paired_by_admin_id: string;
           p_replace_existing?: boolean;
         };
-        Returns: {
-          id: string;
-          laundry_employee_id: string;
-          laundry_employee_name_en: string | null;
-          laundry_employee_name_ar: string | null;
-          onesignal_player_id: string;
-          device_label: string;
-          status: string;
-          paired_at: string;
-          last_seen_at: string;
-          paired_by_admin_id: string | null;
-          replaced_at: string | null;
-          removed_at: string | null;
-        };
+        Returns: Json;
       };
       sync_onesignal_subscription_rotation: {
         Args: {

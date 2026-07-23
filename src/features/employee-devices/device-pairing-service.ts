@@ -490,14 +490,26 @@ export async function pairDeviceFromSession(input: {
     log('RPC response', {
       isArray: Array.isArray(rpcData),
       rowCount: Array.isArray(rpcData) ? rpcData.length : row ? 1 : 0,
-      deviceId: row && typeof row === 'object' && 'id' in row ? row.id : null,
+      deviceId:
+        row && typeof row === 'object' && row !== null && 'id' in row
+          ? (row as { id: unknown }).id
+          : null,
       playerId:
-        row && typeof row === 'object' && 'onesignal_player_id' in row
-          ? row.onesignal_player_id
+        row &&
+        typeof row === 'object' &&
+        row !== null &&
+        'onesignal_player_id' in row
+          ? (row as { onesignal_player_id: unknown }).onesignal_player_id
           : null,
     });
 
-    if (row && typeof row === 'object' && 'id' in row && row.id) {
+    if (
+      row &&
+      typeof row === 'object' &&
+      row !== null &&
+      'id' in row &&
+      (row as { id: unknown }).id
+    ) {
       const linked = mapDevice(row as DeviceRow);
       log('pair complete via RPC', {
         deviceId: linked.id,
