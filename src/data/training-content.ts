@@ -1,88 +1,206 @@
-export type LocalizedText = {
-  en: string;
-  ar: string;
+export type TrainingVideoSource = 'youtube' | 'mp4';
+
+export type TrainingVideo = {
+  id: string;
+  title: string;
+  description: string;
+  /**
+   * Primary media URL / data URL. Historically named youtubeUrl;
+   * also accepts direct MP4 URLs and uploaded MP4 data URLs.
+   */
+  youtubeUrl: string;
+  duration: string;
+  thumbnailUrl: string;
+  displayOrder: number;
+  active: boolean;
+  sourceType: TrainingVideoSource;
 };
 
 export type TrainingLesson = {
   id: string;
-  title: LocalizedText;
-  description: LocalizedText;
-  contentHtml: LocalizedText;
+  /** Arabic title — required to publish a lesson */
+  title: string;
+  /** Optional Arabic rich HTML (text, images, tables) */
+  contentHtml: string;
+  /** Optional videos attached to this lesson */
+  videos: TrainingVideo[];
   lastUpdated: string;
-};
-
-export type TrainingVideo = {
-  id: string;
-  youtubeUrl: string;
-  duration: string;
-  description: LocalizedText;
 };
 
 export type TrainingState = {
   lessons: TrainingLesson[];
+  /**
+   * Legacy top-level videos (pre per-lesson videos).
+   * Kept for save/load compatibility; migrated into lessons on normalize.
+   */
   videos: TrainingVideo[];
 };
 
+/** Read Arabic text from a plain string or legacy `{ en, ar }` object. */
+export function pickArabicText(value: unknown): string {
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (value && typeof value === 'object') {
+    const record = value as { ar?: unknown; en?: unknown };
+    if (typeof record.ar === 'string' && record.ar.trim()) {
+      return record.ar;
+    }
+    if (typeof record.en === 'string') {
+      return record.en;
+    }
+  }
+  return '';
+}
+
+export function detectVideoSource(url: string): TrainingVideoSource {
+  const trimmed = url.trim().toLowerCase();
+  if (!trimmed) {
+    return 'youtube';
+  }
+  if (
+    trimmed.includes('youtube.com') ||
+    trimmed.includes('youtu.be') ||
+    trimmed.includes('youtube-nocookie.com')
+  ) {
+    return 'youtube';
+  }
+  if (
+    trimmed.endsWith('.mp4') ||
+    trimmed.endsWith('.webm') ||
+    trimmed.endsWith('.ogg') ||
+    trimmed.includes('.mp4?') ||
+    trimmed.startsWith('blob:') ||
+    trimmed.startsWith('data:video')
+  ) {
+    return 'mp4';
+  }
+  return 'youtube';
+}
+
+/** True when HTML has no visible text and no media/table nodes. */
+export function isTrainingContentEmpty(html: string): boolean {
+  const trimmed = (html || '').trim();
+  if (!trimmed || trimmed === '<p></p>' || trimmed === '<p><br></p>') {
+    return true;
+  }
+  if (/<(img|table|iframe|video|figure|ul|ol|blockquote|hr)\b/i.test(trimmed)) {
+    return false;
+  }
+  const plain = trimmed
+    .replace(/<br\s*\/?>/gi, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/<[^>]+>/g, '')
+    .trim();
+  return plain.length === 0;
+}
+
+export function lessonHasVideos(lesson: TrainingLesson): boolean {
+  return lesson.videos.some(
+    (video) => video.active !== false && Boolean(video.youtubeUrl.trim()),
+  );
+}
+
+export function lessonIsPublishable(lesson: TrainingLesson): boolean {
+  return lesson.title.trim().length > 0;
+}
+
+export function createEmptyVideo(order = 0): TrainingVideo {
+  return {
+    id: `video-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    title: '',
+    description: '',
+    youtubeUrl: '',
+    duration: '',
+    thumbnailUrl: '',
+    displayOrder: order,
+    active: true,
+    sourceType: 'youtube',
+  };
+}
+
+export function createEmptyLesson(): TrainingLesson {
+  return {
+    id: `lesson-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    title: '',
+    contentHtml: '',
+    videos: [],
+    lastUpdated: new Date().toISOString().slice(0, 10),
+  };
+}
+
+export function normalizeVideo(raw: unknown, index = 0): TrainingVideo | null {
+  if (!raw || typeof raw !== 'object') {
+    return null;
+  }
+  const item = raw as Partial<TrainingVideo> & {
+    videoUrl?: string;
+    title?: unknown;
+    description?: unknown;
+  };
+  if (typeof item.id !== 'string') {
+    return null;
+  }
+  const youtubeUrl =
+    (typeof item.youtubeUrl === 'string' && item.youtubeUrl) ||
+    (typeof item.videoUrl === 'string' && item.videoUrl) ||
+    '';
+  const sourceType =
+    item.sourceType === 'mp4' || item.sourceType === 'youtube'
+      ? item.sourceType
+      : detectVideoSource(youtubeUrl);
+
+  return {
+    id: item.id,
+    title: pickArabicText(item.title),
+    description: pickArabicText(item.description),
+    youtubeUrl,
+    duration: typeof item.duration === 'string' ? item.duration : '',
+    thumbnailUrl:
+      typeof item.thumbnailUrl === 'string' ? item.thumbnailUrl : '',
+    displayOrder:
+      typeof item.displayOrder === 'number' && Number.isFinite(item.displayOrder)
+        ? item.displayOrder
+        : index,
+    active: typeof item.active === 'boolean' ? item.active : true,
+    sourceType,
+  };
+}
+
+export function normalizeLesson(raw: unknown): TrainingLesson | null {
+  if (!raw || typeof raw !== 'object') {
+    return null;
+  }
+  const item = raw as Partial<TrainingLesson> & {
+    title?: unknown;
+    contentHtml?: unknown;
+    videos?: unknown;
+  };
+  if (typeof item.id !== 'string') {
+    return null;
+  }
+  const videos = Array.isArray(item.videos)
+    ? item.videos
+        .map((video, index) => normalizeVideo(video, index))
+        .filter((video): video is TrainingVideo => Boolean(video))
+        .sort((a, b) => a.displayOrder - b.displayOrder)
+        .map((video, index) => ({ ...video, displayOrder: index }))
+    : [];
+
+  return {
+    id: item.id,
+    title: pickArabicText(item.title),
+    contentHtml: pickArabicText(item.contentHtml),
+    videos,
+    lastUpdated:
+      typeof item.lastUpdated === 'string'
+        ? item.lastUpdated
+        : new Date().toISOString().slice(0, 10),
+  };
+}
+
+/** Empty by default — no demo / sample content. */
 export const defaultTrainingState: TrainingState = {
-  lessons: [
-    {
-      id: 'lesson-001',
-      title: {
-        en: 'Luxury Linen Handling Standards',
-        ar: 'معايير التعامل مع بياضات الضيوف الفاخرة',
-      },
-      description: {
-        en: 'Core standards for sorting, washing, and preserving premium linen quality.',
-        ar: 'المعايير الأساسية لفرز وغسيل وحفظ جودة البياضات الفاخرة.',
-      },
-      contentHtml: {
-        en: `
-          <h3>Guest Linen Excellence Protocol</h3>
-          <p>Follow this flow for every VIP and suite linen batch.</p>
-          <ul>
-            <li>Separate by fabric family before loading.</li>
-            <li>Use approved low-alkaline chemistry only.</li>
-            <li>Record any stain escalation in the shift log.</li>
-          </ul>
-          <table>
-            <thead><tr><th>Fabric</th><th>Wash Temp</th><th>Dry Method</th></tr></thead>
-            <tbody>
-              <tr><td>Egyptian Cotton</td><td>40C</td><td>Low tumble</td></tr>
-              <tr><td>Sateen</td><td>30C</td><td>Air finish</td></tr>
-            </tbody>
-          </table>
-          <p><strong>Inspection:</strong> Check seams, texture, and fragrance before dispatch.</p>
-        `,
-        ar: `
-          <h3>بروتوكول التميز لبياضات الضيوف</h3>
-          <p>اتبع هذا التسلسل لكل دفعة خاصة بالأجنحة وكبار الضيوف.</p>
-          <ul>
-            <li>افصل حسب نوع القماش قبل التحميل.</li>
-            <li>استخدم فقط المواد المعتمدة منخفضة القلوية.</li>
-            <li>سجل أي تصعيد للبقع في سجل المناوبة.</li>
-          </ul>
-          <table>
-            <thead><tr><th>القماش</th><th>حرارة الغسيل</th><th>طريقة التجفيف</th></tr></thead>
-            <tbody>
-              <tr><td>قطن مصري</td><td>40</td><td>تجفيف منخفض</td></tr>
-              <tr><td>ساتان</td><td>30</td><td>تهوية طبيعية</td></tr>
-            </tbody>
-          </table>
-          <p><strong>الفحص:</strong> افحص الخياطة والملمس والرائحة قبل التسليم.</p>
-        `,
-      },
-      lastUpdated: '2026-06-30',
-    },
-  ],
-  videos: [
-    {
-      id: 'video-001',
-      youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-      duration: '03:32',
-      description: {
-        en: 'Machine preparation and pre-cycle inspection workflow.',
-        ar: 'إعداد الماكينات وخطوات الفحص قبل دورة التشغيل.',
-      },
-    },
-  ],
+  lessons: [],
+  videos: [],
 };

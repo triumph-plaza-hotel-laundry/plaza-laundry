@@ -1,0 +1,39 @@
+.admin-permission-denied {
+  max-width: 36rem;
+  padding: 2rem 1rem;
+}
+
+.admin-permission-denied__card {
+  display: grid;
+  gap: 0.85rem;
+  justify-items: center;
+  text-align: center;
+  padding: 1.5rem 1.25rem;
+  border: 1px solid rgb(214 183 110 / 30%);
+  border-radius: 1rem;
+  background: linear-gradient(165deg, rgb(22 22 22 / 92%), rgb(10 10 10 / 88%));
+  box-shadow: 0 14px 32px rgb(0 0 0 / 35%);
+}
+
+.admin-permission-denied__icon {
+  color: #d6b76e;
+}
+
+.admin-permission-denied__card h1 {
+  margin: 0;
+  color: #f5f2ea;
+  font-size: 1.05rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.admin-permission-denied__link {
+  color: #d6b76e;
+  text-decoration: none;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgb(214 183 110 / 40%);
+}
+
+.admin-permission-denied__link:hover {
+  border-bottom-color: #d6b76e;
+}

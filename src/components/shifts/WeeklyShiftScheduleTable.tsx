@@ -280,7 +280,7 @@ export const WeeklyShiftScheduleTable = memo(function WeeklyShiftScheduleTable({
 
   return (
     <div
-      className={`shift-schedule-page${editable ? 'shift-schedule-page--editable' : ''}`}
+      className={`shift-schedule-page${editable ? ' shift-schedule-page--editable' : ''}`}
     >
       <header className="shift-schedule-page__header">
         <div className="shift-schedule-page__titles">
@@ -384,7 +384,7 @@ export const WeeklyShiftScheduleTable = memo(function WeeklyShiftScheduleTable({
                 className="shift-schedule-accordion__panel"
                 id={`shift-schedule-panel-${day}`}
                 initial={false}
-                transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               >
                 <div className="shift-schedule-accordion__panel-inner">
                   <DayScheduleContent

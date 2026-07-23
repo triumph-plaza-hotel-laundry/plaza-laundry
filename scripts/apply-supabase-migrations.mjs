@@ -34,6 +34,7 @@ const regions = [
 
 const REALTIME_TABLES = [
   'app_data_documents',
+  'app_settings',
   'inventory_items',
   'inventory_receipts',
   'inventory_issues',

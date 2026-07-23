@@ -11,5 +11,6 @@ major_version = 15
 verify_jwt = false
 
 [functions.shift-reminder.schedule]
-# 22:00 Africa/Cairo (UTC+2) = 20:00 UTC daily
-cron = "0 20 * * *"
+# Poll every minute. Actual send time is read from app_settings.shift_reminder_time
+# (Africa/Cairo wall clock). History dedupe prevents duplicate deliveries.
+cron = "* * * * *"

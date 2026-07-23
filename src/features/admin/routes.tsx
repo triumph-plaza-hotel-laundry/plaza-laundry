@@ -1,7 +1,7 @@
 import { lazy } from 'react';
 import { Route } from 'react-router-dom';
 import { AdminGuard } from '@/features/admin/guards/AdminGuard';
-import { OwnerGuard } from '@/features/admin/guards/OwnerGuard';
+import { ShiftNotificationsGuard } from '@/features/admin/guards/ShiftNotificationsGuard';
 import { AdminLayout } from '@/features/admin/layout/AdminLayout';
 
 const AdminLoginPage = lazy(() =>
@@ -153,7 +153,7 @@ export const adminRoutes = (
       <Route element={<AdminTrainingPage />} path="training" />
       <Route element={<AdminHomeContentPage />} path="home" />
       <Route element={<AdminAiSettingsPage />} path="ai" />
-      <Route element={<OwnerGuard />}>
+      <Route element={<ShiftNotificationsGuard />}>
         <Route element={<AdminOwnerPushPage />} path="push-notifications" />
       </Route>
       <Route element={<AdminEmployeeDevicesPage />} path="employee-devices" />

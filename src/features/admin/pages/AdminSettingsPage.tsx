@@ -1,7 +1,22 @@
+import {
+  ChevronDown,
+  KeyRound,
+  Pencil,
+  Plus,
+  Power,
+  Shield,
+  Trash2,
+  X,
+} from 'lucide-react';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { AdminPageHeader } from '@/features/admin/components/AdminPageHeader';
 import { isPrimaryAdminAccount } from '@/features/auth/owner-protection';
-import type { AdminType, AuthUser } from '@/features/auth/types';
+import {
+  listSpecialPermissionsForUser,
+  setSpecialPermission,
+  specialAdminPermissionsRepository,
+  type SpecialAdminPermission,
+} from '@/features/auth/special-admin-permissions';
+import type { AuthUser } from '@/features/auth/types';
 import {
   changeStoredOwnPassword,
   createStoredAdminUser,
@@ -12,118 +27,114 @@ import {
   updateStoredAdminUser,
 } from '@/features/auth/users';
 import {
-  allInventoryPermissions,
-  listInventoryPermissions,
-  setInventoryPermissions as saveInventoryPermissions,
-  type InventoryPermission,
-} from '@/features/inventory/inventory-permissions-service';
-import {
-  allDevicePermissions,
-  listDevicePermissions,
+  hasDevicePermission,
   setDevicePermissions as saveDevicePermissions,
-  type DevicePermission,
 } from '@/features/employee-devices/device-permissions-service';
-import { useInventoryPermissions } from '@/hooks/useInventoryPermissions';
 import { useAuth, useLanguage } from '@/hooks';
-import '@/features/admin/admin-editor.css';
 import '@/features/admin/admin-settings.css';
 
-type AdminFormState = {
-  displayName: string;
-  username: string;
-  password: string;
-  confirmPassword: string;
-  adminType: AdminType;
-  isActive: boolean;
-};
-
-const emptyForm = (): AdminFormState => ({
-  displayName: '',
-  username: '',
-  password: '',
-  confirmPassword: '',
-  adminType: 'Admin',
-  isActive: true,
-});
+type DialogMode =
+  | null
+  | 'add'
+  | 'edit-name'
+  | 'change-password'
+  | 'delete'
+  | 'own-password';
 
 export function AdminSettingsPage() {
   const { t } = useLanguage();
   const { user, logAction } = useAuth();
   const [admins, setAdmins] = useState<AuthUser[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [form, setForm] = useState<AdminFormState>(emptyForm());
-  const [isCreating, setIsCreating] = useState(false);
+  const [dialog, setDialog] = useState<DialogMode>(null);
+  const [displayName, setDisplayName] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
-  const [inventoryPermissions, setInventoryPermissions] = useState<
-    InventoryPermission[]
-  >([]);
-  const [devicePermissions, setDevicePermissions] = useState<DevicePermission[]>(
-    [],
-  );
+  const [specialGrants, setSpecialGrants] = useState<
+    Record<string, SpecialAdminPermission[]>
+  >({});
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const inventoryPermissionFlags = useInventoryPermissions();
+  const isSuperAdmin = user ? isPrimaryAdminAccount(user) : false;
+  const canManageAdminAccounts = isSuperAdmin;
 
   const selected = useMemo(
     () => admins.find((admin) => admin.id === selectedId) ?? null,
     [admins, selectedId],
   );
-  const canManageAdminAccounts = user ? isPrimaryAdminAccount(user) : false;
 
   const refreshAdmins = async () => {
     await ensureUsersStoreReady();
     setAdmins(await listAdminManagedUsers());
   };
 
+  const refreshSpecialGrants = async () => {
+    await specialAdminPermissionsRepository.hydrate();
+    const listed = await listAdminManagedUsers();
+    const next: Record<string, SpecialAdminPermission[]> = {};
+    await Promise.all(
+      listed.map(async (admin) => {
+        const grants = new Set(listSpecialPermissionsForUser(admin.id));
+        try {
+          if (await hasDevicePermission(admin.id, 'devices.manage')) {
+            grants.add('employee_devices');
+          }
+        } catch {
+          // ignore legacy lookup failures
+        }
+        next[admin.id] = [...grants];
+      }),
+    );
+    setSpecialGrants(next);
+  };
+
   useEffect(() => {
     void refreshAdmins();
+    void refreshSpecialGrants();
   }, []);
 
   useEffect(() => {
-    if (!selected) {
-      setForm(emptyForm());
-      setInventoryPermissions([]);
-      setDevicePermissions([]);
-      return;
-    }
-
-    setForm({
-      displayName: selected.displayName,
-      username: selected.username,
-      password: '',
-      confirmPassword: '',
-      adminType: selected.adminType,
-      isActive: selected.isActive,
+    return specialAdminPermissionsRepository.subscribe(() => {
+      void refreshSpecialGrants();
     });
+  }, []);
 
-    void listInventoryPermissions(selected.id)
-      .then(setInventoryPermissions)
-      .catch(() => setInventoryPermissions([]));
+  const clearFormSecrets = () => {
+    setPassword('');
+    setConfirmPassword('');
+    setCurrentPassword('');
+  };
 
-    void listDevicePermissions(selected.id)
-      .then((permissions) => {
-        setDevicePermissions(
-          isPrimaryAdminAccount(selected)
-            ? allDevicePermissions()
-            : permissions,
-        );
-      })
-      .catch(() =>
-        setDevicePermissions(
-          isPrimaryAdminAccount(selected) ? allDevicePermissions() : [],
-        ),
-      );
-  }, [selected]);
+  const openDialog = (mode: DialogMode, admin?: AuthUser) => {
+    setError(null);
+    setMessage(null);
+    clearFormSecrets();
+    if (admin) {
+      setSelectedId(admin.id);
+      setDisplayName(admin.displayName);
+      setUsername(admin.username);
+    } else {
+      setSelectedId(null);
+      setDisplayName('');
+      setUsername('');
+    }
+    setDialog(mode);
+  };
+
+  const closeDialog = () => {
+    setDialog(null);
+    clearFormSecrets();
+  };
 
   const handleCreate = async (event: FormEvent) => {
     event.preventDefault();
     if (!user) return;
-
-    if (form.password !== form.confirmPassword) {
+    if (password !== confirmPassword) {
       setError(t('admin.settings.passwordMismatch'));
       return;
     }
@@ -131,13 +142,12 @@ export function AdminSettingsPage() {
     setIsSaving(true);
     setError(null);
     setMessage(null);
-
     try {
       const created = await createStoredAdminUser(user, {
-        displayName: form.displayName,
-        username: form.username,
-        password: form.password,
-        adminType: form.adminType,
+        displayName,
+        username,
+        password,
+        adminType: 'Admin',
       });
       logAction({
         action: 'admin.createUser',
@@ -145,10 +155,9 @@ export function AdminSettingsPage() {
         newValue: created,
       });
       setMessage(t('admin.settings.adminCreated'));
-      setIsCreating(false);
-      setForm(emptyForm());
+      closeDialog();
       await refreshAdmins();
-      setSelectedId(created.id);
+      await refreshSpecialGrants();
     } catch (caught) {
       setError(
         caught instanceof Error
@@ -160,25 +169,17 @@ export function AdminSettingsPage() {
     }
   };
 
-  const handleUpdate = async () => {
+  const handleEditName = async (event: FormEvent) => {
+    event.preventDefault();
     if (!user || !selected) return;
-
-    if (form.password && form.password !== form.confirmPassword) {
-      setError(t('admin.settings.passwordMismatch'));
-      return;
-    }
 
     setIsSaving(true);
     setError(null);
     setMessage(null);
-
     try {
       const updated = await updateStoredAdminUser(user, selected.id, {
-        displayName: form.displayName,
-        username: isPrimaryAdminAccount(selected) ? undefined : form.username,
-        adminType: form.adminType,
-        isActive: form.isActive,
-        password: form.password || undefined,
+        displayName,
+        username: isPrimaryAdminAccount(selected) ? undefined : username,
       });
       logAction({
         action: 'admin.updateUser',
@@ -187,7 +188,39 @@ export function AdminSettingsPage() {
         newValue: updated,
       });
       setMessage(t('admin.settings.adminUpdated'));
+      closeDialog();
       await refreshAdmins();
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : t('admin.settings.saveFailed'),
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleChangePassword = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!user || !selected) return;
+    if (password !== confirmPassword) {
+      setError(t('admin.settings.passwordMismatch'));
+      return;
+    }
+
+    setIsSaving(true);
+    setError(null);
+    setMessage(null);
+    try {
+      await resetStoredAdminPassword(user, selected.id, password);
+      logAction({
+        action: 'admin.resetPassword',
+        page: 'admin/settings',
+        newValue: { id: selected.id },
+      });
+      setMessage(t('admin.settings.passwordReset'));
+      closeDialog();
     } catch (caught) {
       setError(
         caught instanceof Error
@@ -204,7 +237,6 @@ export function AdminSettingsPage() {
 
     setIsSaving(true);
     setError(null);
-
     try {
       await deleteStoredUser(user, selected.id);
       logAction({
@@ -213,8 +245,10 @@ export function AdminSettingsPage() {
         oldValue: selected,
       });
       setMessage(t('admin.settings.adminDeleted'));
+      closeDialog();
       setSelectedId(null);
       await refreshAdmins();
+      await refreshSpecialGrants();
     } catch (caught) {
       setError(
         caught instanceof Error
@@ -226,49 +260,15 @@ export function AdminSettingsPage() {
     }
   };
 
-  const handleResetPassword = async () => {
-    if (!user || !selected || !form.password) return;
-
-    if (form.password !== form.confirmPassword) {
-      setError(t('admin.settings.passwordMismatch'));
-      return;
-    }
-
-    setIsSaving(true);
-    setError(null);
-
-    try {
-      await resetStoredAdminPassword(user, selected.id, form.password);
-      logAction({
-        action: 'admin.resetPassword',
-        page: 'admin/settings',
-        newValue: { id: selected.id },
-      });
-      setMessage(t('admin.settings.passwordReset'));
-      setForm((current) => ({ ...current, password: '', confirmPassword: '' }));
-    } catch (caught) {
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : t('admin.settings.saveFailed'),
-      );
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleToggleActive = async () => {
-    if (!user || !selected || isPrimaryAdminAccount(selected)) {
-      return;
-    }
+  const handleToggleActive = async (admin: AuthUser) => {
+    if (!user || isPrimaryAdminAccount(admin)) return;
 
     setIsSaving(true);
     setError(null);
     setMessage(null);
-
     try {
-      const updated = await updateStoredAdminUser(user, selected.id, {
-        isActive: !selected.isActive,
+      const updated = await updateStoredAdminUser(user, admin.id, {
+        isActive: !admin.isActive,
       });
       logAction({
         action: updated.isActive ? 'admin.enableUser' : 'admin.disableUser',
@@ -292,11 +292,50 @@ export function AdminSettingsPage() {
     }
   };
 
+  const handleToggleSpecial = async (
+    admin: AuthUser,
+    permission: SpecialAdminPermission,
+    enabled: boolean,
+  ) => {
+    if (!user || !isSuperAdmin || isPrimaryAdminAccount(admin)) return;
+
+    setIsSaving(true);
+    setError(null);
+    setMessage(null);
+    try {
+      await setSpecialPermission(user, admin.id, permission, enabled);
+
+      if (permission === 'employee_devices') {
+        await saveDevicePermissions(
+          user.id,
+          admin.id,
+          enabled ? ['devices.manage'] : [],
+          user,
+        );
+      }
+
+      logAction({
+        action: 'admin.updateSpecialPermission',
+        page: 'admin/settings',
+        newValue: { userId: admin.id, permission, enabled },
+      });
+      setMessage(t('admin.settings.specialPermissionsSaved'));
+      await refreshSpecialGrants();
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : t('admin.settings.saveFailed'),
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleChangeOwnPassword = async (event: FormEvent) => {
     event.preventDefault();
     if (!user) return;
-
-    if (newPassword !== confirmNewPassword) {
+    if (password !== confirmPassword) {
       setError(t('admin.settings.passwordMismatch'));
       return;
     }
@@ -304,14 +343,11 @@ export function AdminSettingsPage() {
     setIsSaving(true);
     setError(null);
     setMessage(null);
-
     try {
-      await changeStoredOwnPassword(user, currentPassword, newPassword);
+      await changeStoredOwnPassword(user, currentPassword, password);
       logAction({ action: 'admin.changeOwnPassword', page: 'admin/settings' });
       setMessage(t('admin.settings.ownPasswordChanged'));
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmNewPassword('');
+      closeDialog();
     } catch (caught) {
       setError(
         caught instanceof Error
@@ -323,451 +359,410 @@ export function AdminSettingsPage() {
     }
   };
 
-  const handleSaveInventoryPermissions = async () => {
-    if (!user || !selected) {
-      return;
+  const hasGrant = (adminId: string, permission: SpecialAdminPermission) => {
+    if (admins.find((a) => a.id === adminId && isPrimaryAdminAccount(a))) {
+      return true;
     }
-
-    setIsSaving(true);
-    setError(null);
-    setMessage(null);
-
-    try {
-      await saveInventoryPermissions(
-        user.id,
-        selected.id,
-        inventoryPermissions,
-        user,
-      );
-      logAction({
-        action: 'admin.updateInventoryPermissions',
-        page: 'admin/settings',
-        newValue: { userId: selected.id, permissions: inventoryPermissions },
-      });
-      setMessage(t('admin.settings.inventoryPermissionsSaved'));
-      await refreshAdmins();
-    } catch (caught) {
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : t('admin.settings.saveFailed'),
-      );
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const toggleInventoryPermission = (permission: InventoryPermission) => {
-    setInventoryPermissions((current) =>
-      current.includes(permission)
-        ? current.filter((entry) => entry !== permission)
-        : [...current, permission],
-    );
-  };
-
-  const handleSaveDevicePermissions = async () => {
-    if (!user || !selected) {
-      return;
-    }
-
-    setIsSaving(true);
-    setError(null);
-    setMessage(null);
-
-    try {
-      await saveDevicePermissions(
-        user.id,
-        selected.id,
-        devicePermissions,
-        user,
-      );
-      logAction({
-        action: 'admin.updateDevicePermissions',
-        page: 'admin/settings',
-        newValue: { userId: selected.id, permissions: devicePermissions },
-      });
-      setMessage(t('admin.settings.devicePermissionsSaved'));
-      await refreshAdmins();
-    } catch (caught) {
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : t('admin.settings.saveFailed'),
-      );
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const toggleDevicePermission = (permission: DevicePermission) => {
-    setDevicePermissions((current) =>
-      current.includes(permission)
-        ? current.filter((entry) => entry !== permission)
-        : [...current, permission],
-    );
+    return (specialGrants[adminId] ?? []).includes(permission);
   };
 
   return (
-    <section className="admin-settings-page admin-editor-page mx-auto">
-      <AdminPageHeader
-        subtitle={t('admin.settings.subtitle')}
-        titleAr="إعدادات التطبيق"
-        titleEn="Application Settings"
-      />
-
-      <section className="admin-settings-section">
-        <div className="admin-settings-section__head">
-          <h2>{t('admin.settings.adminManagement')}</h2>
-          <button
-            className="admin-editor-btn"
-            disabled={!canManageAdminAccounts}
-            onClick={() => {
-              setIsCreating(true);
-              setSelectedId(null);
-              setForm(emptyForm());
-            }}
-            type="button"
-          >
-            {t('admin.settings.addAdmin')}
-          </button>
+    <section className="admin-mgmt mx-auto" dir="auto">
+      <header className="admin-mgmt__hero">
+        <div className="admin-mgmt__hero-icon">
+          <Shield size={22} strokeWidth={1.7} />
         </div>
-
-        {error ? (
-          <p className="admin-settings-message admin-settings-message--error">
-            {error}
-          </p>
-        ) : null}
-        {message ? (
-          <p className="admin-settings-message admin-settings-message--success">
-            {message}
-          </p>
-        ) : null}
-
-        <div className="admin-editor-grid admin-editor-grid--2">
-          <div className="admin-editor-panel">
-            <table className="admin-editor-table admin-editor-table--responsive">
-              <thead>
-                <tr>
-                  <th>{t('admin.settings.fullName')}</th>
-                  <th>{t('admin.settings.status')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {admins.map((admin) => (
-                  <tr key={admin.id}>
-                    <td data-label={t('admin.settings.fullName')}>
-                      <button
-                        className="admin-editor-btn"
-                        onClick={() => {
-                          setSelectedId(admin.id);
-                          setIsCreating(false);
-                        }}
-                        type="button"
-                      >
-                        {admin.displayName}
-                        {isPrimaryAdminAccount(admin)
-                          ? ` (${t('admin.settings.primary')})`
-                          : ''}
-                      </button>
-                    </td>
-                    <td data-label={t('admin.settings.status')}>
-                      {admin.isActive
-                        ? t('admin.settings.active')
-                        : t('admin.settings.disabled')}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {isCreating ? (
-            <form
-              className="admin-editor-panel admin-editor-grid"
-              onSubmit={handleCreate}
-            >
-              <AdminUserFields
-                form={form}
-                isPrimary={false}
-                onChange={setForm}
-                t={t}
-              />
-              <div className="admin-editor-actions-row">
-                <button
-                  className="admin-edit-toolbar__btn admin-edit-toolbar__btn--save"
-                  disabled={isSaving}
-                  type="submit"
-                >
-                  {t('admin.settings.addAdmin')}
-                </button>
-              </div>
-            </form>
-          ) : selected ? (
-            <div className="admin-editor-panel admin-editor-grid">
-              <AdminUserFields
-                form={form}
-                isPrimary={isPrimaryAdminAccount(selected)}
-                onChange={setForm}
-                t={t}
-              />
-              <div className="admin-editor-actions-row">
-                <button
-                  className="admin-edit-toolbar__btn admin-edit-toolbar__btn--save"
-                  disabled={isSaving || !canManageAdminAccounts}
-                  onClick={() => void handleUpdate()}
-                  type="button"
-                >
-                  {t('admin.editor.save')}
-                </button>
-                <button
-                  className="admin-edit-toolbar__btn admin-edit-toolbar__btn--cancel"
-                  disabled={
-                    isSaving || !canManageAdminAccounts || !form.password
-                  }
-                  onClick={() => void handleResetPassword()}
-                  type="button"
-                >
-                  {t('admin.settings.resetPassword')}
-                </button>
-                {!isPrimaryAdminAccount(selected) ? (
-                  <>
-                    <button
-                      className="admin-editor-btn admin-editor-btn--danger"
-                      disabled={isSaving || !canManageAdminAccounts}
-                      onClick={() => void handleDelete()}
-                      type="button"
-                    >
-                      {t('admin.editor.delete')}
-                    </button>
-                    <button
-                      className="admin-editor-btn"
-                      disabled={isSaving || !canManageAdminAccounts}
-                      onClick={() => void handleToggleActive()}
-                      type="button"
-                    >
-                      {selected.isActive
-                        ? t('admin.settings.disableAdmin')
-                        : t('admin.settings.enableAdmin')}
-                    </button>
-                  </>
-                ) : null}
-              </div>
-            </div>
-          ) : null}
+        <div>
+          <h1>{t('admin.settings.adminManagement')}</h1>
+          <p>{t('admin.settings.subtitle')}</p>
         </div>
-      </section>
+      </header>
 
-      {inventoryPermissionFlags.canManagePermissions ? (
-        <section className="admin-settings-section">
-          <div className="admin-settings-section__head">
-            <div>
-              <h2>{t('admin.settings.inventoryPermissions')}</h2>
-              <p>{t('admin.settings.inventoryPermissionsSubtitle')}</p>
-            </div>
-          </div>
-
-          {selected && !isCreating ? (
-            <div className="admin-editor-panel admin-editor-grid">
-              <p className="admin-settings-section__selected">
-                {selected.displayName}
-                {isPrimaryAdminAccount(selected)
-                  ? ` (${t('admin.settings.primary')})`
-                  : ''}
-              </p>
-              {allInventoryPermissions().map((permission) => (
-                <label
-                  className="admin-editor-field admin-editor-field--checkbox"
-                  key={permission}
-                >
-                  <input
-                    checked={inventoryPermissions.includes(permission)}
-                    onChange={() => toggleInventoryPermission(permission)}
-                    type="checkbox"
-                  />
-                  <span>
-                    {permission === 'inventory.add'
-                      ? t('admin.settings.inventoryPermAdd')
-                      : permission === 'inventory.edit'
-                        ? t('admin.settings.inventoryPermEdit')
-                        : permission === 'inventory.enable_disable'
-                          ? t('admin.settings.inventoryPermEnableDisable')
-                          : t('admin.settings.inventoryPermDelete')}
-                  </span>
-                </label>
-              ))}
-              <button
-                className="admin-edit-toolbar__btn admin-edit-toolbar__btn--save"
-                disabled={isSaving}
-                onClick={() => void handleSaveInventoryPermissions()}
-                type="button"
-              >
-                {t('admin.editor.save')}
-              </button>
-
-              <hr className="admin-settings-divider" />
-
-              <h3 className="admin-settings-subsection-title">
-                {t('admin.settings.devicePermission')}
-              </h3>
-              <p className="admin-settings-subsection-copy">
-                {t('admin.settings.devicePermissionSubtitle')}
-              </p>
-              {allDevicePermissions().map((permission) => (
-                <label
-                  className="admin-editor-field admin-editor-field--checkbox"
-                  key={permission}
-                >
-                  <input
-                    checked={devicePermissions.includes(permission)}
-                    onChange={() => toggleDevicePermission(permission)}
-                    type="checkbox"
-                  />
-                  <span>{t('admin.settings.devicePermission')}</span>
-                </label>
-              ))}
-              <button
-                className="admin-edit-toolbar__btn admin-edit-toolbar__btn--save"
-                disabled={isSaving}
-                onClick={() => void handleSaveDevicePermissions()}
-                type="button"
-              >
-                {t('admin.editor.save')}
-              </button>
-            </div>
-          ) : (
-            <p className="admin-settings-message">
-              {t('admin.settings.adminManagement')}
-            </p>
-          )}
-        </section>
+      {error ? (
+        <p className="admin-mgmt__alert admin-mgmt__alert--error">{error}</p>
+      ) : null}
+      {message ? (
+        <p className="admin-mgmt__alert admin-mgmt__alert--ok">{message}</p>
       ) : null}
 
-      <section className="admin-settings-section">
-        <h2>{t('admin.settings.changeOwnPassword')}</h2>
-        <form
-          className="admin-editor-panel admin-editor-grid"
-          onSubmit={handleChangeOwnPassword}
+      <div className="admin-mgmt__toolbar">
+        <button
+          className="admin-mgmt__btn admin-mgmt__btn--gold"
+          disabled={!canManageAdminAccounts}
+          onClick={() => openDialog('add')}
+          type="button"
         >
-          <div className="admin-editor-field">
-            <label>{t('admin.settings.currentPassword')}</label>
-            <input
-              onChange={(event) => setCurrentPassword(event.target.value)}
-              type="password"
-              value={currentPassword}
-            />
+          <Plus size={18} strokeWidth={1.75} />
+          {t('admin.settings.addAdmin')}
+        </button>
+      </div>
+
+      <div className="admin-mgmt__accordion">
+        {admins.map((admin) => {
+          const primary = isPrimaryAdminAccount(admin);
+          const expanded = expandedId === admin.id;
+          return (
+            <article
+              className={
+                expanded
+                  ? 'admin-mgmt__acc-item is-open'
+                  : 'admin-mgmt__acc-item'
+              }
+              key={admin.id}
+            >
+              <button
+                aria-expanded={expanded}
+                className="admin-mgmt__acc-row"
+                onClick={() =>
+                  setExpandedId((current) =>
+                    current === admin.id ? null : admin.id,
+                  )
+                }
+                type="button"
+              >
+                <div className="admin-mgmt__acc-main">
+                  <span className="admin-mgmt__acc-name">
+                    {admin.displayName}
+                    {primary ? (
+                      <span className="admin-mgmt__primary-tag">
+                        {t('admin.settings.primary')}
+                      </span>
+                    ) : null}
+                  </span>
+                  <span
+                    className={
+                      admin.isActive
+                        ? 'admin-mgmt__status admin-mgmt__status--on'
+                        : 'admin-mgmt__status admin-mgmt__status--off'
+                    }
+                  >
+                    {admin.isActive
+                      ? t('admin.settings.active')
+                      : t('admin.settings.disabled')}
+                  </span>
+                </div>
+                <ChevronDown
+                  aria-hidden="true"
+                  className="admin-mgmt__acc-chevron"
+                  size={18}
+                  strokeWidth={1.75}
+                />
+              </button>
+
+              <div className="admin-mgmt__acc-panel">
+                <div className="admin-mgmt__acc-panel-inner">
+                  <div className="admin-mgmt__acc-card">
+                    <div className="admin-mgmt__actions">
+                      <button
+                        className="admin-mgmt__action"
+                        disabled={!canManageAdminAccounts}
+                        onClick={() => openDialog('edit-name', admin)}
+                        type="button"
+                      >
+                        <Pencil size={15} strokeWidth={1.75} />
+                        {t('admin.settings.editName')}
+                      </button>
+                      <button
+                        className="admin-mgmt__action"
+                        disabled={!canManageAdminAccounts}
+                        onClick={() => openDialog('change-password', admin)}
+                        type="button"
+                      >
+                        <KeyRound size={15} strokeWidth={1.75} />
+                        {t('admin.settings.changePassword')}
+                      </button>
+                      {!primary ? (
+                        <>
+                          <button
+                            className="admin-mgmt__action"
+                            disabled={!canManageAdminAccounts || isSaving}
+                            onClick={() => void handleToggleActive(admin)}
+                            type="button"
+                          >
+                            <Power size={15} strokeWidth={1.75} />
+                            {admin.isActive
+                              ? t('admin.settings.disableAdmin')
+                              : t('admin.settings.enableAdmin')}
+                          </button>
+                          <button
+                            className="admin-mgmt__action admin-mgmt__action--danger"
+                            disabled={!canManageAdminAccounts || isSaving}
+                            onClick={() => openDialog('delete', admin)}
+                            type="button"
+                          >
+                            <Trash2 size={15} strokeWidth={1.75} />
+                            {t('admin.editor.delete')}
+                          </button>
+                        </>
+                      ) : null}
+                    </div>
+
+                    {isSuperAdmin ? (
+                      <div className="admin-mgmt__perms">
+                        <p className="admin-mgmt__perms-title">
+                          {t('admin.settings.specialPermissions')}
+                        </p>
+                        <label className="admin-mgmt__switch">
+                          <span>{t('admin.settings.permEmployeeDevices')}</span>
+                          <input
+                            checked={hasGrant(admin.id, 'employee_devices')}
+                            disabled={primary || isSaving}
+                            onChange={(event) =>
+                              void handleToggleSpecial(
+                                admin,
+                                'employee_devices',
+                                event.target.checked,
+                              )
+                            }
+                            type="checkbox"
+                          />
+                        </label>
+                        <label className="admin-mgmt__switch">
+                          <span>
+                            {t('admin.settings.permShiftNotifications')}
+                          </span>
+                          <input
+                            checked={hasGrant(admin.id, 'shift_notifications')}
+                            disabled={primary || isSaving}
+                            onChange={(event) =>
+                              void handleToggleSpecial(
+                                admin,
+                                'shift_notifications',
+                                event.target.checked,
+                              )
+                            }
+                            type="checkbox"
+                          />
+                        </label>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+
+      {dialog ? (
+        <div className="admin-mgmt__backdrop" role="dialog" aria-modal="true">
+          <div className="admin-mgmt__dialog">
+            <div className="admin-mgmt__dialog-head">
+              <h3>
+                {dialog === 'add'
+                  ? t('admin.settings.addAdmin')
+                  : dialog === 'edit-name'
+                    ? t('admin.settings.editName')
+                    : dialog === 'change-password'
+                      ? t('admin.settings.changePassword')
+                      : dialog === 'own-password'
+                        ? t('admin.settings.changeOwnPassword')
+                        : t('admin.editor.delete')}
+              </h3>
+              <button
+                aria-label="Close"
+                className="admin-mgmt__icon-btn"
+                onClick={closeDialog}
+                type="button"
+              >
+                <X size={18} strokeWidth={1.75} />
+              </button>
+            </div>
+
+            {dialog === 'add' ? (
+              <form className="admin-mgmt__form" onSubmit={handleCreate}>
+                <Field
+                  label={t('admin.settings.fullName')}
+                  onChange={setDisplayName}
+                  value={displayName}
+                />
+                <Field
+                  label={t('admin.settings.username')}
+                  onChange={setUsername}
+                  value={username}
+                />
+                <Field
+                  label={t('admin.settings.password')}
+                  onChange={setPassword}
+                  type="password"
+                  value={password}
+                />
+                <Field
+                  label={t('admin.settings.confirmPassword')}
+                  onChange={setConfirmPassword}
+                  type="password"
+                  value={confirmPassword}
+                />
+                <DialogActions
+                  cancelLabel={t('admin.editor.cancel')}
+                  onCancel={closeDialog}
+                  saving={isSaving}
+                  submitLabel={t('admin.settings.addAdmin')}
+                />
+              </form>
+            ) : null}
+
+            {dialog === 'edit-name' && selected ? (
+              <form className="admin-mgmt__form" onSubmit={handleEditName}>
+                <Field
+                  disabled={isPrimaryAdminAccount(selected)}
+                  label={t('admin.settings.fullName')}
+                  onChange={setDisplayName}
+                  value={displayName}
+                />
+                <Field
+                  disabled={isPrimaryAdminAccount(selected)}
+                  label={t('admin.settings.username')}
+                  onChange={setUsername}
+                  value={username}
+                />
+                <DialogActions
+                  cancelLabel={t('admin.editor.cancel')}
+                  onCancel={closeDialog}
+                  saving={isSaving}
+                  submitLabel={t('admin.editor.save')}
+                />
+              </form>
+            ) : null}
+
+            {dialog === 'change-password' && selected ? (
+              <form className="admin-mgmt__form" onSubmit={handleChangePassword}>
+                <Field
+                  label={t('admin.settings.password')}
+                  onChange={setPassword}
+                  type="password"
+                  value={password}
+                />
+                <Field
+                  label={t('admin.settings.confirmPassword')}
+                  onChange={setConfirmPassword}
+                  type="password"
+                  value={confirmPassword}
+                />
+                <DialogActions
+                  cancelLabel={t('admin.editor.cancel')}
+                  onCancel={closeDialog}
+                  saving={isSaving}
+                  submitLabel={t('admin.settings.changePassword')}
+                />
+              </form>
+            ) : null}
+
+            {dialog === 'own-password' ? (
+              <form
+                className="admin-mgmt__form"
+                onSubmit={handleChangeOwnPassword}
+              >
+                <Field
+                  label={t('admin.settings.currentPassword')}
+                  onChange={setCurrentPassword}
+                  type="password"
+                  value={currentPassword}
+                />
+                <Field
+                  label={t('admin.settings.newPassword')}
+                  onChange={setPassword}
+                  type="password"
+                  value={password}
+                />
+                <Field
+                  label={t('admin.settings.confirmPassword')}
+                  onChange={setConfirmPassword}
+                  type="password"
+                  value={confirmPassword}
+                />
+                <DialogActions
+                  cancelLabel={t('admin.editor.cancel')}
+                  onCancel={closeDialog}
+                  saving={isSaving}
+                  submitLabel={t('admin.settings.changeOwnPassword')}
+                />
+              </form>
+            ) : null}
+
+            {dialog === 'delete' && selected ? (
+              <div className="admin-mgmt__form">
+                <p className="admin-mgmt__confirm-copy">
+                  {t('admin.settings.confirmDelete').replace(
+                    '{name}',
+                    selected.displayName,
+                  )}
+                </p>
+                <div className="admin-mgmt__dialog-actions">
+                  <button
+                    className="admin-mgmt__btn"
+                    onClick={closeDialog}
+                    type="button"
+                  >
+                    {t('admin.editor.cancel')}
+                  </button>
+                  <button
+                    className="admin-mgmt__btn admin-mgmt__btn--danger"
+                    disabled={isSaving}
+                    onClick={() => void handleDelete()}
+                    type="button"
+                  >
+                    {t('admin.editor.delete')}
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </div>
-          <div className="admin-editor-field">
-            <label>{t('admin.settings.newPassword')}</label>
-            <input
-              onChange={(event) => setNewPassword(event.target.value)}
-              type="password"
-              value={newPassword}
-            />
-          </div>
-          <div className="admin-editor-field">
-            <label>{t('admin.settings.confirmPassword')}</label>
-            <input
-              onChange={(event) => setConfirmNewPassword(event.target.value)}
-              type="password"
-              value={confirmNewPassword}
-            />
-          </div>
-          <button
-            className="admin-edit-toolbar__btn admin-edit-toolbar__btn--save"
-            disabled={isSaving}
-            type="submit"
-          >
-            {t('admin.settings.changeOwnPassword')}
-          </button>
-        </form>
-      </section>
+        </div>
+      ) : null}
     </section>
   );
 }
 
-type AdminUserFieldsProps = {
-  form: AdminFormState;
-  isPrimary: boolean;
-  onChange: (
-    next: AdminFormState | ((current: AdminFormState) => AdminFormState),
-  ) => void;
-  t: (key: import('@/types/language').TranslationKey) => string;
-};
-
-function AdminUserFields({
-  form,
-  isPrimary,
+function Field({
+  label,
+  value,
   onChange,
-  t,
-}: AdminUserFieldsProps) {
+  type = 'text',
+  disabled = false,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+  disabled?: boolean;
+}) {
   return (
-    <>
-      <div className="admin-editor-field">
-        <label>{t('admin.settings.fullName')}</label>
-        <input
-          disabled={isPrimary}
-          onChange={(event) =>
-            onChange({ ...form, displayName: event.target.value })
-          }
-          value={form.displayName}
-        />
-      </div>
-      <div className="admin-editor-field">
-        <label>{t('admin.settings.username')}</label>
-        <input
-          disabled={isPrimary}
-          onChange={(event) =>
-            onChange({ ...form, username: event.target.value })
-          }
-          value={form.username}
-        />
-      </div>
-      <div className="admin-editor-field">
-        <label>{t('admin.settings.adminType')}</label>
-        <select
-          disabled={isPrimary}
-          onChange={(event) =>
-            onChange({ ...form, adminType: event.target.value as AdminType })
-          }
-          value={form.adminType}
-        >
-          <option value="Admin">{t('admin.settings.adminTypeAdmin')}</option>
-        </select>
-      </div>
-      <div className="admin-editor-field">
-        <label>{t('admin.settings.password')}</label>
-        <input
-          onChange={(event) =>
-            onChange({ ...form, password: event.target.value })
-          }
-          type="password"
-          value={form.password}
-        />
-      </div>
-      <div className="admin-editor-field">
-        <label>{t('admin.settings.confirmPassword')}</label>
-        <input
-          onChange={(event) =>
-            onChange({ ...form, confirmPassword: event.target.value })
-          }
-          type="password"
-          value={form.confirmPassword}
-        />
-      </div>
-      {!isPrimary ? (
-        <div className="admin-editor-field">
-          <label>{t('admin.settings.status')}</label>
-          <select
-            onChange={(event) =>
-              onChange({ ...form, isActive: event.target.value === 'active' })
-            }
-            value={form.isActive ? 'active' : 'disabled'}
-          >
-            <option value="active">{t('admin.settings.active')}</option>
-            <option value="disabled">{t('admin.settings.disabled')}</option>
-          </select>
-        </div>
-      ) : null}
-    </>
+    <label className="admin-mgmt__field">
+      <span>{label}</span>
+      <input
+        disabled={disabled}
+        onChange={(event) => onChange(event.target.value)}
+        type={type}
+        value={value}
+      />
+    </label>
+  );
+}
+
+function DialogActions({
+  submitLabel,
+  cancelLabel,
+  onCancel,
+  saving,
+}: {
+  submitLabel: string;
+  cancelLabel: string;
+  onCancel: () => void;
+  saving: boolean;
+}) {
+  return (
+    <div className="admin-mgmt__dialog-actions">
+      <button className="admin-mgmt__btn" onClick={onCancel} type="button">
+        {cancelLabel}
+      </button>
+      <button
+        className="admin-mgmt__btn admin-mgmt__btn--gold"
+        disabled={saving}
+        type="submit"
+      >
+        {submitLabel}
+      </button>
+    </div>
   );
 }

@@ -1,5 +1,8 @@
 import {
   defaultTrainingState,
+  normalizeLesson,
+  normalizeVideo,
+  createEmptyLesson,
   type TrainingLesson,
   type TrainingState,
   type TrainingVideo,
@@ -23,9 +26,52 @@ function normalizeTraining(
   }
 
   const partial = parsed as Partial<TrainingState>;
+  const legacyVideos = Array.isArray(partial.videos)
+    ? partial.videos
+        .map((item, index) => normalizeVideo(item, index))
+        .filter((item): item is TrainingVideo => Boolean(item))
+        .sort((a, b) => a.displayOrder - b.displayOrder)
+    : [];
+
+  let lessons = Array.isArray(partial.lessons)
+    ? partial.lessons
+        .map((item) => normalizeLesson(item))
+        .filter((item): item is TrainingLesson => Boolean(item))
+    : seed.lessons;
+
+  // Migrate legacy top-level videos into the first lesson when needed.
+  if (legacyVideos.length > 0) {
+    if (lessons.length === 0) {
+      lessons = [
+        {
+          ...createEmptyLesson(),
+          title: 'فيديوهات التدريب',
+          videos: legacyVideos.map((video, index) => ({
+            ...video,
+            displayOrder: index,
+          })),
+        },
+      ];
+    } else {
+      const [first, ...rest] = lessons;
+      if (first.videos.length === 0) {
+        lessons = [
+          {
+            ...first,
+            videos: legacyVideos.map((video, index) => ({
+              ...video,
+              displayOrder: index,
+            })),
+          },
+          ...rest,
+        ];
+      }
+    }
+  }
+
   return {
-    lessons: partial.lessons ?? seed.lessons,
-    videos: partial.videos ?? seed.videos,
+    lessons,
+    videos: [],
   };
 }
 

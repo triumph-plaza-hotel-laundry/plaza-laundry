@@ -1,6 +1,3 @@
-import {
-  assertInventoryPermission,
-} from '@/features/inventory/inventory-permissions-service';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { isMissingTableError, toServiceError } from '@/lib/supabase/errors';
 import { isPrimaryAdminAccount } from '@/features/auth/owner-protection';
@@ -144,7 +141,7 @@ async function removePermissions(
 
 /**
  * Saves device-management grants for a target admin.
- * Only callers who can manage inventory permission grants may change these.
+ * Only the Super Admin (primary) may change these special grants.
  */
 export async function setDevicePermissions(
   actorId: string,
@@ -152,7 +149,9 @@ export async function setDevicePermissions(
   nextPermissions: DevicePermission[],
   actor?: Pick<AuthUser, 'id' | 'username' | 'isOwner' | 'isProtected'> | null,
 ): Promise<void> {
-  await assertInventoryPermission(actorId, 'inventory.delete', actor);
+  if (!actor || !isPrimaryAdminAccount(actor) || actor.id !== actorId) {
+    throw new Error('Permission denied');
+  }
 
   const current = new Set(await listDevicePermissions(targetUserId));
   const next = new Set(nextPermissions);

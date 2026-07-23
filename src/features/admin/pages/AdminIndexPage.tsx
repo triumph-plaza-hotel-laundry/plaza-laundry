@@ -4,14 +4,17 @@ import { adminDashboardModules } from '@/features/admin/config/admin-dashboard-m
 import { PrimaryAdminDevicePanel } from '@/features/primary-admin-device';
 import { isPrimaryAdminAccount } from '@/features/auth/owner-protection';
 import { useAuth, useLanguage } from '@/hooks';
-import { useDevicePermissions } from '@/hooks/useDevicePermissions';
+import { useSpecialAdminPermissions } from '@/hooks/useSpecialAdminPermissions';
 import '@/features/admin/admin-dashboard.css';
 
 export function AdminIndexPage() {
   const { t } = useLanguage();
   const { logout, user } = useAuth();
-  const { canManageDevices, isReady: devicePermissionsReady } =
-    useDevicePermissions();
+  const {
+    canManageEmployeeDevices,
+    canManageShiftNotifications,
+    isReady: specialPermissionsReady,
+  } = useSpecialAdminPermissions();
 
   const visibleModules = adminDashboardModules.filter((module) => {
     if (module.ownerOnly) {
@@ -19,7 +22,11 @@ export function AdminIndexPage() {
     }
 
     if (module.requiresDevicePermission) {
-      return devicePermissionsReady && canManageDevices;
+      return specialPermissionsReady && canManageEmployeeDevices;
+    }
+
+    if (module.requiresShiftNotificationPermission) {
+      return specialPermissionsReady && canManageShiftNotifications;
     }
 
     return true;

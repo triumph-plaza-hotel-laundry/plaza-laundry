@@ -19,6 +19,7 @@ export const STORAGE_KEYS = {
   authSession: 'tpl-auth-session',
   authUsers: 'tpl-auth-users',
   auditLog: 'tpl-audit-log',
+  adminSpecialPermissions: 'tpl-admin-special-permissions-v1',
   fabricFavorites: 'tpl-fabric-favorites',
   fabricRecent: 'tpl-fabric-recent',
   theme: 'tpl-theme',

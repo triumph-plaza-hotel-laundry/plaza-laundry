@@ -1,51 +1,54 @@
-import { useState } from 'react';
-import { AdminEditToolbar } from '@/features/admin/components/AdminEditToolbar';
+import { Eye, Save, Trash2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { AdminPageHeader } from '@/features/admin/components/AdminPageHeader';
 import { useDraftState } from '@/features/admin/hooks/useDraftState';
 import {
-  trainingRepository,
+  createEmptyLesson,
+  isTrainingContentEmpty,
+  lessonHasVideos,
+  lessonIsPublishable,
   type TrainingLesson,
-  type TrainingVideo,
-} from '@/data/repositories';
-import { useAuth, useLanguage } from '@/hooks';
+} from '@/data/training-content';
+import { trainingRepository } from '@/data/repositories';
+import { useAuth } from '@/hooks';
+import { LessonVideosManager } from '@/features/training/admin/LessonVideosManager';
+import { TrainingRichEditor } from '@/features/training/editor/TrainingRichEditor';
+import { sanitizeTrainingHtml } from '@/features/training/sanitize';
+import {
+  getYoutubeEmbedUrl,
+  getYoutubeThumbnail,
+} from '@/features/training/youtube';
 import '@/features/admin/admin-editor.css';
-
-function emptyLesson(): TrainingLesson {
-  return {
-    id: `lesson-${Date.now()}`,
-    title: { en: '', ar: '' },
-    description: { en: '', ar: '' },
-    contentHtml: { en: '', ar: '' },
-    lastUpdated: new Date().toISOString().slice(0, 10),
-  };
-}
-
-function emptyVideo(): TrainingVideo {
-  return {
-    id: `video-${Date.now()}`,
-    youtubeUrl: '',
-    duration: '',
-    description: { en: '', ar: '' },
-  };
-}
+import '@/features/training/admin/training-admin.css';
+import '@/features/training/public/training-public.css';
 
 export function AdminTrainingEditorPage() {
-  const { t } = useLanguage();
   const { assertCan, logAction } = useAuth();
   const { draft, isDirty, setDraft, resetDraft, commitDraft } =
     useDraftState(trainingRepository);
-  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(
-    draft.lessons[0]?.id ?? null,
-  );
-  const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveNotice, setSaveNotice] = useState<string | null>(null);
   const [saveNoticeIsError, setSaveNoticeIsError] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
-  const selectedLesson =
-    draft.lessons.find((lesson) => lesson.id === selectedLessonId) ?? null;
-  const selectedVideo =
-    draft.videos.find((video) => video.id === selectedVideoId) ?? null;
+  const lesson: TrainingLesson = useMemo(
+    () => draft.lessons[0] ?? createEmptyLesson(),
+    [draft.lessons],
+  );
+
+  const updateLesson = (patch: Partial<TrainingLesson>) => {
+    const nextLesson: TrainingLesson = {
+      ...lesson,
+      ...patch,
+      videos: patch.videos ?? lesson.videos ?? [],
+      lastUpdated: new Date().toISOString().slice(0, 10),
+    };
+    setDraft({
+      ...draft,
+      lessons: [nextLesson],
+      videos: [],
+    });
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -53,18 +56,45 @@ export function AdminTrainingEditorPage() {
     setSaveNoticeIsError(false);
     try {
       assertCan('training', 'update');
-      await commitDraft(async (value) => {
-        await trainingRepository.replaceAll(value);
+      const title = lesson.title.trim();
+      const videos = (lesson.videos ?? [])
+        .filter((video) => video.youtubeUrl.trim())
+        .map((video, index) => ({ ...video, displayOrder: index }));
+      const contentHtml = isTrainingContentEmpty(lesson.contentHtml)
+        ? ''
+        : lesson.contentHtml;
+
+      if (!title) {
+        setSaveNotice('عنوان التدريب مطلوب.');
+        setSaveNoticeIsError(true);
+        return;
+      }
+
+      const nextLesson: TrainingLesson = {
+        ...lesson,
+        title,
+        contentHtml,
+        videos,
+        lastUpdated: new Date().toISOString().slice(0, 10),
+      };
+
+      const next = {
+        lessons: [nextLesson],
+        videos: [],
+      };
+
+      await commitDraft(async () => {
+        await trainingRepository.replaceAll(next);
         logAction({
           action: 'training.replaceAll',
           page: 'admin/training',
-          newValue: value,
+          newValue: next,
         });
       });
-      setSaveNotice(t('admin.editor.saveSuccess'));
+      setSaveNotice('تم الحفظ بنجاح');
     } catch (error) {
       setSaveNotice(
-        error instanceof Error ? error.message : t('admin.editor.saveError'),
+        error instanceof Error ? error.message : 'تعذر الحفظ. حاول مرة أخرى.',
       );
       setSaveNoticeIsError(true);
     } finally {
@@ -72,252 +102,193 @@ export function AdminTrainingEditorPage() {
     }
   };
 
-  const updateLesson = (patch: Partial<TrainingLesson>) => {
-    if (!selectedLesson) {
+  const handleDelete = () => {
+    const confirmed = window.confirm(
+      'هل تريد حذف محتوى التدريب بالكامل؟ اضغط حفظ بعد الحذف لتثبيت التغيير.',
+    );
+    if (!confirmed) {
       return;
     }
-
-    setDraft({
-      ...draft,
-      lessons: draft.lessons.map((lesson) =>
-        lesson.id === selectedLesson.id ? { ...lesson, ...patch } : lesson,
-      ),
-    });
+    setDraft({ lessons: [], videos: [] });
+    setSaveNotice('تم مسح المحتوى — اضغط حفظ لتثبيت الحذف');
+    setSaveNoticeIsError(false);
   };
 
-  const updateVideo = (patch: Partial<TrainingVideo>) => {
-    if (!selectedVideo) {
-      return;
-    }
-
-    setDraft({
-      ...draft,
-      videos: draft.videos.map((video) =>
-        video.id === selectedVideo.id ? { ...video, ...patch } : video,
-      ),
-    });
-  };
+  const showContentInPreview = !isTrainingContentEmpty(lesson.contentHtml);
+  const previewVideos = (lesson.videos ?? []).filter(
+    (video) => video.active !== false && video.youtubeUrl.trim(),
+  );
 
   return (
-    <section className="admin-editor-page mx-auto">
+    <section
+      className="admin-editor-page training-admin-page training-admin-page--ar mx-auto"
+      dir="rtl"
+      lang="ar"
+    >
       <AdminPageHeader
-        subtitle={t('admin.editor.trainingSubtitle')}
+        subtitle="عنوان مطلوب — المحتوى والصور والجداول والفيديوهات اختيارية"
         titleAr="إدارة التدريب"
-        titleEn="Manage Training"
-      />
-      <AdminEditToolbar
-        isDirty={isDirty}
-        isSaving={isSaving}
-        notice={saveNotice}
-        noticeIsError={saveNoticeIsError}
-        onCancel={resetDraft}
-        onSave={() => void handleSave()}
+        titleEn="إدارة التدريب"
       />
 
-      <div className="admin-editor-grid admin-editor-grid--2">
-        <div className="admin-editor-panel">
-          <h3>{t('training.writtenLessons')}</h3>
-          <div className="admin-editor-actions-row">
+      <div
+        className="training-admin-actions"
+        role="toolbar"
+        aria-label="أدوات التدريب"
+      >
+        <p
+          className={`training-admin-actions__hint${saveNoticeIsError ? ' is-error' : ''}${saveNotice && !saveNoticeIsError ? ' is-success' : ''}`}
+        >
+          {saveNotice ??
+            (isDirty ? 'هناك تغييرات غير محفوظة' : 'جميع التغييرات محفوظة')}
+        </p>
+        <div className="training-admin-actions__buttons">
+          <button
+            className="training-admin-btn"
+            onClick={() => setPreviewOpen(true)}
+            type="button"
+          >
+            <Eye size={16} /> معاينة
+          </button>
+          <button
+            className="training-admin-btn training-admin-btn--danger"
+            onClick={handleDelete}
+            type="button"
+          >
+            <Trash2 size={16} /> حذف
+          </button>
+          <button
+            className="training-admin-btn training-admin-btn--primary"
+            disabled={!isDirty || isSaving || !lessonIsPublishable(lesson)}
+            onClick={() => void handleSave()}
+            type="button"
+          >
+            <Save size={16} /> {isSaving ? 'جاري الحفظ…' : 'حفظ'}
+          </button>
+          {isDirty ? (
             <button
-              className="admin-editor-btn"
+              className="training-admin-btn"
+              disabled={isSaving}
               onClick={() => {
-                const next = emptyLesson();
-                setDraft({ ...draft, lessons: [next, ...draft.lessons] });
-                setSelectedLessonId(next.id);
+                resetDraft();
+                setSaveNotice(null);
+                setSaveNoticeIsError(false);
               }}
               type="button"
             >
-              {t('admin.editor.add')}
+              إلغاء
             </button>
-            <button
-              className="admin-editor-btn admin-editor-btn--danger"
-              disabled={!selectedLesson}
-              onClick={() => {
-                if (!selectedLesson) return;
-                setDraft({
-                  ...draft,
-                  lessons: draft.lessons.filter(
-                    (lesson) => lesson.id !== selectedLesson.id,
-                  ),
-                });
-                setSelectedLessonId(
-                  draft.lessons.find((l) => l.id !== selectedLesson.id)?.id ??
-                    null,
-                );
-              }}
-              type="button"
-            >
-              {t('admin.editor.delete')}
-            </button>
-          </div>
-          <table className="admin-editor-table">
-            <tbody>
-              {draft.lessons.map((lesson) => (
-                <tr key={lesson.id}>
-                  <td>
-                    <button
-                      className="admin-editor-btn"
-                      onClick={() => {
-                        setSelectedLessonId(lesson.id);
-                        setSelectedVideoId(null);
-                      }}
-                      type="button"
-                    >
-                      {lesson.title.en || lesson.id}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          ) : null}
+        </div>
+      </div>
+
+      <section className="training-admin-section training-admin-section--simple training-admin-section--lux">
+        <div className="training-admin-field">
+          <label htmlFor="training-title-ar">
+            عنوان التدريب <span className="training-required">*</span>
+          </label>
+          <input
+            dir="rtl"
+            id="training-title-ar"
+            onChange={(event) => updateLesson({ title: event.target.value })}
+            placeholder="اكتب عنوان التدريب هنا (مطلوب)"
+            required
+            value={lesson.title}
+          />
         </div>
 
-        {selectedLesson ? (
-          <div className="admin-editor-panel admin-editor-grid">
-            {(['title', 'description'] as const).flatMap((field) =>
-              (['en', 'ar'] as const).map((lang) => (
+        <div className="training-admin-field">
+          <label>المحرر الفاخر — المحتوى والصور والجداول والفيديو داخل الدرس (اختياري)</label>
+          <TrainingRichEditor
+            key={lesson.id}
+            onChange={(html) => updateLesson({ contentHtml: html })}
+            placeholder="يمكنك ترك المحتوى فارغاً… أو إدراج صور وجداول وفيديوهات من الشريط أعلاه"
+            value={lesson.contentHtml}
+          />
+        </div>
+
+        <LessonVideosManager
+          onChange={(videos) => updateLesson({ videos })}
+          videos={lesson.videos ?? []}
+        />
+      </section>
+
+      {previewOpen ? (
+        <div
+          aria-modal="true"
+          className="training-dialog-backdrop"
+          onClick={() => setPreviewOpen(false)}
+          role="dialog"
+        >
+          <div
+            className="training-preview-dialog"
+            dir="rtl"
+            lang="ar"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className="training-preview-dialog__header">
+              <h2>معاينة التدريب</h2>
+              <button
+                className="training-admin-btn"
+                onClick={() => setPreviewOpen(false)}
+                type="button"
+              >
+                إغلاق
+              </button>
+            </header>
+            <article className="training-preview-dialog__body">
+              <h3>{lesson.title.trim() || 'بدون عنوان'}</h3>
+              {showContentInPreview ? (
                 <div
-                  className="admin-editor-field"
-                  key={`lesson-${field}-${lang}`}
-                >
-                  <label>
-                    {field} ({lang.toUpperCase()})
-                  </label>
-                  <input
-                    onChange={(event) =>
-                      updateLesson({
-                        [field]: {
-                          ...selectedLesson[field],
-                          [lang]: event.target.value,
-                        },
-                      })
-                    }
-                    value={selectedLesson[field][lang]}
-                  />
+                  className="training-rich"
+                  dangerouslySetInnerHTML={{
+                    __html: sanitizeTrainingHtml(lesson.contentHtml),
+                  }}
+                />
+              ) : null}
+              {previewVideos.length > 0 ? (
+                <div className="training-lesson-videos-public">
+                  {previewVideos.map((video) => {
+                    const thumb =
+                      video.thumbnailUrl ||
+                      getYoutubeThumbnail(video.youtubeUrl);
+                    const embed = getYoutubeEmbedUrl(video.youtubeUrl);
+                    const isMp4 = video.sourceType === 'mp4';
+                    return (
+                      <div className="training-video" key={video.id}>
+                        {video.title ? <h4>{video.title}</h4> : null}
+                        {video.description ? <p>{video.description}</p> : null}
+                        {isMp4 ? (
+                          <video
+                            className="training-video__player"
+                            controls
+                            playsInline
+                            poster={thumb || undefined}
+                            preload="metadata"
+                            src={video.youtubeUrl}
+                          >
+                            <track kind="captions" />
+                          </video>
+                        ) : embed ? (
+                          <iframe
+                            allowFullScreen
+                            className="training-video__player"
+                            loading="lazy"
+                            src={embed}
+                            title={video.title || 'فيديو'}
+                          />
+                        ) : null}
+                      </div>
+                    );
+                  })}
                 </div>
-              )),
-            )}
-            {(['en', 'ar'] as const).map((lang) => (
-              <div className="admin-editor-field" key={`content-${lang}`}>
-                <label>contentHtml ({lang.toUpperCase()})</label>
-                <textarea
-                  onChange={(event) =>
-                    updateLesson({
-                      contentHtml: {
-                        ...selectedLesson.contentHtml,
-                        [lang]: event.target.value,
-                      },
-                    })
-                  }
-                  rows={4}
-                  value={selectedLesson.contentHtml[lang]}
-                />
-              </div>
-            ))}
+              ) : !showContentInPreview && !lessonHasVideos(lesson) ? (
+                <p className="training-empty">لا يوجد محتوى إضافي بعد.</p>
+              ) : null}
+            </article>
           </div>
-        ) : null}
-      </div>
-
-      <div className="admin-editor-grid admin-editor-grid--2">
-        <div className="admin-editor-panel">
-          <h3>{t('training.videoLessons')}</h3>
-          <div className="admin-editor-actions-row">
-            <button
-              className="admin-editor-btn"
-              onClick={() => {
-                const next = emptyVideo();
-                setDraft({ ...draft, videos: [next, ...draft.videos] });
-                setSelectedVideoId(next.id);
-                setSelectedLessonId(null);
-              }}
-              type="button"
-            >
-              {t('admin.editor.add')}
-            </button>
-            <button
-              className="admin-editor-btn admin-editor-btn--danger"
-              disabled={!selectedVideo}
-              onClick={() => {
-                if (!selectedVideo) return;
-                setDraft({
-                  ...draft,
-                  videos: draft.videos.filter(
-                    (video) => video.id !== selectedVideo.id,
-                  ),
-                });
-                setSelectedVideoId(
-                  draft.videos.find((v) => v.id !== selectedVideo.id)?.id ??
-                    null,
-                );
-              }}
-              type="button"
-            >
-              {t('admin.editor.delete')}
-            </button>
-          </div>
-          <table className="admin-editor-table">
-            <tbody>
-              {draft.videos.map((video) => (
-                <tr key={video.id}>
-                  <td>
-                    <button
-                      className="admin-editor-btn"
-                      onClick={() => {
-                        setSelectedVideoId(video.id);
-                        setSelectedLessonId(null);
-                      }}
-                      type="button"
-                    >
-                      {video.youtubeUrl || video.id}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
-
-        {selectedVideo ? (
-          <div className="admin-editor-panel admin-editor-grid">
-            <div className="admin-editor-field">
-              <label htmlFor="training-video-url">YouTube URL</label>
-              <input
-                id="training-video-url"
-                onChange={(event) =>
-                  updateVideo({ youtubeUrl: event.target.value })
-                }
-                value={selectedVideo.youtubeUrl}
-              />
-            </div>
-            <div className="admin-editor-field">
-              <label>{t('training.fieldDuration')}</label>
-              <input
-                onChange={(event) =>
-                  updateVideo({ duration: event.target.value })
-                }
-                value={selectedVideo.duration}
-              />
-            </div>
-            {(['en', 'ar'] as const).map((lang) => (
-              <div className="admin-editor-field" key={`video-desc-${lang}`}>
-                <label>description ({lang.toUpperCase()})</label>
-                <textarea
-                  onChange={(event) =>
-                    updateVideo({
-                      description: {
-                        ...selectedVideo.description,
-                        [lang]: event.target.value,
-                      },
-                    })
-                  }
-                  rows={3}
-                  value={selectedVideo.description[lang]}
-                />
-              </div>
-            ))}
-          </div>
-        ) : null}
-      </div>
+      ) : null}
     </section>
   );
 }

@@ -27,6 +27,8 @@ export { useInventoryPermissions } from '@/hooks/useInventoryPermissions';
 export type { InventoryPermissionFlags } from '@/hooks/useInventoryPermissions';
 export { useDevicePermissions } from '@/hooks/useDevicePermissions';
 export type { DevicePermissionFlags } from '@/hooks/useDevicePermissions';
+export { useSpecialAdminPermissions } from '@/hooks/useSpecialAdminPermissions';
+export type { SpecialAdminPermissionFlags } from '@/hooks/useSpecialAdminPermissions';
 export { useThisDeviceLinkStatus } from '@/hooks/useThisDeviceLinkStatus';
 export { useInventoryAuth } from '@/hooks/useInventoryAuth';
 export { useUnderExecution } from '@/hooks/useUnderExecution';

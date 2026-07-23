@@ -27,8 +27,10 @@ export type AdminDashboardModule = {
   path: string;
   descriptionKey: TranslationKey;
   ownerOnly?: boolean;
-  /** Requires admin_device_permissions devices.manage (or primary admin). */
+  /** Requires special grant employee_devices (or Super Admin). */
   requiresDevicePermission?: boolean;
+  /** Requires special grant shift_notifications (or Super Admin). */
+  requiresShiftNotificationPermission?: boolean;
 };
 
 export const adminDashboardModules: AdminDashboardModule[] = [
@@ -121,7 +123,7 @@ export const adminDashboardModules: AdminDashboardModule[] = [
     labelKey: 'admin.dashboard.pushNotifications',
     path: '/admin/push-notifications',
     descriptionKey: 'admin.dashboard.pushNotificationsDesc',
-    ownerOnly: true,
+    requiresShiftNotificationPermission: true,
   },
   {
     icon: Smartphone,

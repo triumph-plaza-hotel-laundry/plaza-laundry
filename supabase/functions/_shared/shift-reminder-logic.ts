@@ -195,7 +195,32 @@ export type TomorrowShiftAssignment = {
   startTimeEn: string;
   startTimeAr: string;
   targetDateKey: string;
+  weekDayId: WeekDayId;
 };
+
+const ARABIC_WEEKDAY_NAMES: Record<WeekDayId, string> = {
+  saturday: 'السبت',
+  sunday: 'الأحد',
+  monday: 'الإثنين',
+  tuesday: 'الثلاثاء',
+  wednesday: 'الأربعاء',
+  thursday: 'الخميس',
+  friday: 'الجمعة',
+};
+
+function formatArabicDateLabel(targetDateKey: string): string {
+  const [year, month, day] = targetDateKey.split('-').map(Number);
+  if (!year || !month || !day) {
+    return targetDateKey;
+  }
+  const date = new Date(Date.UTC(year, month - 1, day, 12));
+  return new Intl.DateTimeFormat('ar-EG', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(date);
+}
 
 export function buildTomorrowShiftAssignments(
   shifts: ShiftsState,
@@ -242,6 +267,7 @@ export function buildTomorrowShiftAssignments(
       startTimeEn: extractStartTime(hours.en),
       startTimeAr: extractStartTime(hours.ar),
       targetDateKey,
+      weekDayId,
     });
   }
 
@@ -253,16 +279,26 @@ export function formatShiftReminderNotification(
 ) {
   const employeeName =
     assignment.employeeNameAr.trim() || assignment.employeeNameEn.trim();
-  const shiftPeriodAr = assignment.period === 'morning' ? 'صباحي' : 'مسائي';
+  const shiftLabelAr =
+    assignment.shiftLabelAr.trim() ||
+    (assignment.period === 'morning' ? 'الشفت الصباحي' : 'الشفت المسائي');
+  const dayNameAr = ARABIC_WEEKDAY_NAMES[assignment.weekDayId];
+  const dateLabelAr = formatArabicDateLabel(assignment.targetDateKey);
 
   return {
     title: '📅 تذكير بشفت الغد',
     body: [
-      `عزيزي ${employeeName}،`,
+      `مرحبًا ${employeeName} 👋`,
       '',
-      `نود تذكيرك بأن لديك غدًا شفت ${shiftPeriodAr}.`,
+      'نود تذكيرك بأن لديك شفت غدًا.',
+      '',
+      `📅 ${dayNameAr} ${dateLabelAr}`,
+      '',
+      `🕒 ${shiftLabelAr}`,
       '',
       'نتمنى لك يومًا موفقًا.',
+      '',
+      'Triumph Plaza Laundry Team',
     ].join('\n'),
   };
 }

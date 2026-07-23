@@ -11,6 +11,12 @@ import {
   type LaundryEmployee,
   type TomorrowShiftAssignment,
 } from '../_shared/shift-reminder-logic.ts';
+import {
+  getCairoHHMM,
+  isWithinShiftReminderSendWindow,
+  loadShiftReminderTime,
+  SHIFT_REMINDER_TIMEZONE,
+} from '../_shared/shift-reminder-settings.ts';
 
 const SHIFTS_KEY = 'tpl-shifts';
 const EMPLOYEES_KEY = 'tpl-employees-v1';
@@ -384,6 +390,24 @@ Deno.serve(async (request) => {
     }
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
+    const reminderTime = await loadShiftReminderTime(supabase);
+    const cairoNow = getCairoHHMM();
+
+    if (mode === 'cron' && !isWithinShiftReminderSendWindow(reminderTime)) {
+      return jsonResponse({
+        ok: true,
+        mode,
+        skippedReason: 'outside_send_window',
+        reminderTime,
+        cairoTime: cairoNow,
+        timeZone: SHIFT_REMINDER_TIMEZONE,
+        targeted: 0,
+        sent: 0,
+        failed: 0,
+        skipped: 0,
+      });
+    }
+
     const { shifts, employees, shiftsUpdatedAt } =
       await loadFreshScheduleData(supabase);
 
@@ -508,6 +532,9 @@ Deno.serve(async (request) => {
       mode,
       audience,
       shiftsUpdatedAt,
+      reminderTime,
+      cairoTime: cairoNow,
+      timeZone: SHIFT_REMINDER_TIMEZONE,
       targeted: assignments.length,
       sent,
       failed,

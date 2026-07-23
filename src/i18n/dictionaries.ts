@@ -325,10 +325,10 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.push.titleEn': 'Shift Push Notifications',
     'admin.push.titleAr': 'إشعارات الشفت',
     'admin.push.subtitle':
-      'Automatic reminders at 10:00 PM Cairo time using the latest weekly schedule.',
+      'Automatic reminders at the configured Cairo time using the latest weekly schedule.',
     'admin.push.automaticTitle': 'Automatic Shift Reminders',
     'admin.push.automaticHint':
-      'Every night at 22:00 Africa/Cairo the system reads the current weekly shift schedule from Supabase and sends each employee only their own tomorrow shift.',
+      'Each night at the configured Africa/Cairo send time the system reads the current weekly shift schedule from Supabase and sends each employee only their own tomorrow shift.',
     'admin.push.tomorrowDate': 'Tomorrow (Cairo)',
     'admin.push.tomorrowShiftCount': 'Employees on shift tomorrow',
     'admin.push.cronSchedule': 'Daily schedule',
@@ -407,6 +407,14 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.settings.devicePermissionSubtitle':
       'Allow this administrator to pair, replace, and remove employee devices.',
     'admin.settings.devicePermissionsSaved': 'Device permissions saved.',
+    'admin.settings.editName': 'Edit Name',
+    'admin.settings.changePassword': 'Change Password',
+    'admin.settings.specialPermissions': 'Special Permissions',
+    'admin.settings.permEmployeeDevices': 'Employee Devices Management',
+    'admin.settings.permShiftNotifications': 'Shift Notifications Management',
+    'admin.settings.specialPermissionsSaved': 'Special permissions updated.',
+    'admin.settings.confirmDelete':
+      'Permanently delete administrator “{name}”?',
     'admin.dashboard.employeeDevices': 'Employee Device Management',
     'admin.dashboard.employeeDevicesDesc':
       'Scan pairing codes and manage linked employee devices.',
@@ -1571,10 +1579,10 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.push.titleEn': 'Shift Push Notifications',
     'admin.push.titleAr': 'إشعارات الشفت',
     'admin.push.subtitle':
-      'تذكيرات تلقائية الساعة 10:00 مساءً بتوقيت القاهرة من أحدث جدول أسبوعي.',
+      'تذكيرات تلقائية في الوقت المضبوط بتوقيت القاهرة من أحدث جدول أسبوعي.',
     'admin.push.automaticTitle': 'تذكيرات الشفت التلقائية',
     'admin.push.automaticHint':
-      'كل ليلة الساعة 22:00 بتوقيت القاهرة يقرأ النظام جدول الشفت الأسبوعي الحالي ويرسل لكل موظف شفته فقط.',
+      'كل ليلة في وقت الإرسال المضبوط بتوقيت القاهرة يقرأ النظام جدول الشفت الأسبوعي الحالي ويرسل لكل موظف شفته فقط.',
     'admin.push.tomorrowDate': 'غداً (القاهرة)',
     'admin.push.tomorrowShiftCount': 'موظفون على شفت الغد',
     'admin.push.cronSchedule': 'الجدول اليومي',
@@ -1648,6 +1656,13 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.settings.devicePermissionSubtitle':
       'السماح لهذا المسؤول بربط أجهزة الموظفين واستبدالها وإزالتها.',
     'admin.settings.devicePermissionsSaved': 'تم حفظ صلاحيات الأجهزة.',
+    'admin.settings.editName': 'تعديل الاسم',
+    'admin.settings.changePassword': 'تغيير كلمة المرور',
+    'admin.settings.specialPermissions': 'صلاحيات خاصة',
+    'admin.settings.permEmployeeDevices': 'إدارة أجهزة الموظفين',
+    'admin.settings.permShiftNotifications': 'إدارة إشعارات الشفت',
+    'admin.settings.specialPermissionsSaved': 'تم تحديث الصلاحيات الخاصة.',
+    'admin.settings.confirmDelete': 'حذف المسؤول «{name}» نهائيًا؟',
     'admin.dashboard.employeeDevices': 'إدارة أجهزة الموظفين',
     'admin.dashboard.employeeDevicesDesc':
       'مسح رموز الربط وإدارة أجهزة الموظفين المرتبطة.',

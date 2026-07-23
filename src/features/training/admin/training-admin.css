@@ -1,0 +1,326 @@
+.training-admin-page {
+  --ta-gold: #d6b76e;
+  --ta-text: #f3efe6;
+  --ta-muted: rgb(243 239 230 / 62%);
+  --ta-border: rgb(214 183 110 / 28%);
+  --ta-panel: linear-gradient(165deg, #141414, #0d0d0d);
+  display: grid;
+  gap: 1.35rem;
+  max-width: 78rem;
+  font-family: 'Noto Kufi Arabic', Tahoma, sans-serif;
+}
+
+.training-admin-page--ar .admin-page-header__title-en {
+  display: none;
+}
+
+.training-admin-section--lux {
+  box-shadow: 0 18px 40px rgb(0 0 0 / 28%);
+  animation: training-admin-rise 280ms ease;
+}
+
+@keyframes training-admin-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.training-admin-actions {
+  box-shadow: 0 12px 28px rgb(0 0 0 / 22%);
+}
+
+.training-admin-btn {
+  border-radius: 0.8rem;
+  min-height: 2.4rem;
+  padding-inline: 0.95rem;
+}
+
+.training-admin-btn--primary {
+  box-shadow: 0 0 0 1px rgb(214 183 110 / 25%);
+}
+
+.training-admin-actions__hint {
+  margin: 0;
+  color: var(--ta-muted);
+  font-size: 0.88rem;
+}
+
+.training-admin-actions__hint.is-success {
+  color: #b7d6a3;
+}
+
+.training-admin-actions__hint.is-error {
+  color: #f0b4b4;
+}
+
+.training-admin-actions__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.training-admin-section {
+  border: 1px solid var(--ta-border);
+  border-radius: 1.1rem;
+  padding: 1rem 1.05rem 1.2rem;
+  background: var(--ta-panel);
+}
+
+.training-admin-section--simple {
+  display: grid;
+  gap: 1rem;
+}
+
+.training-admin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--ta-border);
+  border-radius: 0.65rem;
+  background: #151515;
+  color: var(--ta-text);
+  padding: 0.5rem 0.8rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.training-admin-btn:hover:not(:disabled) {
+  border-color: var(--ta-gold);
+  transform: translateY(-1px);
+}
+
+.training-admin-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.training-admin-btn--primary {
+  color: var(--ta-gold);
+  background: rgb(214 183 110 / 12%);
+}
+
+.training-admin-btn--danger {
+  color: #f0b4b4;
+  border-color: rgb(240 180 180 / 35%);
+}
+
+.training-admin-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.training-admin-field label {
+  color: var(--ta-gold);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.training-admin-field input,
+.training-admin-field textarea {
+  border: 1px solid var(--ta-border);
+  border-radius: 0.65rem;
+  background: #0d0d0d;
+  color: var(--ta-text);
+  padding: 0.75rem 0.85rem;
+  font: inherit;
+  font-size: 1.05rem;
+}
+
+.training-admin-field input:focus,
+.training-admin-field textarea:focus {
+  outline: 2px solid rgb(214 183 110 / 35%);
+  outline-offset: 1px;
+}
+
+.training-preview-dialog {
+  width: min(100%, 52rem);
+  max-height: min(88vh, 48rem);
+  overflow: auto;
+  border: 1px solid var(--ta-border);
+  border-radius: 1rem;
+  background: #101010;
+  color: var(--ta-text);
+  box-shadow: 0 22px 48px rgb(0 0 0 / 45%);
+  padding: 1rem;
+}
+
+.training-preview-dialog__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+  position: sticky;
+  top: 0;
+  background: #101010;
+  padding-bottom: 0.5rem;
+  z-index: 1;
+}
+
+.training-preview-dialog__header h2 {
+  margin: 0;
+  color: var(--ta-gold);
+}
+
+.training-preview-dialog__body h3 {
+  margin: 0 0 0.75rem;
+  color: var(--ta-gold);
+  font-size: 1.35rem;
+}
+
+.training-required {
+  color: #f0b4b4;
+}
+
+.training-admin-status {
+  margin: 0.35rem 0 0;
+  color: var(--ta-gold);
+  font-size: 0.8rem;
+}
+
+.training-admin-empty {
+  margin: 0;
+  color: var(--ta-muted);
+  font-size: 0.9rem;
+}
+
+.training-admin-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.training-lesson-videos {
+  border: 1px solid var(--ta-border);
+  border-radius: 0.9rem;
+  padding: 0.9rem;
+  background: #0f0f0f;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.training-lesson-videos__header h3 {
+  margin: 0;
+  color: var(--ta-gold);
+  font-size: 1.05rem;
+}
+
+.training-lesson-videos__header p {
+  margin: 0.25rem 0 0;
+  color: var(--ta-muted);
+  font-size: 0.85rem;
+}
+
+.training-lesson-videos__add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.training-lesson-videos__add input {
+  flex: 1 1 14rem;
+  border: 1px solid var(--ta-border);
+  border-radius: 0.55rem;
+  background: #0d0d0d;
+  color: var(--ta-text);
+  padding: 0.55rem 0.65rem;
+  font: inherit;
+}
+
+.training-lesson-videos__body {
+  display: grid;
+  gap: 0.85rem;
+}
+
+@media (width >= 900px) {
+  .training-lesson-videos__body {
+    grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
+  }
+}
+
+.training-lesson-videos__list {
+  display: grid;
+  gap: 0.4rem;
+  align-content: start;
+}
+
+.training-lesson-videos__card {
+  display: grid;
+  grid-template-columns: auto 3.2rem minmax(0, 1fr);
+  gap: 0.45rem;
+  align-items: center;
+  text-align: start;
+  border: 1px solid var(--ta-border);
+  border-radius: 0.65rem;
+  background: #141414;
+  color: var(--ta-text);
+  padding: 0.5rem;
+  cursor: grab;
+}
+
+.training-lesson-videos__card.is-selected {
+  border-color: var(--ta-gold);
+  background: rgb(214 183 110 / 10%);
+}
+
+.training-lesson-videos__card.is-dragging {
+  opacity: 0.55;
+}
+
+.training-lesson-videos__card img,
+.training-lesson-videos__thumb-empty {
+  width: 3.2rem;
+  height: 2.1rem;
+  border-radius: 0.3rem;
+  object-fit: cover;
+  border: 1px solid var(--ta-border);
+}
+
+.training-lesson-videos__thumb-empty {
+  display: block;
+  background: #1a1a1a;
+}
+
+.training-lesson-videos__card strong {
+  display: block;
+  color: var(--ta-gold);
+  font-size: 0.86rem;
+}
+
+.training-lesson-videos__card small {
+  color: var(--ta-muted);
+}
+
+.training-lesson-videos__grip {
+  color: var(--ta-gold);
+}
+
+.training-lesson-videos__form {
+  display: grid;
+  gap: 0.7rem;
+}
+
+@media (max-width: 640px) {
+  .training-admin-actions {
+    align-items: stretch;
+  }
+
+  .training-admin-actions__buttons {
+    width: 100%;
+  }
+
+  .training-admin-actions__buttons .training-admin-btn {
+    flex: 1 1 calc(50% - 0.45rem);
+    justify-content: center;
+  }
+}
+

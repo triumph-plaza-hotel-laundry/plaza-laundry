@@ -6,6 +6,16 @@ export type PushNotificationHistoryRow =
 
 export type PushHistoryStatus = PushNotificationHistoryRow['status'];
 
+function requireSupabase() {
+  const client = getSupabaseClient();
+  if (!client) {
+    throw new Error(
+      'Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.',
+    );
+  }
+  return client;
+}
+
 export async function listPushNotificationHistory(
   limit = 200,
 ): Promise<PushNotificationHistoryRow[]> {
@@ -30,4 +40,44 @@ export async function listPushNotificationHistory(
   }
 
   return data ?? [];
+}
+
+/** Permanently delete Shift Notifications history rows by id. */
+export async function deletePushNotificationHistoryByIds(
+  ids: string[],
+): Promise<number> {
+  const uniqueIds = [...new Set(ids.filter(Boolean))];
+  if (uniqueIds.length === 0) {
+    return 0;
+  }
+
+  const client = requireSupabase();
+  const { data, error } = await client
+    .from('push_notification_history')
+    .delete()
+    .in('id', uniqueIds)
+    .select('id');
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data?.length ?? uniqueIds.length;
+}
+
+/** Permanently delete every Shift Notifications history row. */
+export async function deleteAllPushNotificationHistory(): Promise<number> {
+  const client = requireSupabase();
+  // PostgREST requires a filter for DELETE; created_at is always set.
+  const { data, error } = await client
+    .from('push_notification_history')
+    .delete()
+    .gte('created_at', '1970-01-01')
+    .select('id');
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data?.length ?? 0;
 }

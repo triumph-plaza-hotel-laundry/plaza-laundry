@@ -1,10 +1,10 @@
 import { ChevronDown } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
-import { Navigate } from 'react-router-dom';
 import { employeesRepository } from '@/data/repositories/employees-repository';
 import type { LaundryEmployee } from '@/data/laundry-employees';
 import { AdminPageHeader } from '@/features/admin/components/AdminPageHeader';
+import { AdminPermissionDenied } from '@/features/admin/components/AdminPermissionDenied';
 import {
   listLinkedDevices,
   pairDeviceFromSession,
@@ -13,9 +13,11 @@ import {
   subscribeLinkedDevices,
   type LinkedDevice,
 } from '@/features/employee-devices/device-pairing-service';
+import { SPECIAL_PERMISSION_DENIED } from '@/features/auth/special-admin-permissions';
 import { useAuth, useEmployees, useLanguage } from '@/hooks';
-import { useDevicePermissions } from '@/hooks/useDevicePermissions';
+import { useSpecialAdminPermissions } from '@/hooks/useSpecialAdminPermissions';
 import '@/features/admin/admin-editor.css';
+import '@/features/admin/admin-permission-denied.css';
 import '@/features/employee-devices/admin-employee-devices.css';
 
 /**
@@ -26,7 +28,8 @@ import '@/features/employee-devices/admin-employee-devices.css';
 export function AdminEmployeeDevicesPage() {
   const { t, language } = useLanguage();
   const { user, logAction } = useAuth();
-  const { canManageDevices, isReady: permissionsReady } = useDevicePermissions();
+  const { canManageEmployeeDevices, isReady: permissionsReady } =
+    useSpecialAdminPermissions();
   // Single source of truth: same live store as Admin → Employees.
   const { employees } = useEmployees();
 
@@ -303,8 +306,8 @@ export function AdminEmployeeDevicesPage() {
     }
   };
 
-  if (permissionsReady && !canManageDevices) {
-    return <Navigate replace to="/admin" />;
+  if (permissionsReady && !canManageEmployeeDevices) {
+    return <AdminPermissionDenied message={SPECIAL_PERMISSION_DENIED} />;
   }
 
   return (
