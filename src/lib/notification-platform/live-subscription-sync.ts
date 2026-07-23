@@ -79,6 +79,8 @@ export async function onSubscriptionIdChanged(
     return;
   }
 
+  // If previousId is unknown, still rewrite local link + ask RPC to infer
+  // the old linked-device id from laundry_employee_id.
   rewriteLocalLinkPlayerId(previousId, nextId);
   emitPlatformSyncEvent();
 

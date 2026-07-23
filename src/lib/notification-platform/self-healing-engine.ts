@@ -265,8 +265,18 @@ export async function runRecoveryPass(
         primaryAdminDeviceId = null;
       }
 
+      // Always pass the previous linked/local id when it differs — otherwise
+      // employee_linked_devices stays on a stale subscription and pushes
+      // "succeed" in OneSignal without reaching the device.
+      const previousFromLocal =
+        local?.onesignalPlayerId &&
+        local.onesignalPlayerId.trim() &&
+        local.onesignalPlayerId.trim() !== subscriptionId
+          ? local.onesignalPlayerId.trim()
+          : null;
+
       await onSubscriptionIdChanged({
-        previousId: null,
+        previousId: previousFromLocal,
         nextId: subscriptionId,
         deviceLabel: detectDeviceLabel(),
         laundryEmployeeId: local?.laundryEmployeeId ?? null,

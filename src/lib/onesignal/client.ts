@@ -467,9 +467,34 @@ export async function registerOneSignalForEmployee(
       logFail('PushSubscription.optIn()', error);
     }
 
+    const previousId =
+      lastKnownSubscriptionId ??
+      readLocalDeviceLink()?.onesignalPlayerId ??
+      null;
     await persistCurrentSubscription(employeeId);
-    lastKnownSubscriptionId = getPushSubscriptionId();
-    logStep('register complete');
+    const nextId = getPushSubscriptionId();
+    lastKnownSubscriptionId = nextId;
+
+    if (nextId && notificationPlatformConfig.isEnabled) {
+      let primaryAdminDeviceId: string | null = null;
+      try {
+        primaryAdminDeviceId = getOrCreatePrimaryAdminDeviceId();
+      } catch {
+        primaryAdminDeviceId = null;
+      }
+
+      await onSubscriptionIdChanged({
+        previousId:
+          previousId && previousId !== nextId ? previousId : null,
+        nextId,
+        deviceLabel: detectDeviceLabel(),
+        laundryEmployeeId: activeLaundryEmployeeId,
+        adminEmployeeId: employeeId,
+        primaryAdminDeviceId,
+      });
+    }
+
+    logStep('register complete', { previousId, nextId });
   } catch (error) {
     logFail('register', error);
   }

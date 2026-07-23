@@ -94,6 +94,12 @@ async function sendOneSignalNotification(
     historyId?: string | null;
   },
 ): Promise<{ ok: boolean; error?: string; invalidPlayerIds?: string[] }> {
+  console.log('[shift-reminder] sendOneSignalNotification start', {
+    subscriptionId: playerId,
+    historyId: options?.historyId ?? null,
+    titlePreview: title.slice(0, 40),
+  });
+
   try {
     const result = await sendToSubscriptionId({
       appId,
@@ -105,50 +111,77 @@ async function sendOneSignalNotification(
     });
 
     if (options?.supabase) {
+      console.log('[shift-reminder] writing delivery attempts', {
+        count: result.attempts.length,
+        subscriptionId: playerId,
+      });
       for (const attempt of result.attempts) {
-        await options.supabase.from('notification_delivery_attempts').insert({
-          history_id: options.historyId ?? null,
-          onesignal_player_id: playerId,
-          attempt_number: attempt.attemptNumber,
-          http_status: attempt.httpStatus,
-          recipients: attempt.recipients,
-          onesignal_notification_id: attempt.onesignalNotificationId,
-          response_body: attempt.responseBody,
-          error_message: attempt.errorMessage,
-          status: attempt.ok ? 'sent' : 'failed',
-          recovery_action: attempt.ok
-            ? null
-            : result.invalidPlayerIds.includes(playerId)
-              ? 'mark_invalid'
-              : 'retry',
-        });
+        const { error: attemptError } = await options.supabase
+          .from('notification_delivery_attempts')
+          .insert({
+            history_id: options.historyId ?? null,
+            onesignal_player_id: playerId,
+            attempt_number: attempt.attemptNumber,
+            http_status: attempt.httpStatus,
+            recipients: attempt.recipients,
+            onesignal_notification_id: attempt.onesignalNotificationId,
+            response_body: attempt.responseBody,
+            error_message: attempt.errorMessage,
+            status: attempt.ok ? 'sent' : 'failed',
+            recovery_action: attempt.ok
+              ? null
+              : result.invalidPlayerIds.includes(playerId)
+                ? 'mark_invalid'
+                : 'retry',
+          });
+        if (attemptError) {
+          console.error(
+            '[shift-reminder] delivery attempt insert failed',
+            attemptError.message,
+          );
+        }
       }
 
       for (const invalidId of result.invalidPlayerIds) {
+        console.warn('[shift-reminder] marking subscription invalid', invalidId);
         await options.supabase.rpc('mark_onesignal_subscription_invalid', {
           p_player_id: invalidId,
           p_reason: 'OneSignal reported invalid/zero recipients',
         });
       }
 
-      await options.supabase.from('notification_platform_events').insert({
-        category: 'delivery',
-        severity: result.ok ? 'info' : 'error',
-        message: result.ok
-          ? 'Push delivered'
-          : result.final.errorMessage ?? 'Push delivery failed',
-        onesignal_player_id: playerId,
-        payload: {
-          recipients: result.final.recipients,
-          httpStatus: result.final.httpStatus,
-          attempts: result.attempts.length,
-          onesignalNotificationId: result.final.onesignalNotificationId,
-        },
-        recovery_action: result.ok ? null : 'smart_retry_exhausted',
-        retry_count: Math.max(0, result.attempts.length - 1),
-        final_status: result.ok ? 'sent' : 'failed',
-      });
+      const { error: eventError } = await options.supabase
+        .from('notification_platform_events')
+        .insert({
+          category: 'delivery',
+          severity: result.ok ? 'info' : 'error',
+          message: result.ok
+            ? 'Push delivered'
+            : result.final.errorMessage ?? 'Push delivery failed',
+          onesignal_player_id: playerId,
+          payload: {
+            recipients: result.final.recipients,
+            httpStatus: result.final.httpStatus,
+            attempts: result.attempts.length,
+            onesignalNotificationId: result.final.onesignalNotificationId,
+          },
+          recovery_action: result.ok ? null : 'smart_retry_exhausted',
+          retry_count: Math.max(0, result.attempts.length - 1),
+          final_status: result.ok ? 'sent' : 'failed',
+        });
+      if (eventError) {
+        console.error(
+          '[shift-reminder] delivery event insert failed',
+          eventError.message,
+        );
+      }
     }
+
+    console.log('[shift-reminder] sendOneSignalNotification done', {
+      ok: result.ok,
+      error: result.ok ? null : result.final.errorMessage,
+      onesignalNotificationId: result.final.onesignalNotificationId,
+    });
 
     return {
       ok: result.ok,
@@ -156,6 +189,7 @@ async function sendOneSignalNotification(
       invalidPlayerIds: result.invalidPlayerIds,
     };
   } catch (error) {
+    console.error('[shift-reminder] sendOneSignalNotification catch', error);
     // Fallback to legacy single-shot if shared pipeline throws.
     const legacy = await sendOneSignalNotificationLegacy(
       appId,
@@ -209,20 +243,185 @@ async function loadFreshScheduleData(supabase: ReturnType<typeof createClient>) 
   };
 }
 
+type LinkedDeviceRow = {
+  onesignal_player_id: string | null;
+  laundry_employee_id: string;
+  paired_by_admin_id: string | null;
+  device_label?: string | null;
+  subscription_status?: string | null;
+};
+
+type FreshSubRow = {
+  onesignal_player_id: string;
+  employee_id: string;
+  laundry_employee_id: string | null;
+  device: string | null;
+  updated_at: string | null;
+  is_valid: boolean | null;
+};
+
+/**
+ * When a QR-linked device rotates its OneSignal subscription id, the linked
+ * row can lag behind onesignal_subscriptions. Prefer the freshest valid
+ * subscription for the same admin + device_label and rewrite the linked row.
+ */
+async function healStaleLinkedDeviceSubscription(
+  supabase: ReturnType<typeof createClient>,
+  device: LinkedDeviceRow,
+): Promise<string | null> {
+  const linkedId =
+    typeof device.onesignal_player_id === 'string'
+      ? device.onesignal_player_id.trim()
+      : '';
+  const adminId =
+    typeof device.paired_by_admin_id === 'string'
+      ? device.paired_by_admin_id.trim()
+      : '';
+  const deviceLabel =
+    typeof device.device_label === 'string' ? device.device_label.trim() : '';
+
+  console.log('[shift-reminder] heal check linked device', {
+    laundryEmployeeId: device.laundry_employee_id,
+    linkedId,
+    adminId: adminId || null,
+    deviceLabel: deviceLabel || null,
+  });
+
+  if (!adminId) {
+    return linkedId || null;
+  }
+
+  const { data: adminSubs, error } = await supabase
+    .from('onesignal_subscriptions')
+    .select(
+      'onesignal_player_id, employee_id, laundry_employee_id, device, updated_at, is_valid',
+    )
+    .eq('employee_id', adminId)
+    .order('updated_at', { ascending: false });
+
+  if (error) {
+    console.error('[shift-reminder] heal: load admin subs failed', error.message);
+    return linkedId || null;
+  }
+
+  const freshRows = ((adminSubs ?? []) as FreshSubRow[]).filter((row) => {
+    const id = row.onesignal_player_id?.trim();
+    if (!id || row.is_valid === false) {
+      return false;
+    }
+    if (deviceLabel && row.device && row.device !== deviceLabel) {
+      return false;
+    }
+    return true;
+  });
+
+  console.log('[shift-reminder] heal: candidate fresh subs', {
+    count: freshRows.length,
+    ids: freshRows.map((r) => r.onesignal_player_id),
+  });
+
+  if (freshRows.length === 0) {
+    return linkedId || null;
+  }
+
+  const newest = freshRows[0]!;
+  const newestId = newest.onesignal_player_id.trim();
+
+  // Prefer the freshest valid subscription for this admin + device_label.
+  // Stale linked ids are why OneSignal can return HTTP 200 while no push arrives.
+  if (!linkedId || newestId === linkedId) {
+    console.log('[shift-reminder] heal: linked id still current', {
+      linkedId: linkedId || newestId,
+    });
+    return linkedId || newestId;
+  }
+
+  console.warn('[shift-reminder] heal: rotating stale linked subscription', {
+    from: linkedId,
+    to: newestId,
+    laundryEmployeeId: device.laundry_employee_id,
+  });
+
+  const now = new Date().toISOString();
+  const { error: rotateError } = await supabase
+    .from('employee_linked_devices')
+    .update({
+      onesignal_player_id: newestId,
+      last_seen_at: now,
+      last_synced_at: now,
+      subscription_status: 'active',
+      updated_at: now,
+      device_label: deviceLabel || newest.device || 'web',
+    })
+    .eq('laundry_employee_id', device.laundry_employee_id)
+    .eq('status', 'active')
+    .eq('onesignal_player_id', linkedId);
+
+  if (rotateError) {
+    // Unique constraint on player id — fall back to RPC rotation.
+    console.warn(
+      '[shift-reminder] heal: direct update failed, trying RPC',
+      rotateError.message,
+    );
+    const { error: rpcError } = await supabase.rpc(
+      'sync_onesignal_subscription_rotation',
+      {
+        p_old_id: linkedId,
+        p_new_id: newestId,
+        p_device_label: deviceLabel || newest.device || 'web',
+        p_laundry_employee_id: device.laundry_employee_id,
+        p_admin_employee_id: adminId,
+        p_primary_admin_device_id: null,
+      },
+    );
+    if (rpcError) {
+      console.error('[shift-reminder] heal: RPC rotation failed', rpcError.message);
+      // Still send to newest — better chance of reaching the live device.
+      return newestId;
+    }
+  }
+
+  if (linkedId) {
+    await supabase
+      .from('onesignal_subscriptions')
+      .update({
+        is_valid: false,
+        updated_at: now,
+      })
+      .eq('onesignal_player_id', linkedId);
+  }
+
+  console.log('[shift-reminder] heal: rotation complete', {
+    from: linkedId,
+    to: newestId,
+  });
+  return newestId;
+}
+
 async function resolveSubscriptions(
   supabase: ReturnType<typeof createClient>,
   laundryEmployeeId: string,
 ): Promise<SubscriptionRow[]> {
+  console.log('[shift-reminder] loading employee subscriptions', {
+    laundryEmployeeId,
+  });
+
   const merged = new Map<string, SubscriptionRow>();
   const invalidIds = new Set<string>();
 
-  const addRows = (rows: SubscriptionRow[]) => {
+  const addRows = (rows: SubscriptionRow[], source: string) => {
     for (const row of rows) {
       const playerId = row.onesignal_player_id?.trim();
       if (!playerId) {
+        console.log('[shift-reminder] skip row — empty player id', { source });
         continue;
       }
       if (row.is_valid === false || invalidIds.has(playerId)) {
+        console.log('[shift-reminder] skip row — invalid filter', {
+          source,
+          playerId,
+          is_valid: row.is_valid,
+        });
         continue;
       }
       merged.set(playerId, { ...row, onesignal_player_id: playerId });
@@ -245,21 +444,31 @@ async function resolveSubscriptions(
           invalidIds.add(id);
         }
       }
+    } else {
+      console.log(
+        '[shift-reminder] is_valid filter unavailable',
+        invalidError.message,
+      );
     }
   }
 
   const { data, error } = await supabase
     .from('onesignal_subscriptions')
-    .select('id, employee_id, onesignal_player_id, laundry_employee_id')
+    .select('id, employee_id, onesignal_player_id, laundry_employee_id, is_valid')
     .or(
       `laundry_employee_id.eq.${laundryEmployeeId},employee_id.eq.${laundryEmployeeId}`,
     );
 
   if (error) {
+    console.error('[shift-reminder] load subscriptions failed', error.message);
     throw new Error(error.message);
   }
 
-  addRows((data ?? []) as SubscriptionRow[]);
+  console.log('[shift-reminder] direct employee/laundry subscriptions', {
+    count: (data ?? []).length,
+    ids: (data ?? []).map((r) => r.onesignal_player_id),
+  });
+  addRows((data ?? []) as SubscriptionRow[], 'direct');
 
   const { data: adminUsers } = await supabase
     .from('admin_users')
@@ -270,10 +479,16 @@ async function resolveSubscriptions(
   if (adminIds.length > 0) {
     const { data: linkedSubs } = await supabase
       .from('onesignal_subscriptions')
-      .select('id, employee_id, onesignal_player_id, laundry_employee_id')
+      .select(
+        'id, employee_id, onesignal_player_id, laundry_employee_id, is_valid',
+      )
       .in('employee_id', adminIds);
 
-    addRows((linkedSubs ?? []) as SubscriptionRow[]);
+    console.log('[shift-reminder] admin-linked subscriptions', {
+      adminIds,
+      count: (linkedSubs ?? []).length,
+    });
+    addRows((linkedSubs ?? []) as SubscriptionRow[], 'admin_users');
   }
 
   // Active employee-linked devices are the pairing source of truth.
@@ -281,58 +496,73 @@ async function resolveSubscriptions(
   // never skip solely because the player id is registered as primary admin.
   const { data: linkedDevices, error: linkedDevicesError } = await supabase
     .from('employee_linked_devices')
-    .select('onesignal_player_id, laundry_employee_id, paired_by_admin_id')
+    .select(
+      'onesignal_player_id, laundry_employee_id, paired_by_admin_id, device_label, subscription_status',
+    )
     .eq('laundry_employee_id', laundryEmployeeId)
     .eq('status', 'active');
 
   if (linkedDevicesError) {
+    console.error(
+      '[shift-reminder] load linked devices failed',
+      linkedDevicesError.message,
+    );
     throw new Error(linkedDevicesError.message);
   }
 
-  // Optional subscription_status filter (post-migration).
-  let invalidLinked = new Set<string>();
-  {
-    const { data: invalidDevices, error: invalidDeviceError } = await supabase
-      .from('employee_linked_devices')
-      .select('onesignal_player_id')
-      .eq('laundry_employee_id', laundryEmployeeId)
-      .eq('status', 'active')
-      .eq('subscription_status', 'invalid');
-    if (!invalidDeviceError) {
-      invalidLinked = new Set(
-        (invalidDevices ?? [])
-          .map((row) =>
-            typeof row.onesignal_player_id === 'string'
-              ? row.onesignal_player_id.trim()
-              : '',
-          )
-          .filter(Boolean),
-      );
-    }
-  }
+  console.log('[shift-reminder] active linked devices', {
+    count: (linkedDevices ?? []).length,
+    devices: linkedDevices,
+  });
 
-  for (const device of linkedDevices ?? []) {
-    const playerId =
-      typeof device.onesignal_player_id === 'string'
-        ? device.onesignal_player_id.trim()
-        : '';
-    if (!playerId || merged.has(playerId)) {
-      continue;
-    }
-    if (invalidIds.has(playerId) || invalidLinked.has(playerId)) {
+  for (const device of (linkedDevices ?? []) as LinkedDeviceRow[]) {
+    if (device.subscription_status === 'invalid') {
+      console.log('[shift-reminder] skip linked device — subscription_status=invalid', {
+        playerId: device.onesignal_player_id,
+      });
       continue;
     }
 
-    merged.set(playerId, {
-      id: playerId,
+    const healedId = await healStaleLinkedDeviceSubscription(supabase, device);
+    if (!healedId) {
+      console.log('[shift-reminder] skip linked device — no subscription id');
+      continue;
+    }
+    if (invalidIds.has(healedId)) {
+      console.log('[shift-reminder] skip linked device — in invalidIds set', {
+        healedId,
+      });
+      continue;
+    }
+    if (merged.has(healedId)) {
+      console.log('[shift-reminder] linked device already in merge set', {
+        healedId,
+      });
+      continue;
+    }
+
+    console.log('[shift-reminder] selecting subscription_id for delivery', {
+      subscriptionId: healedId,
+      source: 'employee_linked_devices+heal',
+      laundryEmployeeId,
+    });
+
+    merged.set(healedId, {
+      id: healedId,
       employee_id:
         (device.paired_by_admin_id as string | null) ?? laundryEmployeeId,
-      onesignal_player_id: playerId,
+      onesignal_player_id: healedId,
       laundry_employee_id: laundryEmployeeId,
     });
   }
 
-  return Array.from(merged.values());
+  const resolved = Array.from(merged.values());
+  console.log('[shift-reminder] resolved subscriptions', {
+    laundryEmployeeId,
+    count: resolved.length,
+    ids: resolved.map((r) => r.onesignal_player_id),
+  });
+  return resolved;
 }
 
 async function logHistory(
@@ -383,12 +613,22 @@ async function deliverAssignment(
       ? { title: custom.title, body: custom.body }
       : formatShiftReminderNotification(assignment);
 
+  console.log('[shift-reminder] deliverAssignment start', {
+    employeeId: assignment.employeeId,
+    audience,
+    type,
+    title: message.title.slice(0, 40),
+  });
+
   const subscriptions = await resolveSubscriptions(
     supabase,
     assignment.employeeId,
   );
 
   if (subscriptions.length === 0) {
+    console.warn('[shift-reminder] no subscriptions — skipping', {
+      employeeId: assignment.employeeId,
+    });
     await logHistory(supabase, {
       type,
       target_date: assignment.targetDateKey,
@@ -416,6 +656,12 @@ async function deliverAssignment(
   let failed = 0;
 
   for (const subscription of subscriptions) {
+    console.log('[shift-reminder] selected subscription_id/player_id', {
+      subscriptionId: subscription.onesignal_player_id,
+      adminUserId: subscription.employee_id,
+      laundryEmployeeId: subscription.laundry_employee_id,
+    });
+
     if (
       type === 'shift_reminder' &&
       (await hasCronReminderBeenSent(
@@ -425,6 +671,7 @@ async function deliverAssignment(
         subscription.onesignal_player_id,
       ))
     ) {
+      console.log('[shift-reminder] skip — cron already sent for this player');
       continue;
     }
 
@@ -438,6 +685,11 @@ async function deliverAssignment(
         supabase,
       },
     );
+
+    console.log('[shift-reminder] writing notification history', {
+      status: result.ok ? 'sent' : 'failed',
+      subscriptionId: subscription.onesignal_player_id,
+    });
 
     await logHistory(supabase, {
       type,
@@ -466,6 +718,12 @@ async function deliverAssignment(
       failed += 1;
     }
   }
+
+  console.log('[shift-reminder] deliverAssignment done', {
+    employeeId: assignment.employeeId,
+    sent,
+    failed,
+  });
 
   return { sent, failed, skipped: 0 };
 }
@@ -516,16 +774,33 @@ Deno.serve(async (request) => {
     const cronSecret = Deno.env.get('SHIFT_REMINDER_CRON_SECRET');
 
     if (!supabaseUrl || !serviceRoleKey) {
+      console.error('[shift-reminder] missing SUPABASE_URL or SERVICE_ROLE_KEY');
       return jsonResponse({ error: 'Supabase not configured' }, 500);
     }
     if (!oneSignalAppId || !oneSignalRestKey) {
+      console.error('[shift-reminder] missing ONESIGNAL_APP_ID or REST API KEY');
       return jsonResponse({ error: 'OneSignal server keys not configured' }, 500);
     }
+
+    console.log('[shift-reminder] request boot', {
+      appIdPrefix: `${oneSignalAppId.slice(0, 8)}…`,
+      restKeyPrefix: `${oneSignalRestKey.slice(0, 10)}…`,
+      restKeyLen: oneSignalRestKey.length,
+      hasServiceRole: Boolean(serviceRoleKey),
+    });
 
     const body = sanitizeManualBody(
       (await request.json().catch(() => ({}))) as RequestBody,
     );
     const mode = body.mode ?? 'cron';
+    console.log('[shift-reminder] request body', {
+      mode,
+      audience: body.audience,
+      employeeId: body.employeeId,
+      departmentId: body.departmentId,
+      triggeredBy: body.triggeredBy,
+      title: body.title?.slice(0, 40),
+    });
 
     if (mode === 'cron') {
       const headerSecret = request.headers.get('x-cron-secret');

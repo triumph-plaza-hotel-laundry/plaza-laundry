@@ -25,10 +25,15 @@ export type SmartDeliveryResult = {
 };
 
 const DEFAULT_BACKOFF_MS = [1_000, 5_000, 15_000] as const;
+const ONESIGNAL_NOTIFICATIONS_URL = 'https://api.onesignal.com/notifications';
 
 /** UUID v4 (RFC 4122 / 9562 variant). */
 const UUID_V4_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/** Any UUID shape (OneSignal subscription / player / notification ids). */
+const UUID_ANY_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -41,8 +46,23 @@ function asRecord(value: unknown): Record<string, unknown> | null {
   return null;
 }
 
+function maskSecret(value: string | null | undefined, keep = 6): string {
+  if (!value) {
+    return '(missing)';
+  }
+  const trimmed = value.trim();
+  if (trimmed.length <= keep) {
+    return `${trimmed.slice(0, 2)}…`;
+  }
+  return `${trimmed.slice(0, keep)}…(len=${trimmed.length})`;
+}
+
 export function isUuidV4(value: string): boolean {
   return UUID_V4_RE.test(value.trim());
+}
+
+function isUuidLike(value: string): boolean {
+  return UUID_ANY_RE.test(value.trim());
 }
 
 /**
@@ -71,17 +91,20 @@ function extractInvalidIds(body: Record<string, unknown> | null): string[] {
   ];
 
   for (const candidate of candidates) {
-    if (Array.isArray(candidate)) {
-      for (const entry of candidate) {
-        if (typeof entry === 'string' && entry.trim()) {
-          ids.add(entry.trim());
-        } else if (entry && typeof entry === 'object') {
-          const record = entry as Record<string, unknown>;
-          for (const key of ['id', 'player_id', 'subscription_id']) {
-            const value = record[key];
-            if (typeof value === 'string' && value.trim()) {
-              ids.add(value.trim());
-            }
+    if (!Array.isArray(candidate)) {
+      continue;
+    }
+    for (const entry of candidate) {
+      if (typeof entry === 'string' && isUuidLike(entry)) {
+        ids.add(entry.trim());
+        continue;
+      }
+      if (entry && typeof entry === 'object') {
+        const record = entry as Record<string, unknown>;
+        for (const key of ['id', 'player_id', 'subscription_id']) {
+          const value = record[key];
+          if (typeof value === 'string' && isUuidLike(value)) {
+            ids.add(value.trim());
           }
         }
       }
@@ -118,7 +141,7 @@ function summarizeError(
 async function sendOnce(
   appId: string,
   restKey: string,
-  playerId: string,
+  subscriptionId: string,
   title: string,
   body: string,
   attemptNumber: number,
@@ -126,29 +149,64 @@ async function sendOnce(
 ): Promise<DeliveryAttemptResult> {
   const key = ensureUuidV4IdempotencyKey(idempotencyKey);
 
+  // Current OneSignal Create Notification API:
+  // - include_subscription_ids targets Web/mobile subscription UUIDs
+  // - Authorization: Key <REST API Key>
+  // - target_channel: push (explicit; avoids channel ambiguity)
+  // - idempotency_key must be UUID v4
   const payload: Record<string, unknown> = {
     app_id: appId,
-    include_subscription_ids: [playerId],
+    include_subscription_ids: [subscriptionId],
+    target_channel: 'push',
     headings: { en: title },
     contents: { en: body },
-    // OneSignal requires a UUID v4. Prefer idempotency_key (external_id alias is legacy).
     idempotency_key: key,
   };
 
-  const response = await fetch('https://api.onesignal.com/notifications', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Key ${restKey}`,
-    },
-    body: JSON.stringify(payload),
+  console.log('[onesignal-delivery] preparing payload', {
+    attemptNumber,
+    endpoint: ONESIGNAL_NOTIFICATIONS_URL,
+    appIdPrefix: maskSecret(appId, 8),
+    restKeyPrefix: maskSecret(restKey, 10),
+    authScheme: 'Key',
+    subscriptionId,
+    idempotencyKey: key,
+    titleLen: title.length,
+    bodyLen: body.length,
+    targeting: 'include_subscription_ids',
+    target_channel: 'push',
   });
 
+  let response: Response;
+  try {
+    console.log('[onesignal-delivery] sending fetch request…');
+    response = await fetch(ONESIGNAL_NOTIFICATIONS_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Key ${restKey}`,
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch (error) {
+    console.error('[onesignal-delivery] fetch threw', error);
+    throw error;
+  }
+
   const rawText = await response.text();
+  console.log('[onesignal-delivery] received response', {
+    attemptNumber,
+    httpStatus: response.status,
+    ok: response.ok,
+    rawPreview: rawText.slice(0, 500),
+  });
+
   let parsed: unknown = null;
   try {
     parsed = rawText ? JSON.parse(rawText) : null;
-  } catch {
+    console.log('[onesignal-delivery] parsed response JSON', parsed);
+  } catch (parseError) {
+    console.error('[onesignal-delivery] response JSON parse failed', parseError);
     parsed = null;
   }
 
@@ -168,21 +226,38 @@ async function sendOnce(
   if (
     response.ok &&
     recipients === 0 &&
-    !invalidPlayerIds.includes(playerId)
+    !invalidPlayerIds.includes(subscriptionId)
   ) {
-    invalidPlayerIds.push(playerId);
+    console.warn(
+      '[onesignal-delivery] recipients=0 — treating subscription as invalid',
+      subscriptionId,
+    );
+    invalidPlayerIds.push(subscriptionId);
   }
 
   const errorMessage = summarizeError(response.status, responseBody, rawText);
 
+  // OneSignal Create Message v2 often returns { id, external_id } with no
+  // recipients field. Treat notification id + HTTP ok as success unless
+  // recipients is explicitly 0 or the subscription is listed invalid.
   const hasPositiveRecipients =
     typeof recipients === 'number' && Number.isFinite(recipients) && recipients > 0;
   const hasNotificationId = Boolean(onesignalNotificationId);
   const ok =
     response.ok &&
     recipients !== 0 &&
-    !invalidPlayerIds.includes(playerId) &&
+    !invalidPlayerIds.includes(subscriptionId) &&
     (hasNotificationId || hasPositiveRecipients);
+
+  console.log('[onesignal-delivery] attempt result', {
+    attemptNumber,
+    ok,
+    httpStatus: response.status,
+    recipients,
+    onesignalNotificationId,
+    invalidPlayerIds,
+    errorMessage: ok ? null : errorMessage,
+  });
 
   return {
     ok,
@@ -215,6 +290,55 @@ export async function sendToSubscriptionId(options: {
   const backoff = options.backoffMs ?? DEFAULT_BACKOFF_MS;
   const attempts: DeliveryAttemptResult[] = [];
   const invalid = new Set<string>();
+  const subscriptionId = options.playerId?.trim() ?? '';
+
+  console.log('[onesignal-delivery] sendToSubscriptionId start', {
+    subscriptionId,
+    hasSubscriptionId: Boolean(subscriptionId),
+    appIdPrefix: maskSecret(options.appId, 8),
+    restKeyPrefix: maskSecret(options.restKey, 10),
+    maxAttempts,
+  });
+
+  if (!subscriptionId) {
+    const failed: DeliveryAttemptResult = {
+      ok: false,
+      httpStatus: 0,
+      recipients: null,
+      onesignalNotificationId: null,
+      errorMessage: 'Missing OneSignal subscription_id',
+      responseBody: null,
+      invalidPlayerIds: [],
+      attemptNumber: 1,
+    };
+    console.error('[onesignal-delivery] abort — empty subscription_id');
+    return {
+      ok: false,
+      attempts: [failed],
+      final: failed,
+      invalidPlayerIds: [],
+    };
+  }
+
+  if (!options.appId?.trim() || !options.restKey?.trim()) {
+    const failed: DeliveryAttemptResult = {
+      ok: false,
+      httpStatus: 0,
+      recipients: null,
+      onesignalNotificationId: null,
+      errorMessage: 'Missing OneSignal App ID or REST API Key',
+      responseBody: null,
+      invalidPlayerIds: [],
+      attemptNumber: 1,
+    };
+    console.error('[onesignal-delivery] abort — missing app id or rest key');
+    return {
+      ok: false,
+      attempts: [failed],
+      final: failed,
+      invalidPlayerIds: [],
+    };
+  }
 
   // One key per logical notification — reused across retries (OneSignal idempotency).
   const idempotencyKey = ensureUuidV4IdempotencyKey(options.idempotencyKey);
@@ -225,13 +349,14 @@ export async function sendToSubscriptionId(options: {
       result = await sendOnce(
         options.appId,
         options.restKey,
-        options.playerId,
+        subscriptionId,
         options.title,
         options.body,
         attempt,
         idempotencyKey,
       );
     } catch (error) {
+      console.error('[onesignal-delivery] sendOnce catch', error);
       result = {
         ok: false,
         httpStatus: 0,
@@ -251,6 +376,11 @@ export async function sendToSubscriptionId(options: {
     }
 
     if (result.ok) {
+      console.log('[onesignal-delivery] send succeeded', {
+        attempt,
+        onesignalNotificationId: result.onesignalNotificationId,
+        recipients: result.recipients,
+      });
       return {
         ok: true,
         attempts,
@@ -259,7 +389,8 @@ export async function sendToSubscriptionId(options: {
       };
     }
 
-    if (invalid.has(options.playerId)) {
+    if (invalid.has(subscriptionId)) {
+      console.warn('[onesignal-delivery] stopping retries — subscription invalid');
       break;
     }
 
@@ -268,14 +399,22 @@ export async function sendToSubscriptionId(options: {
       result.httpStatus < 500 &&
       result.httpStatus !== 429
     ) {
+      console.warn('[onesignal-delivery] stopping retries — client error', result.httpStatus);
       break;
     }
 
     if (attempt < maxAttempts) {
       const delay = backoff[Math.min(attempt - 1, backoff.length - 1)] ?? 15_000;
+      console.log('[onesignal-delivery] backing off before retry', { attempt, delay });
       await sleep(delay);
     }
   }
+
+  console.error('[onesignal-delivery] send exhausted retries', {
+    subscriptionId,
+    attempts: attempts.length,
+    finalError: attempts[attempts.length - 1]?.errorMessage,
+  });
 
   return {
     ok: false,
@@ -294,6 +433,9 @@ export async function sendOneSignalNotificationLegacy(
   body: string,
 ): Promise<{ ok: boolean; error?: string }> {
   try {
+    console.log('[onesignal-delivery] legacy fallback send', {
+      subscriptionId: playerId,
+    });
     const result = await sendOnce(
       appId,
       restKey,
@@ -307,6 +449,7 @@ export async function sendOneSignalNotificationLegacy(
       ? { ok: true }
       : { ok: false, error: result.errorMessage ?? 'Send failed' };
   } catch (error) {
+    console.error('[onesignal-delivery] legacy fallback catch', error);
     return {
       ok: false,
       error: error instanceof Error ? error.message : 'Send failed',
