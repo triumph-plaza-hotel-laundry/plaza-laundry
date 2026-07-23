@@ -72,17 +72,11 @@ function logStep(step: string, detail?: unknown) {
   console.info(`${LOG_PREFIX} ▶ ${step}`);
 }
 
-function readExistingPlayerId() {
+function readExistingPlayerId(): string | null {
   try {
     const id = OneSignal.User.PushSubscription.id;
-
-    console.log("================================");
-    console.log("ONESIGNAL PLAYER ID:", id);
-    console.log("================================");
-
-    return typeof id === "string" && id.trim() ? id.trim() : null;
-  } catch (error) {
-    console.log("FAILED TO READ PLAYER ID", error);
+    return typeof id === 'string' && id.trim() ? id.trim() : null;
+  } catch {
     return null;
   }
 }
@@ -418,20 +412,29 @@ export async function prepareDeviceForPairing(): Promise<{
 
 /** Fast read for sidebar link status — does not wait on prompts or optIn. */
 export async function getCurrentOneSignalPlayerId(): Promise<string | null> {
-  const immediate = readExistingPlayerId();
-  if (immediate) {
-    return immediate;
-  }
-
   if (!onesignalConfig.isConfigured) {
     return null;
   }
 
   try {
-    await Promise.race([ensureOneSignalInitialized(), sleep(1500)]);
+    await ensureOneSignalInitialized();
   } catch {
-    // ignore
+    return null;
   }
 
-  return readExistingPlayerId();
+  const immediate = readExistingPlayerId();
+  if (immediate) {
+    return immediate;
+  }
+
+  const pollDeadline = Date.now() + 2000;
+  while (Date.now() < pollDeadline) {
+    await sleep(300);
+    const playerId = readExistingPlayerId();
+    if (playerId) {
+      return playerId;
+    }
+  }
+
+  return null;
 }
