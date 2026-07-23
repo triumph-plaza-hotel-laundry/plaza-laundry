@@ -17,6 +17,10 @@ import {
   loadShiftReminderTime,
   SHIFT_REMINDER_TIMEZONE,
 } from '../_shared/shift-reminder-settings.ts';
+import {
+  sendOneSignalNotificationLegacy,
+  sendToSubscriptionId,
+} from '../_shared/notification-delivery.ts';
 
 const SHIFTS_KEY = 'tpl-shifts';
 const EMPLOYEES_KEY = 'tpl-employees-v1';
@@ -43,6 +47,7 @@ type SubscriptionRow = {
   employee_id: string;
   onesignal_player_id: string;
   laundry_employee_id: string | null;
+  is_valid?: boolean | null;
 };
 
 type HistoryInsert = {
@@ -84,27 +89,90 @@ async function sendOneSignalNotification(
   playerId: string,
   title: string,
   body: string,
-): Promise<{ ok: boolean; error?: string }> {
-  const response = await fetch('https://api.onesignal.com/notifications', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Key ${restKey}`,
-    },
-    body: JSON.stringify({
-      app_id: appId,
-      include_subscription_ids: [playerId],
-      headings: { en: title },
-      contents: { en: body },
-    }),
-  });
+  options?: {
+    supabase?: ReturnType<typeof createClient>;
+    historyId?: string | null;
+    idempotencyKey?: string;
+  },
+): Promise<{ ok: boolean; error?: string; invalidPlayerIds?: string[] }> {
+  try {
+    const result = await sendToSubscriptionId({
+      appId,
+      restKey,
+      playerId,
+      title,
+      body,
+      maxAttempts: 3,
+      idempotencyKey: options?.idempotencyKey,
+    });
 
-  if (!response.ok) {
-    const text = await response.text();
-    return { ok: false, error: text || `HTTP ${response.status}` };
+    if (options?.supabase) {
+      for (const attempt of result.attempts) {
+        await options.supabase.from('notification_delivery_attempts').insert({
+          history_id: options.historyId ?? null,
+          onesignal_player_id: playerId,
+          attempt_number: attempt.attemptNumber,
+          http_status: attempt.httpStatus,
+          recipients: attempt.recipients,
+          onesignal_notification_id: attempt.onesignalNotificationId,
+          response_body: attempt.responseBody,
+          error_message: attempt.errorMessage,
+          status: attempt.ok ? 'sent' : 'failed',
+          recovery_action: attempt.ok
+            ? null
+            : result.invalidPlayerIds.includes(playerId)
+              ? 'mark_invalid'
+              : 'retry',
+        });
+      }
+
+      for (const invalidId of result.invalidPlayerIds) {
+        await options.supabase.rpc('mark_onesignal_subscription_invalid', {
+          p_player_id: invalidId,
+          p_reason: 'OneSignal reported invalid/zero recipients',
+        });
+      }
+
+      await options.supabase.from('notification_platform_events').insert({
+        category: 'delivery',
+        severity: result.ok ? 'info' : 'error',
+        message: result.ok
+          ? 'Push delivered'
+          : result.final.errorMessage ?? 'Push delivery failed',
+        onesignal_player_id: playerId,
+        payload: {
+          recipients: result.final.recipients,
+          httpStatus: result.final.httpStatus,
+          attempts: result.attempts.length,
+          onesignalNotificationId: result.final.onesignalNotificationId,
+        },
+        recovery_action: result.ok ? null : 'smart_retry_exhausted',
+        retry_count: Math.max(0, result.attempts.length - 1),
+        final_status: result.ok ? 'sent' : 'failed',
+      });
+    }
+
+    return {
+      ok: result.ok,
+      error: result.ok ? undefined : result.final.errorMessage ?? 'Send failed',
+      invalidPlayerIds: result.invalidPlayerIds,
+    };
+  } catch (error) {
+    // Fallback to legacy single-shot if shared pipeline throws.
+    const legacy = await sendOneSignalNotificationLegacy(
+      appId,
+      restKey,
+      playerId,
+      title,
+      body,
+    );
+    return {
+      ok: legacy.ok,
+      error:
+        legacy.error ??
+        (error instanceof Error ? error.message : 'Delivery pipeline error'),
+    };
   }
-
-  return { ok: true };
 }
 
 async function loadFreshScheduleData(supabase: ReturnType<typeof createClient>) {
@@ -148,6 +216,7 @@ async function resolveSubscriptions(
   laundryEmployeeId: string,
 ): Promise<SubscriptionRow[]> {
   const merged = new Map<string, SubscriptionRow>();
+  const invalidIds = new Set<string>();
 
   const addRows = (rows: SubscriptionRow[]) => {
     for (const row of rows) {
@@ -155,9 +224,31 @@ async function resolveSubscriptions(
       if (!playerId) {
         continue;
       }
+      if (row.is_valid === false || invalidIds.has(playerId)) {
+        continue;
+      }
       merged.set(playerId, { ...row, onesignal_player_id: playerId });
     }
   };
+
+  // Optional invalid-id set (column may not exist pre-migration).
+  {
+    const { data: invalidSubs, error: invalidError } = await supabase
+      .from('onesignal_subscriptions')
+      .select('onesignal_player_id')
+      .eq('is_valid', false);
+    if (!invalidError) {
+      for (const row of invalidSubs ?? []) {
+        const id =
+          typeof row.onesignal_player_id === 'string'
+            ? row.onesignal_player_id.trim()
+            : '';
+        if (id) {
+          invalidIds.add(id);
+        }
+      }
+    }
+  }
 
   const { data, error } = await supabase
     .from('onesignal_subscriptions')
@@ -200,12 +291,37 @@ async function resolveSubscriptions(
     throw new Error(linkedDevicesError.message);
   }
 
+  // Optional subscription_status filter (post-migration).
+  let invalidLinked = new Set<string>();
+  {
+    const { data: invalidDevices, error: invalidDeviceError } = await supabase
+      .from('employee_linked_devices')
+      .select('onesignal_player_id')
+      .eq('laundry_employee_id', laundryEmployeeId)
+      .eq('status', 'active')
+      .eq('subscription_status', 'invalid');
+    if (!invalidDeviceError) {
+      invalidLinked = new Set(
+        (invalidDevices ?? [])
+          .map((row) =>
+            typeof row.onesignal_player_id === 'string'
+              ? row.onesignal_player_id.trim()
+              : '',
+          )
+          .filter(Boolean),
+      );
+    }
+  }
+
   for (const device of linkedDevices ?? []) {
     const playerId =
       typeof device.onesignal_player_id === 'string'
         ? device.onesignal_player_id.trim()
         : '';
     if (!playerId || merged.has(playerId)) {
+      continue;
+    }
+    if (invalidIds.has(playerId) || invalidLinked.has(playerId)) {
       continue;
     }
 
@@ -320,6 +436,10 @@ async function deliverAssignment(
       subscription.onesignal_player_id,
       message.title,
       message.body,
+      {
+        supabase,
+        idempotencyKey: `${type}:${assignment.targetDateKey}:${assignment.employeeId}:${subscription.onesignal_player_id}:${triggeredBy}`,
+      },
     );
 
     await logHistory(supabase, {
@@ -430,6 +550,22 @@ Deno.serve(async (request) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
     const reminderTime = await loadShiftReminderTime(supabase);
     const cairoNow = getCairoHHMM();
+
+    if (mode === 'cron') {
+      // Cheap DB guardian pass — expire sessions / dedupe actives / prune events.
+      const { error: cleanupError } = await supabase.rpc(
+        'notification_db_guardian_cleanup',
+        {
+          p_event_retention_days: 30,
+        },
+      );
+      if (cleanupError) {
+        console.error(
+          '[shift-reminder] guardian cleanup skipped',
+          cleanupError.message,
+        );
+      }
+    }
 
     if (mode === 'cron' && !isWithinShiftReminderSendWindow(reminderTime)) {
       return jsonResponse({

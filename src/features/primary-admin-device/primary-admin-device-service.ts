@@ -168,3 +168,61 @@ export async function registerPrimaryAdminDevice(
 
   return mapRow(data as PrimaryAdminDeviceRow);
 }
+
+/**
+ * Heal primary admin device subscription id when this browser is the registered
+ * primary device and OneSignal rotated the subscription id.
+ */
+export async function healPrimaryAdminSubscriptionIfSameDevice(
+  nextSubscriptionId: string,
+): Promise<boolean> {
+  const trimmed = nextSubscriptionId?.trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  try {
+    const existing = await getPrimaryAdminDevice();
+    if (!existing) {
+      return false;
+    }
+
+    const localDeviceId = getOrCreatePrimaryAdminDeviceId();
+    if (existing.deviceId !== localDeviceId) {
+      return false;
+    }
+
+    if (existing.onesignalSubscriptionId === trimmed) {
+      return true;
+    }
+
+    const client = requireClient();
+    const { data, error } = await client.rpc(
+      'sync_onesignal_subscription_rotation',
+      {
+        p_old_id: existing.onesignalSubscriptionId,
+        p_new_id: trimmed,
+        p_device_label: 'primary-admin-web',
+        p_laundry_employee_id: null,
+        p_admin_employee_id: existing.registeredByAdminId,
+        p_primary_admin_device_id: localDeviceId,
+      },
+    );
+
+    if (error) {
+      const message = error.message?.toLowerCase() ?? '';
+      const missingRpc =
+        error.code === 'PGRST202' ||
+        error.code === '42883' ||
+        message.includes('could not find the function');
+      if (!missingRpc) {
+        throw toServiceError(error, 'Unable to heal primary admin subscription.');
+      }
+      return false;
+    }
+
+    return Boolean(data);
+  } catch {
+    return false;
+  }
+}

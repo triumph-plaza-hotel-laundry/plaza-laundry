@@ -856,6 +856,8 @@ export type Database = {
           removed_at: string | null;
           created_at: string;
           updated_at: string;
+          last_synced_at: string | null;
+          subscription_status: 'active' | 'invalid' | 'unknown';
         };
         Insert: {
           id?: string;
@@ -872,6 +874,8 @@ export type Database = {
           removed_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          last_synced_at?: string | null;
+          subscription_status?: 'active' | 'invalid' | 'unknown';
         };
         Update: {
           id?: string;
@@ -888,6 +892,8 @@ export type Database = {
           removed_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          last_synced_at?: string | null;
+          subscription_status?: 'active' | 'invalid' | 'unknown';
         };
         Relationships: [
           {
@@ -907,6 +913,7 @@ export type Database = {
           onesignal_subscription_id: string;
           registered_at: string;
           registered_by_admin_id: string | null;
+          updated_at: string;
         };
         Insert: {
           id?: string;
@@ -915,6 +922,7 @@ export type Database = {
           onesignal_subscription_id: string;
           registered_at?: string;
           registered_by_admin_id?: string | null;
+          updated_at?: string;
         };
         Update: {
           id?: string;
@@ -923,6 +931,7 @@ export type Database = {
           onesignal_subscription_id?: string;
           registered_at?: string;
           registered_by_admin_id?: string | null;
+          updated_at?: string;
         };
         Relationships: [
           {
@@ -943,6 +952,8 @@ export type Database = {
           laundry_employee_id: string | null;
           created_at: string;
           updated_at: string;
+          last_verified_at: string | null;
+          is_valid: boolean;
         };
         Insert: {
           id?: string;
@@ -952,6 +963,8 @@ export type Database = {
           laundry_employee_id?: string | null;
           created_at?: string;
           updated_at?: string;
+          last_verified_at?: string | null;
+          is_valid?: boolean;
         };
         Update: {
           id?: string;
@@ -961,6 +974,8 @@ export type Database = {
           laundry_employee_id?: string | null;
           created_at?: string;
           updated_at?: string;
+          last_verified_at?: string | null;
+          is_valid?: boolean;
         };
         Relationships: [
           {
@@ -1188,6 +1203,104 @@ export type Database = {
           },
         ];
       };
+      notification_platform_events: {
+        Row: {
+          id: string;
+          category: string;
+          severity: 'info' | 'warning' | 'error';
+          message: string;
+          laundry_employee_id: string | null;
+          onesignal_player_id: string | null;
+          device_label: string | null;
+          payload: Json | null;
+          recovery_action: string | null;
+          retry_count: number;
+          final_status: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          category: string;
+          severity?: 'info' | 'warning' | 'error';
+          message: string;
+          laundry_employee_id?: string | null;
+          onesignal_player_id?: string | null;
+          device_label?: string | null;
+          payload?: Json | null;
+          recovery_action?: string | null;
+          retry_count?: number;
+          final_status?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          category?: string;
+          severity?: 'info' | 'warning' | 'error';
+          message?: string;
+          laundry_employee_id?: string | null;
+          onesignal_player_id?: string | null;
+          device_label?: string | null;
+          payload?: Json | null;
+          recovery_action?: string | null;
+          retry_count?: number;
+          final_status?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      notification_delivery_attempts: {
+        Row: {
+          id: string;
+          history_id: string | null;
+          onesignal_player_id: string;
+          attempt_number: number;
+          http_status: number | null;
+          recipients: number | null;
+          onesignal_notification_id: string | null;
+          response_body: Json | null;
+          error_message: string | null;
+          status: 'pending' | 'sent' | 'failed' | 'skipped';
+          recovery_action: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          history_id?: string | null;
+          onesignal_player_id: string;
+          attempt_number?: number;
+          http_status?: number | null;
+          recipients?: number | null;
+          onesignal_notification_id?: string | null;
+          response_body?: Json | null;
+          error_message?: string | null;
+          status?: 'pending' | 'sent' | 'failed' | 'skipped';
+          recovery_action?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          history_id?: string | null;
+          onesignal_player_id?: string;
+          attempt_number?: number;
+          http_status?: number | null;
+          recipients?: number | null;
+          onesignal_notification_id?: string | null;
+          response_body?: Json | null;
+          error_message?: string | null;
+          status?: 'pending' | 'sent' | 'failed' | 'skipped';
+          recovery_action?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'notification_delivery_attempts_history_id_fkey';
+            columns: ['history_id'];
+            isOneToOne: false;
+            referencedRelation: 'push_notification_history';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -1202,6 +1315,54 @@ export type Database = {
           p_actor_id: string;
         };
         Returns: number;
+      };
+      pair_employee_device: {
+        Args: {
+          p_pairing_token: string;
+          p_laundry_employee_id: string;
+          p_laundry_employee_name_en: string;
+          p_laundry_employee_name_ar: string;
+          p_paired_by_admin_id: string;
+          p_replace_existing?: boolean;
+        };
+        Returns: {
+          id: string;
+          laundry_employee_id: string;
+          laundry_employee_name_en: string | null;
+          laundry_employee_name_ar: string | null;
+          onesignal_player_id: string;
+          device_label: string;
+          status: string;
+          paired_at: string;
+          last_seen_at: string;
+          paired_by_admin_id: string | null;
+          replaced_at: string | null;
+          removed_at: string | null;
+        }[];
+      };
+      sync_onesignal_subscription_rotation: {
+        Args: {
+          p_old_id: string | null;
+          p_new_id: string;
+          p_device_label?: string;
+          p_laundry_employee_id?: string | null;
+          p_admin_employee_id?: string | null;
+          p_primary_admin_device_id?: string | null;
+        };
+        Returns: Json;
+      };
+      notification_db_guardian_cleanup: {
+        Args: {
+          p_event_retention_days?: number;
+        };
+        Returns: Json;
+      };
+      mark_onesignal_subscription_invalid: {
+        Args: {
+          p_player_id: string;
+          p_reason?: string | null;
+        };
+        Returns: undefined;
       };
     };
     Enums: {

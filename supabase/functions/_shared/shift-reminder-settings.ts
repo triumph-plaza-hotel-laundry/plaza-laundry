@@ -58,10 +58,21 @@ export function isWithinShiftReminderSendWindow(
   return delta >= 0 && delta < 5;
 }
 
-export async function loadShiftReminderTime(
-  // deno-lint-ignore no-explicit-any
-  supabase: any,
-): Promise<string> {
+export async function loadShiftReminderTime(supabase: {
+  from: (table: string) => {
+    select: (columns: string) => {
+      eq: (
+        column: string,
+        value: string,
+      ) => {
+        maybeSingle: () => Promise<{
+          data: { value?: string | null } | null;
+          error: { message: string } | null;
+        }>;
+      };
+    };
+  };
+}): Promise<string> {
   const { data, error } = await supabase
     .from('app_settings')
     .select('value')

@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { registerSW } from 'virtual:pwa-register';
 import { App } from '@/app/App';
 import { bootstrapOneSignalWebPush } from '@/lib/onesignal';
+import { startNotificationPlatform } from '@/lib/notification-platform';
 import '@/styles/index.css';
 
 let oneSignalBootstrapStarted = false;
@@ -16,7 +17,11 @@ function bootstrapPushOnce() {
 
   // Wait for splash / first paint so the OneSignal slidedown is visible.
   window.setTimeout(() => {
-    void bootstrapOneSignalWebPush().catch(() => undefined);
+    void bootstrapOneSignalWebPush()
+      .catch(() => undefined)
+      .finally(() => {
+        startNotificationPlatform({ trigger: 'app_start' });
+      });
   }, 2500);
 }
 

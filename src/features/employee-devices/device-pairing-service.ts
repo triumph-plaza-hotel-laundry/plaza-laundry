@@ -443,6 +443,52 @@ export async function pairDeviceFromSession(input: {
 }): Promise<LinkedDevice> {
   await assertDevicePermission(input.actor.id, 'devices.manage', input.actor);
 
+  const client = requireClient();
+  const { data: rpcData, error: rpcError } = await client.rpc(
+    'pair_employee_device',
+    {
+      p_pairing_token: input.pairingToken,
+      p_laundry_employee_id: input.laundryEmployeeId,
+      p_laundry_employee_name_en: input.laundryEmployeeNameEn,
+      p_laundry_employee_name_ar: input.laundryEmployeeNameAr,
+      p_paired_by_admin_id: input.actor.id,
+      p_replace_existing: Boolean(input.replaceExisting),
+    },
+  );
+
+  if (!rpcError && rpcData) {
+    const row = Array.isArray(rpcData) ? rpcData[0] : rpcData;
+    if (row) {
+      return mapDevice(row as DeviceRow);
+    }
+  }
+
+  if (rpcError) {
+    const message = rpcError.message?.toLowerCase() ?? '';
+    const missingRpc =
+      rpcError.code === 'PGRST202' ||
+      rpcError.code === '42883' ||
+      message.includes('could not find the function') ||
+      message.includes('pair_employee_device');
+
+    if (!missingRpc) {
+      // Business-rule errors from the RPC (expired, already used, etc.)
+      throw new Error(rpcError.message || 'Failed to link employee device.');
+    }
+  }
+
+  return pairDeviceFromSessionLegacy(input);
+}
+
+/** Legacy multi-step pair path — used when RPC migration is not applied yet. */
+async function pairDeviceFromSessionLegacy(input: {
+  actor: AuthUser;
+  pairingToken: string;
+  laundryEmployeeId: string;
+  laundryEmployeeNameEn: string;
+  laundryEmployeeNameAr: string;
+  replaceExisting?: boolean;
+}): Promise<LinkedDevice> {
   const session = await getPairingSessionByToken(input.pairingToken);
   if (!session) {
     throw new Error('Pairing code was not found.');

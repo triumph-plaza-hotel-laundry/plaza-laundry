@@ -322,6 +322,9 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.dashboard.pushNotifications': 'Shift Push Notifications',
     'admin.dashboard.pushNotificationsDesc':
       'Automatic shift reminders and owner manual OneSignal broadcasts.',
+    'admin.dashboard.notificationDiagnostics': 'Notification Diagnostics',
+    'admin.dashboard.notificationDiagnosticsDesc':
+      'Self-healing platform health: OneSignal, workers, subscriptions, and recovery.',
     'admin.push.titleEn': 'Shift Push Notifications',
     'admin.push.titleAr': 'إشعارات الشفت',
     'admin.push.subtitle':
@@ -1576,6 +1579,9 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.dashboard.pushNotifications': 'إشعارات الشفت',
     'admin.dashboard.pushNotificationsDesc':
       'تذكيرات الشفت التلقائية وإرسال يدوي عبر OneSignal للمالك فقط.',
+    'admin.dashboard.notificationDiagnostics': 'تشخيص الإشعارات',
+    'admin.dashboard.notificationDiagnosticsDesc':
+      'صحة منصة الإصلاح الذاتي: OneSignal والعمال والاشتراكات والاستعادة.',
     'admin.push.titleEn': 'Shift Push Notifications',
     'admin.push.titleAr': 'إشعارات الشفت',
     'admin.push.subtitle':

@@ -10,6 +10,7 @@ import {
   writeLocalDeviceLink,
 } from '@/features/employee-devices/local-device-link';
 import { getCurrentOneSignalPlayerId } from '@/features/employee-devices/onesignal-pairing';
+import { subscribePlatformSync } from '@/lib/notification-platform';
 
 /**
  * Tracks whether THIS browser/PWA is currently linked to an employee.
@@ -70,6 +71,9 @@ export function useThisDeviceLinkStatus() {
 
   // When Admin removes/replaces the device, update nav without reinstall.
   useEffect(() => subscribeLinkedDevices(() => void refresh()), [refresh]);
+
+  // Platform live-sync (subscription rotation / cache heal) refreshes status.
+  useEffect(() => subscribePlatformSync(() => void refresh()), [refresh]);
 
   useEffect(() => {
     const onVisible = () => {

@@ -31,6 +31,7 @@ import {
   registerOneSignalForEmployee,
   unregisterOneSignalForEmployee,
 } from '@/lib/onesignal';
+import { runRecoveryPass } from '@/lib/notification-platform';
 import type {
   AuthSession,
   PermissionAction,
@@ -67,7 +68,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (shouldRegisterPush) {
       void registerOneSignalForEmployee(user.id, {
         laundryEmployeeId: user.laundryEmployeeId,
-      }).catch(() => undefined);
+      })
+        .catch(() => undefined)
+        .finally(() => {
+          void runRecoveryPass('session_change');
+        });
+    } else {
+      void runRecoveryPass('session_change');
     }
   }, [session?.user]);
 
