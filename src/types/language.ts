@@ -402,6 +402,8 @@ export type TranslationKey =
   | 'hotelAssets.statsDepartments'
   | 'hotelAssets.statsEmployees'
   | 'hotelAssets.statsReceipts'
+  | 'hotelAssets.saveTotalAssets'
+  | 'hotelAssets.totalAssetsSaved'
   | 'hotelAssets.statsLastActivity'
   | 'hotelAssets.statsNone'
   | 'hotelAssets.search'

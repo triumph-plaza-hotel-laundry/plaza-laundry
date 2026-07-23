@@ -77,6 +77,47 @@
   font-variant-numeric: tabular-nums;
 }
 
+.hotel-assets__stat-edit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.hotel-assets__stat-input {
+  width: 6.5rem;
+  min-width: 0;
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.55rem;
+  border: 1px solid var(--ha-border-strong);
+  background: rgb(255 255 255 / 6%);
+  color: var(--ha-gold);
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.hotel-assets__stat-input:focus {
+  outline: 2px solid rgb(214 183 110 / 45%);
+  outline-offset: 1px;
+}
+
+.hotel-assets__stat-save {
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.55rem;
+  border: 1px solid var(--ha-border-strong);
+  background: rgb(214 183 110 / 16%);
+  color: var(--ha-gold);
+  font-size: 0.78rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.hotel-assets__stat-save:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .hotel-assets__toolbar-bar {
   display: flex;
   flex-wrap: wrap;

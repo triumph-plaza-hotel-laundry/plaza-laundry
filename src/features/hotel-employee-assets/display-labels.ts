@@ -1,19 +1,46 @@
 /**
- * Display-only Arabic labels for Hotel Employee Assets.
- * Stored English names in the DB are never mutated.
+ * Display-only bilingual labels for Hotel Employee Assets.
+ * Stored English names / IDs in the DB are never mutated.
  */
 
+type DepartmentDisplay = {
+  ar: string;
+  en: string;
+};
+
+/** Explicit renames requested for Hotel Employee Assets. */
+const DEPARTMENT_DISPLAY: Record<string, DepartmentDisplay> = {
+  'Front Offices': { ar: 'المكاتب الأمامية', en: 'Front Office' },
+  'Front Office': { ar: 'المكاتب الأمامية', en: 'Front Office' },
+  'Personnel Affairs': { ar: 'شؤون العاملين', en: 'Human Resources' },
+  'Human Resources': { ar: 'شؤون العاملين', en: 'Human Resources' },
+  'Information Technology': {
+    ar: 'نظم المعلومات',
+    en: 'Information Technology',
+  },
+  IT: { ar: 'نظم المعلومات', en: 'Information Technology' },
+  Sales: { ar: 'المبيعات', en: 'Sales' },
+  'Sales & Marketing': { ar: 'المبيعات', en: 'Sales' },
+  'Sales & Purchasing': { ar: 'المبيعات', en: 'Sales' },
+  Laundry: { ar: 'المغسلة', en: 'Laundry' },
+  'Occupational Safety and Health': {
+    ar: 'السلامة والصحة المهنية',
+    en: 'Occupational Safety & Health',
+  },
+  'Occupational Safety and Health (OSH)': {
+    ar: 'السلامة والصحة المهنية',
+    en: 'Occupational Safety & Health',
+  },
+  'Occupational Safety & Health': {
+    ar: 'السلامة والصحة المهنية',
+    en: 'Occupational Safety & Health',
+  },
+};
+
+/** Fallback Arabic labels for departments without an explicit rename. */
 const DEPARTMENT_NAME_AR: Record<string, string> = {
-  'Front Offices': 'الاستقبال',
-  'Front Office': 'الاستقبال',
-  'Personnel Affairs': 'الموارد البشرية',
-  'Human Resources': 'الموارد البشرية',
-  'Information Technology': 'تقنية المعلومات',
-  IT: 'تقنية المعلومات',
   'Audio Engineering': 'الهندسة الصوتية',
   Engineering: 'الهندسة',
-  Sales: 'المبيعات والتسويق',
-  'Sales & Marketing': 'المبيعات والتسويق',
   'Public Relations': 'العلاقات العامة',
   'Drivers & Secretariat': 'السائقون والسكرتارية',
   Accounts: 'الحسابات',
@@ -21,13 +48,10 @@ const DEPARTMENT_NAME_AR: Record<string, string> = {
   Security: 'الأمن',
   Housekeeping: 'الإشراف الداخلي',
   Kitchen: 'المطبخ',
-  Laundry: 'المغسلة',
   Stewarding: 'الاستيوارد',
   Maintenance: 'الصيانة',
   Purchasing: 'المشتريات',
   Gym: 'الجيم',
-  'Occupational Safety and Health': 'السلامة والصحة المهنية',
-  'Occupational Safety and Health (OSH)': 'السلامة والصحة المهنية',
 };
 
 const ITEM_NAME_AR: Record<string, string> = {
@@ -71,7 +95,7 @@ const ITEM_NAME_AR: Record<string, string> = {
   'Tan Apron': 'مريلة بيج',
   "Men's HK Kit": 'طقم إشراف داخلي رجالي',
   "Women's HK Kit": 'طقم إشراف داخلي حريمي',
-  'Head Cover': 'غطاء ,رأس',
+  'Head Cover': 'غطاء رأس',
   'Black Coat': 'معطف أسود',
   'Navy Coat': 'معطف كحلي',
   "Men's Supervision Kit": 'طقم إشراف رجالي',
@@ -94,14 +118,22 @@ const ITEM_NAME_AR: Record<string, string> = {
   'Grey Sports Shorts': 'شورت رياضي رمادي',
 };
 
+/** Always bilingual: Arabic (English). UI language is ignored (kept for call-site compat). */
 export function displayAssetDepartmentName(
   name: string,
-  language: string,
+  _language?: string,
 ): string {
-  if (language !== 'ar') {
+  const mapped = DEPARTMENT_DISPLAY[name];
+  if (mapped) {
+    return `${mapped.ar} (${mapped.en})`;
+  }
+
+  const ar = DEPARTMENT_NAME_AR[name] ?? name;
+  const en = name;
+  if (ar === en) {
     return name;
   }
-  return DEPARTMENT_NAME_AR[name] ?? name;
+  return `${ar} (${en})`;
 }
 
 export function displayAssetItemName(name: string, language: string): string {

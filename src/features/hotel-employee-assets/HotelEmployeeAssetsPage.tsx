@@ -14,6 +14,9 @@ import {
   type AssetEmployee,
   type AssetReceipt,
 } from '@/features/hotel-employee-assets/types';
+import {
+  getHotelAssetsTotal,
+} from '@/data/repositories/app-settings-repository';
 import { getErrorMessage } from '@/lib/supabase/errors';
 import { useInventoryAuth, useLanguage } from '@/hooks';
 import '@/features/admin/admin-editor.css';
@@ -38,12 +41,16 @@ export function HotelEmployeeAssetsPage() {
   const [search, setSearch] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
-  const [receiptTotal, setReceiptTotal] = useState(0);
+  const [totalAssets, setTotalAssets] = useState(0);
   const [lastActivityAt, setLastActivityAt] = useState<string | null>(null);
 
   const loadAll = useCallback(async () => {
-    const nextDepartments = await listAssetDepartments();
+    const [nextDepartments, persistedTotal] = await Promise.all([
+      listAssetDepartments(),
+      getHotelAssetsTotal(),
+    ]);
     setDepartments(nextDepartments);
+    setTotalAssets(persistedTotal);
 
     const employeeGroups = await Promise.all(
       nextDepartments.map(async (department) => {
@@ -74,10 +81,8 @@ export function HotelEmployeeAssetsPage() {
     );
 
     const nextReceipts: Record<string, AssetReceipt[]> = {};
-    let count = 0;
     for (const [employeeId, list] of receiptGroups) {
       nextReceipts[employeeId] = list;
-      count += list.length;
       for (const receipt of list) {
         if (!latest || receipt.createdAt > latest) {
           latest = receipt.createdAt;
@@ -85,7 +90,6 @@ export function HotelEmployeeAssetsPage() {
       }
     }
     setReceiptsByEmployee(nextReceipts);
-    setReceiptTotal(count);
     setLastActivityAt(latest);
   }, []);
 
@@ -165,7 +169,7 @@ export function HotelEmployeeAssetsPage() {
         </article>
         <article className="hotel-assets__stat">
           <p className="hotel-assets__stat-label">{t('hotelAssets.statsReceipts')}</p>
-          <p className="hotel-assets__stat-value">{receiptTotal}</p>
+          <p className="hotel-assets__stat-value">{totalAssets}</p>
         </article>
         <article className="hotel-assets__stat">
           <p className="hotel-assets__stat-label">{t('hotelAssets.statsLastActivity')}</p>

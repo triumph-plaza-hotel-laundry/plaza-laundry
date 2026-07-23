@@ -1,6 +1,8 @@
 import { getSupabaseClient } from '@/lib/supabase/client';
 import {
+  DEFAULT_HOTEL_ASSETS_TOTAL,
   DEFAULT_SHIFT_REMINDER_TIME,
+  HOTEL_ASSETS_TOTAL_KEY,
   SHIFT_REMINDER_TIME_KEY,
 } from '@/lib/app-settings/constants';
 import {
@@ -79,4 +81,38 @@ export async function setShiftReminderTime(next: string): Promise<string> {
   return normalized;
 }
 
-export { resolveShiftReminderTime, SHIFT_REMINDER_TIME_KEY };
+function normalizeHotelAssetsTotal(raw: string | null | undefined): number {
+  if (raw == null || raw.trim() === '') {
+    return 0;
+  }
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return 0;
+  }
+  return Math.floor(parsed);
+}
+
+/** Manual Total Assets for Hotel Employee Assets (defaults to 0). */
+export async function getHotelAssetsTotal(): Promise<number> {
+  try {
+    const raw = await getAppSetting(HOTEL_ASSETS_TOTAL_KEY);
+    if (raw == null) {
+      return Number(DEFAULT_HOTEL_ASSETS_TOTAL);
+    }
+    return normalizeHotelAssetsTotal(raw);
+  } catch {
+    return Number(DEFAULT_HOTEL_ASSETS_TOTAL);
+  }
+}
+
+export async function setHotelAssetsTotal(next: number): Promise<number> {
+  const safe = Math.max(0, Math.floor(Number(next) || 0));
+  await setAppSetting(HOTEL_ASSETS_TOTAL_KEY, String(safe));
+  return safe;
+}
+
+export {
+  resolveShiftReminderTime,
+  SHIFT_REMINDER_TIME_KEY,
+  HOTEL_ASSETS_TOTAL_KEY,
+};

@@ -34,6 +34,10 @@ import {
   type AssetReceiptItemInput,
 } from '@/features/hotel-employee-assets/types';
 import { getErrorMessage } from '@/lib/supabase/errors';
+import {
+  getHotelAssetsTotal,
+  setHotelAssetsTotal,
+} from '@/data/repositories/app-settings-repository';
 import { useLanguage } from '@/hooks';
 import type { TranslationKey } from '@/types/language';
 import '@/features/admin/admin-editor.css';
@@ -78,7 +82,9 @@ export function AdminHotelEmployeeAssetsPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [ready, setReady] = useState(false);
-  const [receiptTotal, setReceiptTotal] = useState(0);
+  const [totalAssets, setTotalAssets] = useState(0);
+  const [totalAssetsDraft, setTotalAssetsDraft] = useState('0');
+  const [isSavingTotal, setIsSavingTotal] = useState(false);
   const [lastActivityAt, setLastActivityAt] = useState<string | null>(null);
 
   const itemOptions = useMemo(
@@ -101,7 +107,6 @@ export function AdminHotelEmployeeAssetsPage() {
     return {
       departments: departments.length,
       employees: allEmployees.length,
-      receipts: receiptTotal,
       lastActivity: lastActivityAt
         ? formatActivityDate(lastActivityAt, language)
         : t('hotelAssets.statsNone'),
@@ -111,17 +116,19 @@ export function AdminHotelEmployeeAssetsPage() {
     departments.length,
     language,
     lastActivityAt,
-    receiptTotal,
     t,
   ]);
 
   const refreshBase = useCallback(async () => {
-    const [nextDepartments, nextItems] = await Promise.all([
+    const [nextDepartments, nextItems, persistedTotal] = await Promise.all([
       listAssetDepartments(),
       listAssetItems(),
+      getHotelAssetsTotal(),
     ]);
     setDepartments(nextDepartments);
     setItems(nextItems);
+    setTotalAssets(persistedTotal);
+    setTotalAssetsDraft(String(persistedTotal));
 
     const employeeGroups = await Promise.all(
       nextDepartments.map(async (department) => {
@@ -152,10 +159,8 @@ export function AdminHotelEmployeeAssetsPage() {
     );
 
     const nextReceipts: Record<string, AssetReceipt[]> = {};
-    let receiptCount = 0;
     for (const [employeeId, list] of receiptGroups) {
       nextReceipts[employeeId] = list;
-      receiptCount += list.length;
       for (const receipt of list) {
         if (!latest || receipt.createdAt > latest) {
           latest = receipt.createdAt;
@@ -163,7 +168,6 @@ export function AdminHotelEmployeeAssetsPage() {
       }
     }
     setReceiptsByEmployee(nextReceipts);
-    setReceiptTotal(receiptCount);
     setLastActivityAt(latest);
   }, []);
 
@@ -190,6 +194,21 @@ export function AdminHotelEmployeeAssetsPage() {
       }
     })();
   }, [refreshBase, t]);
+
+  const saveTotalAssets = async () => {
+    setIsSavingTotal(true);
+    setError(null);
+    try {
+      const saved = await setHotelAssetsTotal(Number(totalAssetsDraft));
+      setTotalAssets(saved);
+      setTotalAssetsDraft(String(saved));
+      setMessage(t('hotelAssets.totalAssetsSaved'));
+    } catch (caught) {
+      setError(getErrorMessage(caught, t('hotelAssets.saveFailed')));
+    } finally {
+      setIsSavingTotal(false);
+    }
+  };
 
   const query = search.trim().toLowerCase();
 
@@ -434,7 +453,29 @@ export function AdminHotelEmployeeAssetsPage() {
         </article>
         <article className="hotel-assets__stat">
           <p className="hotel-assets__stat-label">{t('hotelAssets.statsReceipts')}</p>
-          <p className="hotel-assets__stat-value">{stats.receipts}</p>
+          <div className="hotel-assets__stat-edit">
+            <input
+              aria-label={t('hotelAssets.statsReceipts')}
+              className="hotel-assets__stat-input"
+              inputMode="numeric"
+              min={0}
+              onChange={(event) => setTotalAssetsDraft(event.target.value)}
+              step={1}
+              type="number"
+              value={totalAssetsDraft}
+            />
+            <button
+              className="hotel-assets__stat-save"
+              disabled={
+                isSavingTotal ||
+                String(totalAssets) === String(Number(totalAssetsDraft) || 0)
+              }
+              onClick={() => void saveTotalAssets()}
+              type="button"
+            >
+              {t('hotelAssets.saveTotalAssets')}
+            </button>
+          </div>
         </article>
         <article className="hotel-assets__stat">
           <p className="hotel-assets__stat-label">{t('hotelAssets.statsLastActivity')}</p>
