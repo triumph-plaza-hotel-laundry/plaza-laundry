@@ -441,7 +441,22 @@ export async function pairDeviceFromSession(input: {
   laundryEmployeeNameAr: string;
   replaceExisting?: boolean;
 }): Promise<LinkedDevice> {
+  const log = (step: string, detail?: unknown) => {
+    if (detail !== undefined) {
+      console.info(`[device-pairing] ▶ ${step}`, detail);
+      return;
+    }
+    console.info(`[device-pairing] ▶ ${step}`);
+  };
+
+  log('pair start', {
+    laundryEmployeeId: input.laundryEmployeeId,
+    replaceExisting: Boolean(input.replaceExisting),
+    tokenPrefix: `${input.pairingToken.slice(0, 12)}…`,
+  });
+
   await assertDevicePermission(input.actor.id, 'devices.manage', input.actor);
+  log('permission OK', { actorId: input.actor.id });
 
   const client = requireClient();
   const { data: rpcData, error: rpcError } = await client.rpc(
@@ -456,28 +471,66 @@ export async function pairDeviceFromSession(input: {
     },
   );
 
-  if (!rpcError && rpcData) {
-    const row = Array.isArray(rpcData) ? rpcData[0] : rpcData;
-    if (row) {
-      return mapDevice(row as DeviceRow);
-    }
-  }
-
   if (rpcError) {
+    log('RPC error', { code: rpcError.code, message: rpcError.message });
     const message = rpcError.message?.toLowerCase() ?? '';
     const missingRpc =
       rpcError.code === 'PGRST202' ||
       rpcError.code === '42883' ||
       message.includes('could not find the function') ||
-      message.includes('pair_employee_device');
+      message.includes('pair_employee_device(text');
 
     if (!missingRpc) {
-      // Business-rule errors from the RPC (expired, already used, etc.)
       throw new Error(rpcError.message || 'Failed to link employee device.');
     }
+
+    log('RPC missing — falling back to legacy multi-step pair');
+  } else {
+    const row = Array.isArray(rpcData) ? rpcData[0] : rpcData;
+    log('RPC response', {
+      isArray: Array.isArray(rpcData),
+      rowCount: Array.isArray(rpcData) ? rpcData.length : row ? 1 : 0,
+      deviceId: row && typeof row === 'object' && 'id' in row ? row.id : null,
+      playerId:
+        row && typeof row === 'object' && 'onesignal_player_id' in row
+          ? row.onesignal_player_id
+          : null,
+    });
+
+    if (row && typeof row === 'object' && 'id' in row && row.id) {
+      const linked = mapDevice(row as DeviceRow);
+      log('pair complete via RPC', {
+        deviceId: linked.id,
+        playerId: linked.onesignalPlayerId,
+        employeeId: linked.laundryEmployeeId,
+      });
+      return linked;
+    }
+
+    // RPC reported success but returned no row — verify DB before legacy.
+    const session = await getPairingSessionByToken(input.pairingToken);
+    log('RPC empty row — session check', {
+      status: session?.status ?? null,
+      playerId: session?.onesignalPlayerId ?? null,
+    });
+    if (session?.status === 'completed' && session.onesignalPlayerId) {
+      const active = await getActiveLinkedDeviceByPlayerId(
+        session.onesignalPlayerId,
+      );
+      if (active) {
+        log('pair complete via post-RPC verify', { deviceId: active.id });
+        return active;
+      }
+    }
+    log('RPC did not persist link — falling back to legacy');
   }
 
-  return pairDeviceFromSessionLegacy(input);
+  const legacy = await pairDeviceFromSessionLegacy(input);
+  log('pair complete via legacy', {
+    deviceId: legacy.id,
+    playerId: legacy.onesignalPlayerId,
+  });
+  return legacy;
 }
 
 /** Legacy multi-step pair path — used when RPC migration is not applied yet. */

@@ -5,6 +5,7 @@ import {
   cancelPendingPairingSessionsForPlayer,
   encodePairingPayload,
   ensureFreshPairingSession,
+  getActiveLinkedDeviceByPlayerId,
   getPairingSessionByToken,
   subscribePairingSession,
 } from '@/features/employee-devices/device-pairing-service';
@@ -152,6 +153,26 @@ export function EmployeeDevicePairingPage() {
               handleSuccess(next);
             }
           });
+
+          // Session realtime can lag; also succeed when the linked-device row appears.
+          void getActiveLinkedDeviceByPlayerId(prepared.onesignalPlayerId).then(
+            (device) => {
+              if (!device || successHandled.current) {
+                return;
+              }
+              console.info('[device-pairing] ▶ linked device detected via poll', {
+                deviceId: device.id,
+                employeeId: device.laundryEmployeeId,
+              });
+              handleSuccess({
+                id: session.id,
+                status: 'completed',
+                onesignalPlayerId: device.onesignalPlayerId,
+                laundryEmployeeId: device.laundryEmployeeId,
+                completedAt: device.pairedAt,
+              });
+            },
+          );
         }, 2500);
       } catch (caught) {
         if (cancelled) {

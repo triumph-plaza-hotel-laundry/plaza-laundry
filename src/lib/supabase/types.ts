@@ -1338,7 +1338,7 @@ export type Database = {
           paired_by_admin_id: string | null;
           replaced_at: string | null;
           removed_at: string | null;
-        }[];
+        };
       };
       sync_onesignal_subscription_rotation: {
         Args: {

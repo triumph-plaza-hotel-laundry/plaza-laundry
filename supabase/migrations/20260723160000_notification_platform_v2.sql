@@ -142,10 +142,10 @@ BEGIN
     RAISE EXCEPTION 'Pairing code was not found.';
   END IF;
 
-  SELECT * INTO v_session
-  FROM employee_device_pairing_sessions
-  WHERE pairing_token = trim(p_pairing_token)
-  FOR UPDATE;
+  SELECT s.* INTO v_session
+  FROM employee_device_pairing_sessions AS s
+  WHERE s.pairing_token = trim(p_pairing_token)
+  FOR UPDATE OF s;
 
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Pairing code was not found.';
@@ -160,17 +160,17 @@ BEGIN
   END IF;
 
   IF v_session.expires_at < v_now THEN
-    UPDATE employee_device_pairing_sessions
+    UPDATE employee_device_pairing_sessions AS s
     SET status = 'expired'
-    WHERE id = v_session.id;
+    WHERE s.id = v_session.id;
     RAISE EXCEPTION 'This pairing code has expired.';
   END IF;
 
-  SELECT count(*) INTO v_active_count
-  FROM employee_linked_devices
-  WHERE laundry_employee_id = p_laundry_employee_id
-    AND status = 'active'
-    AND onesignal_player_id <> v_session.onesignal_player_id;
+  SELECT count(*)::integer INTO v_active_count
+  FROM employee_linked_devices AS d
+  WHERE d.laundry_employee_id = p_laundry_employee_id
+    AND d.status = 'active'
+    AND d.onesignal_player_id <> v_session.onesignal_player_id;
 
   IF v_active_count > 0 AND NOT COALESCE(p_replace_existing, false) THEN
     RAISE EXCEPTION 'This employee already has a linked device. Choose replace to continue.';
@@ -179,33 +179,32 @@ BEGIN
   IF COALESCE(p_replace_existing, false) THEN
     FOR v_old_player IN
       SELECT d.onesignal_player_id
-      FROM employee_linked_devices d
+      FROM employee_linked_devices AS d
       WHERE d.laundry_employee_id = p_laundry_employee_id
         AND d.status = 'active'
         AND d.onesignal_player_id <> v_session.onesignal_player_id
     LOOP
-      UPDATE employee_linked_devices
+      UPDATE employee_linked_devices AS d
       SET status = 'replaced',
           replaced_at = v_now,
           updated_at = v_now
-      WHERE laundry_employee_id = p_laundry_employee_id
-        AND onesignal_player_id = v_old_player
-        AND status = 'active';
+      WHERE d.laundry_employee_id = p_laundry_employee_id
+        AND d.onesignal_player_id = v_old_player
+        AND d.status = 'active';
 
-      DELETE FROM onesignal_subscriptions
-      WHERE onesignal_player_id = v_old_player;
+      DELETE FROM onesignal_subscriptions AS sub
+      WHERE sub.onesignal_player_id = v_old_player;
     END LOOP;
   END IF;
 
-  -- Drop previous active link on this exact player id.
-  UPDATE employee_linked_devices
+  UPDATE employee_linked_devices AS d
   SET status = 'replaced',
       replaced_at = v_now,
       updated_at = v_now
-  WHERE onesignal_player_id = v_session.onesignal_player_id
-    AND status = 'active';
+  WHERE d.onesignal_player_id = v_session.onesignal_player_id
+    AND d.status = 'active';
 
-  INSERT INTO employee_linked_devices (
+  INSERT INTO employee_linked_devices AS d (
     laundry_employee_id,
     laundry_employee_name_en,
     laundry_employee_name_ar,
@@ -251,25 +250,33 @@ BEGIN
       updated_at = EXCLUDED.updated_at,
       last_synced_at = EXCLUDED.last_synced_at,
       subscription_status = 'active'
-  RETURNING * INTO v_device;
+  RETURNING d.* INTO v_device;
 
-  UPDATE employee_device_pairing_sessions
+  IF v_device.id IS NULL THEN
+    RAISE EXCEPTION 'Failed to link employee device.';
+  END IF;
+
+  UPDATE employee_device_pairing_sessions AS s
   SET status = 'completed',
       laundry_employee_id = p_laundry_employee_id,
       laundry_employee_name_en = p_laundry_employee_name_en,
       laundry_employee_name_ar = p_laundry_employee_name_ar,
       paired_by_admin_id = p_paired_by_admin_id,
       completed_at = v_now
-  WHERE id = v_session.id
-    AND status = 'pending';
+  WHERE s.id = v_session.id
+    AND s.status = 'pending';
 
-  UPDATE employee_device_pairing_sessions
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Failed to complete pairing session.';
+  END IF;
+
+  UPDATE employee_device_pairing_sessions AS s
   SET status = 'cancelled'
-  WHERE onesignal_player_id = v_session.onesignal_player_id
-    AND status = 'pending'
-    AND id <> v_session.id;
+  WHERE s.onesignal_player_id = v_session.onesignal_player_id
+    AND s.status = 'pending'
+    AND s.id <> v_session.id;
 
-  INSERT INTO onesignal_subscriptions (
+  INSERT INTO onesignal_subscriptions AS sub (
     employee_id,
     onesignal_player_id,
     device,
@@ -303,7 +310,7 @@ BEGIN
     v_device.laundry_employee_name_ar,
     v_device.onesignal_player_id,
     v_device.device_label,
-    v_device.status,
+    v_device.status::text,
     v_device.paired_at,
     v_device.last_seen_at,
     v_device.paired_by_admin_id,
