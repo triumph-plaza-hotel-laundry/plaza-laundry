@@ -172,17 +172,17 @@ export function formatShiftReminderNotification(assignment: TomorrowShiftAssignm
   const dayNameAr = ARABIC_WEEKDAY_NAMES[assignment.weekDayId];
   const dateLabelAr = formatArabicDateLabel(assignment.targetDateKey);
 
-  const title = '📅 تذكير بشفت الغد';
+  const title = 'تذكير بشفت الغد';
   const body = [
-    `مرحبًا ${employeeName} 👋`,
+    `مرحباً ${employeeName}`,
     '',
-    'نود تذكيرك بأن لديك شفت غدًا.',
+    'نود تذكيرك بأن لديك شفت غداً.',
     '',
-    `📅 ${dayNameAr} ${dateLabelAr}`,
+    `${dayNameAr} ${dateLabelAr}`,
     '',
-    `🕒 ${shiftLabelAr}`,
+    shiftLabelAr,
     '',
-    'نتمنى لك يومًا موفقًا.',
+    'نتمنى لك يوماً موفقاً.',
     '',
     'Triumph Plaza Laundry Team',
   ].join('\n');

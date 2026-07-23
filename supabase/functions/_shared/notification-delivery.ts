@@ -15,6 +15,11 @@ export type DeliveryAttemptResult = {
   responseBody: Record<string, unknown> | null;
   invalidPlayerIds: string[];
   attemptNumber: number;
+  /** From OneSignal View Message — actual browser delivery counters. */
+  successful: number | null;
+  failed: number | null;
+  errored: number | null;
+  converted: number | null;
 };
 
 export type SmartDeliveryResult = {
@@ -138,6 +143,67 @@ function summarizeError(
   return null;
 }
 
+async function viewNotificationOutcome(
+  appId: string,
+  restKey: string,
+  notificationId: string,
+): Promise<{
+  successful: number | null;
+  failed: number | null;
+  errored: number | null;
+  converted: number | null;
+  raw: Record<string, unknown> | null;
+}> {
+  const url = `${ONESIGNAL_NOTIFICATIONS_URL}/${notificationId}?app_id=${encodeURIComponent(appId)}`;
+  console.log('[onesignal-delivery] viewing notification outcome', {
+    notificationId,
+    url: url.replace(appId, 'APP_ID'),
+  });
+
+  try {
+    // Give OneSignal a moment to finalize platform delivery counters.
+    await sleep(1_200);
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Key ${restKey}`,
+        Accept: 'application/json',
+      },
+    });
+    const rawText = await response.text();
+    console.log('[onesignal-delivery] view notification response', {
+      httpStatus: response.status,
+      rawPreview: rawText.slice(0, 800),
+    });
+    let parsed: unknown = null;
+    try {
+      parsed = rawText ? JSON.parse(rawText) : null;
+    } catch {
+      parsed = null;
+    }
+    const body = asRecord(parsed);
+    const num = (value: unknown): number | null =>
+      typeof value === 'number' && Number.isFinite(value) ? value : null;
+
+    return {
+      successful: num(body?.successful),
+      failed: num(body?.failed),
+      errored: num(body?.errored),
+      converted: num(body?.converted),
+      raw: body,
+    };
+  } catch (error) {
+    console.error('[onesignal-delivery] view notification catch', error);
+    return {
+      successful: null,
+      failed: null,
+      errored: null,
+      converted: null,
+      raw: null,
+    };
+  }
+}
+
 async function sendOnce(
   appId: string,
   restKey: string,
@@ -171,10 +237,13 @@ async function sendOnce(
     authScheme: 'Key',
     subscriptionId,
     idempotencyKey: key,
+    title,
+    bodyPreview: body.slice(0, 160),
     titleLen: title.length,
     bodyLen: body.length,
     targeting: 'include_subscription_ids',
     target_channel: 'push',
+    fullPayload: payload,
   });
 
   let response: Response;
@@ -220,7 +289,37 @@ async function sendOnce(
         : Number(recipientsRaw);
 
   const onesignalNotificationId =
-    typeof responseBody?.id === 'string' ? responseBody.id : null;
+    typeof responseBody?.id === 'string' && responseBody.id.trim()
+      ? responseBody.id.trim()
+      : null;
+
+  let successful: number | null = null;
+  let failedCount: number | null = null;
+  let errored: number | null = null;
+  let converted: number | null = null;
+
+  if (response.ok && onesignalNotificationId) {
+    const outcome = await viewNotificationOutcome(
+      appId,
+      restKey,
+      onesignalNotificationId,
+    );
+    successful = outcome.successful;
+    failedCount = outcome.failed;
+    errored = outcome.errored;
+    converted = outcome.converted;
+    if (outcome.raw) {
+      responseBody.view = outcome.raw;
+    }
+    console.log('[onesignal-delivery] delivery counters', {
+      notificationId: onesignalNotificationId,
+      subscriptionId,
+      successful,
+      failed: failedCount,
+      errored,
+      converted,
+    });
+  }
 
   const invalidPlayerIds = extractInvalidIds(responseBody);
   if (
@@ -235,25 +334,47 @@ async function sendOnce(
     invalidPlayerIds.push(subscriptionId);
   }
 
+  // Create Message can return an id even when the subscription cannot receive
+  // web push (View Message then shows successful=0 and failed/errored > 0).
+  if (
+    response.ok &&
+    onesignalNotificationId &&
+    successful === 0 &&
+    ((failedCount ?? 0) > 0 || (errored ?? 0) > 0) &&
+    !invalidPlayerIds.includes(subscriptionId)
+  ) {
+    console.warn(
+      '[onesignal-delivery] notification id accepted but View Message shows zero successful deliveries',
+      { subscriptionId, successful, failedCount, errored },
+    );
+    invalidPlayerIds.push(subscriptionId);
+  }
+
   const errorMessage = summarizeError(response.status, responseBody, rawText);
 
-  // OneSignal Create Message v2 often returns { id, external_id } with no
-  // recipients field. Treat notification id + HTTP ok as success unless
-  // recipients is explicitly 0 or the subscription is listed invalid.
   const hasPositiveRecipients =
     typeof recipients === 'number' && Number.isFinite(recipients) && recipients > 0;
+  const hasPositiveSuccessful =
+    typeof successful === 'number' && Number.isFinite(successful) && successful > 0;
   const hasNotificationId = Boolean(onesignalNotificationId);
+  const viewSaysFailed =
+    successful === 0 && ((failedCount ?? 0) > 0 || (errored ?? 0) > 0);
+
   const ok =
     response.ok &&
     recipients !== 0 &&
+    !viewSaysFailed &&
     !invalidPlayerIds.includes(subscriptionId) &&
-    (hasNotificationId || hasPositiveRecipients);
+    (hasPositiveSuccessful || hasPositiveRecipients || (hasNotificationId && successful == null));
 
   console.log('[onesignal-delivery] attempt result', {
     attemptNumber,
     ok,
     httpStatus: response.status,
     recipients,
+    successful,
+    failed: failedCount,
+    errored,
     onesignalNotificationId,
     invalidPlayerIds,
     errorMessage: ok ? null : errorMessage,
@@ -264,10 +385,19 @@ async function sendOnce(
     httpStatus: response.status,
     recipients: Number.isFinite(recipients as number) ? (recipients as number) : null,
     onesignalNotificationId,
-    errorMessage: ok ? null : errorMessage || 'Delivery failed',
+    errorMessage: ok
+      ? null
+      : errorMessage ||
+        (viewSaysFailed
+          ? `OneSignal accepted id but delivered to 0 devices (failed=${failedCount}, errored=${errored})`
+          : 'Delivery failed'),
     responseBody,
     invalidPlayerIds,
     attemptNumber,
+    successful,
+    failed: failedCount,
+    errored,
+    converted,
   };
 }
 
@@ -310,6 +440,10 @@ export async function sendToSubscriptionId(options: {
       responseBody: null,
       invalidPlayerIds: [],
       attemptNumber: 1,
+      successful: null,
+      failed: null,
+      errored: null,
+      converted: null,
     };
     console.error('[onesignal-delivery] abort — empty subscription_id');
     return {
@@ -330,6 +464,10 @@ export async function sendToSubscriptionId(options: {
       responseBody: null,
       invalidPlayerIds: [],
       attemptNumber: 1,
+      successful: null,
+      failed: null,
+      errored: null,
+      converted: null,
     };
     console.error('[onesignal-delivery] abort — missing app id or rest key');
     return {
@@ -367,6 +505,10 @@ export async function sendToSubscriptionId(options: {
         responseBody: null,
         invalidPlayerIds: [],
         attemptNumber: attempt,
+        successful: null,
+        failed: null,
+        errored: null,
+        converted: null,
       };
     }
 

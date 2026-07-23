@@ -286,17 +286,17 @@ export function formatShiftReminderNotification(
   const dateLabelAr = formatArabicDateLabel(assignment.targetDateKey);
 
   return {
-    title: '📅 تذكير بشفت الغد',
+    title: 'تذكير بشفت الغد',
     body: [
-      `مرحبًا ${employeeName} 👋`,
+      `مرحباً ${employeeName}`,
       '',
-      'نود تذكيرك بأن لديك شفت غدًا.',
+      'نود تذكيرك بأن لديك شفت غداً.',
       '',
-      `📅 ${dayNameAr} ${dateLabelAr}`,
+      `${dayNameAr} ${dateLabelAr}`,
       '',
-      `🕒 ${shiftLabelAr}`,
+      shiftLabelAr,
       '',
-      'نتمنى لك يومًا موفقًا.',
+      'نتمنى لك يوماً موفقاً.',
       '',
       'Triumph Plaza Laundry Team',
     ].join('\n'),

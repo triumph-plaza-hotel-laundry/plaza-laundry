@@ -1078,7 +1078,7 @@ Deno.serve(async (request) => {
         role: assignment.role,
         targetDateKey: assignment.targetDateKey,
         usingCustomCopy: Boolean(custom),
-        title: (custom?.title ?? 'template:📅 تذكير بشفت الغد').slice(0, 40),
+        title: (custom?.title ?? 'template:تذكير بشفت الغد').slice(0, 40),
       });
 
       const result = await deliverAssignment(
