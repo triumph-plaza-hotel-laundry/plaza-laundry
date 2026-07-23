@@ -135,7 +135,6 @@ export function AdminOwnerPushPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<
     null | 'selected' | 'all' | string
   >(null);
-  const [autoEnabledUi, setAutoEnabledUi] = useState(true);
   const [reminderTime, setReminderTime] = useState(DEFAULT_SHIFT_REMINDER_TIME);
   const [draftReminderTime, setDraftReminderTime] = useState(
     DEFAULT_SHIFT_REMINDER_TIME,
@@ -585,11 +584,7 @@ export function AdminOwnerPushPage() {
           <div className="ap-meta">
             <div className="ap-meta__row">
               <span>الحالة</span>
-              {autoEnabledUi ? (
-                <span className="ap-badge ap-badge--ok">نشط</span>
-              ) : (
-                <span className="ap-badge ap-badge--off">متوقف (واجهة)</span>
-              )}
+              <span className="ap-badge ap-badge--ok">جدولة الخادم</span>
             </div>
             <div className="ap-meta__row">
               <span>وقت الإرسال</span>
@@ -609,14 +604,11 @@ export function AdminOwnerPushPage() {
           <div className="ap-actions">
             <button
               className="ap-btn"
-              onClick={() => {
-                setAutoEnabledUi((value) => !value);
-                openScheduleDialog();
-              }}
+              onClick={openScheduleDialog}
               type="button"
             >
               <Power className="ap-icon" size={22} strokeWidth={1.75} />
-              {autoEnabledUi ? 'إيقاف' : 'تشغيل'}
+              إعداد الجدولة
             </button>
             <button
               className="ap-btn"
@@ -990,8 +982,10 @@ export function AdminOwnerPushPage() {
                 />
               </label>
               <p className="ap-dialog__schedule-note">
-                يتم حفظ الوقت في Supabase ويُطبَّق تلقائيًا على جدولة إشعارات
-                شفت الغد دون تعديل الكود.
+                يتم حفظ الوقت في Supabase. الإرسال التلقائي يعتمد على جدولة
+                الخادم (pg_cron) التي تستدعي Edge Function كل دقيقة، ثم ترسل فقط
+                داخل نافذة الخمس دقائق من الوقت المحفوظ بتوقيت القاهرة. زر التشغيل
+                في الواجهة لا يشغّل مؤقّتًا في المتصفح.
               </p>
               {scheduleError ? (
                 <p className="ap-alert ap-alert--error" role="alert">
