@@ -1099,16 +1099,19 @@ export type Database = {
           id: string;
           name: string;
           created_at: string;
+          is_active: boolean;
         };
         Insert: {
           id?: string;
           name: string;
           created_at?: string;
+          is_active?: boolean;
         };
         Update: {
           id?: string;
           name?: string;
           created_at?: string;
+          is_active?: boolean;
         };
         Relationships: [];
       };

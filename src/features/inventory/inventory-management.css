@@ -152,6 +152,8 @@
 }
 
 .inv-management-page .inv-warehouse__search {
+  position: relative;
+  z-index: 6;
   display: flex;
   flex-direction: column;
   gap: 0.875rem;
@@ -760,7 +762,9 @@ html[dir='rtl']
   max-height: min(16rem, 42vh);
   margin: 0;
   padding: 0.35rem 0;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   list-style: none;
   border: 1px solid var(--inv-gold);
   border-top: 1px solid rgb(201 164 92 / 28%);
@@ -768,44 +772,98 @@ html[dir='rtl']
   background: linear-gradient(180deg, #0a0a0a, #050505);
   box-shadow: 0 16px 36px rgb(0 0 0 / 42%);
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .inv-combobox__list.inv-combobox__list--portal {
   position: fixed;
-  z-index: 10000;
+  z-index: 40;
   top: auto;
   right: auto;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0.35rem 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  border: 1px solid #c9a45c;
+  border-top: 1px solid rgb(201 164 92 / 28%);
   border-radius: 0 0 0.5rem 0.5rem;
+  background: linear-gradient(180deg, #0a0a0a, #050505);
+  box-shadow: 0 16px 36px rgb(0 0 0 / 42%);
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
-.inv-management-page .inv-combobox__option {
+.inv-combobox__list.inv-combobox__list--portal.inv-combobox__list--above {
+  border-radius: 0.5rem 0.5rem 0 0;
+  border-top: 1px solid var(--inv-gold);
+  border-bottom: 1px solid rgb(201 164 92 / 28%);
+  box-shadow: 0 -14px 32px rgb(0 0 0 / 42%);
+}
+
+.inv-management-page .inv-combobox__option,
+.inv-combobox__list--portal .inv-combobox__option {
   padding: 0.625rem 0.875rem;
-  color: var(--inv-text);
+  overflow: hidden;
+  color: var(--inv-text, #f5f0e6);
   cursor: pointer;
   font-size: 0.875rem;
   line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   transition:
     background 120ms ease,
     color 120ms ease;
 }
 
 .inv-management-page .inv-combobox__option--active,
-.inv-management-page .inv-combobox__option:hover {
+.inv-management-page .inv-combobox__option:hover,
+.inv-combobox__list--portal .inv-combobox__option--active,
+.inv-combobox__list--portal .inv-combobox__option:hover {
   background: rgb(201 164 92 / 14%);
-  color: var(--inv-gold-soft);
+  color: var(--inv-gold-soft, #e2c88a);
 }
 
-.inv-management-page .inv-combobox__option--clear {
-  border-bottom: 1px solid rgb(201 164 92 / 16%);
-  color: var(--inv-gold);
+.inv-management-page .inv-combobox__option--selected,
+.inv-combobox__list--portal .inv-combobox__option--selected {
+  color: var(--inv-gold, #c9a45c);
   font-weight: 600;
 }
 
-.inv-management-page .inv-combobox__empty {
+.inv-management-page .inv-combobox__option--selected:not(
+    .inv-combobox__option--active
+  ),
+.inv-combobox__list--portal
+  .inv-combobox__option--selected:not(.inv-combobox__option--active) {
+  background: rgb(201 164 92 / 8%);
+}
+
+.inv-management-page .inv-combobox__option--clear,
+.inv-combobox__list--portal .inv-combobox__option--clear {
+  border-bottom: 1px solid rgb(201 164 92 / 16%);
+  color: var(--inv-gold, #c9a45c);
+  font-weight: 600;
+}
+
+.inv-management-page .inv-combobox__mark,
+.inv-combobox__list--portal .inv-combobox__mark {
+  padding: 0.05em 0.12em;
+  border-radius: 0.15rem;
+  background: rgb(201 164 92 / 28%);
+  color: var(--inv-gold-soft, #e2c88a);
+  font: inherit;
+}
+
+.inv-management-page .inv-combobox__empty,
+.inv-combobox__list--portal .inv-combobox__empty {
   padding: 0.875rem;
-  color: var(--inv-muted);
+  color: var(--inv-muted, rgb(245 240 230 / 62%));
   font-size: 0.8125rem;
+  line-height: 1.4;
   text-align: center;
+  white-space: normal;
 }
 
 html[dir='rtl'] .inv-management-page .inv-combobox__toggle {
@@ -1156,6 +1214,31 @@ html[dir='rtl']
 }
 
 @media (max-width: 639px) {
+  .inv-management-page .inv-warehouse__search {
+    z-index: 8;
+    gap: 0.75rem;
+    padding: 0.875rem 0.875rem 0.75rem;
+  }
+
+  .inv-management-page .inv-combobox {
+    min-width: 0;
+  }
+
+  .inv-management-page .inv-combobox__input {
+    font-size: 1rem;
+  }
+
+  .inv-combobox__list.inv-combobox__list--portal {
+    z-index: 45;
+    max-width: calc(100vw - 1rem);
+  }
+
+  .inv-management-page .inv-combobox__option,
+  .inv-combobox__list--portal .inv-combobox__option {
+    padding: 0.6875rem 0.8125rem;
+    font-size: 0.9375rem;
+  }
+
   .inv-management-page .inv-table-wrap--erp {
     max-height: min(28rem, 58vh);
   }

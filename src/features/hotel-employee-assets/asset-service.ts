@@ -51,8 +51,18 @@ function mapDepartment(row: {
   };
 }
 
-function mapItem(row: { id: string; name: string; created_at: string }): AssetItem {
-  return { id: row.id, name: row.name, createdAt: row.created_at };
+function mapItem(row: {
+  id: string;
+  name: string;
+  created_at: string;
+  is_active?: boolean;
+}): AssetItem {
+  return {
+    id: row.id,
+    name: row.name,
+    createdAt: row.created_at,
+    isActive: row.is_active ?? true,
+  };
 }
 
 function mapEmployee(row: {
@@ -86,11 +96,13 @@ export async function listAssetDepartments(): Promise<AssetDepartment[]> {
   return (data ?? []).map(mapDepartment);
 }
 
+/** Active catalog items only — used for future receipt selection lists. */
 export async function listAssetItems(): Promise<AssetItem[]> {
   const client = requireClient();
   const { data, error } = await client
     .from(ITEMS)
-    .select('id, name, created_at')
+    .select('id, name, created_at, is_active')
+    .eq('is_active', true)
     .order('name', { ascending: true });
 
   if (error) {
@@ -99,6 +111,21 @@ export async function listAssetItems(): Promise<AssetItem[]> {
   }
 
   return (data ?? []).map(mapItem);
+}
+
+/** All catalog rows including retired items (for receipt history name lookup). */
+async function listAllAssetItemNames(): Promise<Map<string, string>> {
+  const client = requireClient();
+  const { data, error } = await client.from(ITEMS).select('id, name');
+
+  if (error) {
+    missingTable(error, ITEMS);
+    throw toServiceError(error, 'Unable to load asset items.');
+  }
+
+  return new Map(
+    (data ?? []).map((row) => [row.id as string, row.name as string]),
+  );
 }
 
 export async function listAssetEmployeesByDepartment(
@@ -184,20 +211,18 @@ async function listReceiptItemsForReceipts(
   }
 
   const client = requireClient();
-  const [{ data, error }, items] = await Promise.all([
+  const [{ data, error }, itemNameById] = await Promise.all([
     client
       .from(RECEIPT_ITEMS)
       .select('id, receipt_id, item_id, quantity')
       .in('receipt_id', receiptIds),
-    listAssetItems(),
+    listAllAssetItemNames(),
   ]);
 
   if (error) {
     missingTable(error, RECEIPT_ITEMS);
     throw toServiceError(error, 'Unable to load receipt items.');
   }
-
-  const itemNameById = new Map(items.map((item) => [item.id, item.name]));
 
   for (const row of data ?? []) {
     const item: AssetReceiptItem = {

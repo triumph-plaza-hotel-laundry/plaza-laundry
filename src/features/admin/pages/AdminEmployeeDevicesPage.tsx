@@ -34,7 +34,6 @@ export function AdminEmployeeDevicesPage() {
   const { employees } = useEmployees();
 
   const [devices, setDevices] = useState<LinkedDevice[]>([]);
-  const [devicesReady, setDevicesReady] = useState(false);
   const [employeesSectionOpen, setEmployeesSectionOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [openEmployeeId, setOpenEmployeeId] = useState<string | null>(null);
@@ -79,8 +78,6 @@ export function AdminEmployeeDevicesPage() {
           ? caught.message
           : t('admin.employeeDevices.loadFailed'),
       );
-    } finally {
-      setDevicesReady(true);
     }
   }, [t]);
 
@@ -96,14 +93,6 @@ export function AdminEmployeeDevicesPage() {
     () => employees.filter((employee) => employee.status === 'active'),
     [employees],
   );
-
-  const employeeById = useMemo(() => {
-    const map = new Map<string, LaundryEmployee>();
-    for (const employee of employees) {
-      map.set(employee.id, employee);
-    }
-    return map;
-  }, [employees]);
 
   const activeDeviceByEmployeeId = useMemo(() => {
     const map = new Map<string, LinkedDevice>();
@@ -140,11 +129,6 @@ export function AdminEmployeeDevicesPage() {
       setScannerError(null);
     }
   }, [activeEmployees, openEmployeeId]);
-
-  const activeDevices = useMemo(
-    () => devices.filter((device) => device.status === 'active'),
-    [devices],
-  );
 
   const stopScanner = useCallback(async () => {
     const scanner = scannerRef.current;
@@ -612,105 +596,7 @@ export function AdminEmployeeDevicesPage() {
           ) : null}
         </article>
       </section>
-
-      <section className="admin-editor-panel">
-        <h2 className="admin-employee-devices__section-title">
-          {t('admin.employeeDevices.linkedSection')}
-        </h2>
-
-        {!devicesReady ? (
-          <p>{t('common.loading')}</p>
-        ) : activeDevices.length === 0 ? (
-          <p>{t('admin.employeeDevices.noDevices')}</p>
-        ) : (
-          <table className="admin-editor-table admin-editor-table--responsive">
-            <thead>
-              <tr>
-                <th>{t('admin.employeeDevices.colEmployee')}</th>
-                <th>{t('admin.employeeDevices.colDevice')}</th>
-                <th>{t('admin.employeeDevices.colStatus')}</th>
-                <th>{t('admin.employeeDevices.colPairedAt')}</th>
-                <th>{t('admin.employeeDevices.colActions')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {devices.map((device) => {
-                const live = employeeById.get(device.laundryEmployeeId);
-                const orphaned = !live || live.status !== 'active';
-                const name = resolveLinkedEmployeeLabel(
-                  device,
-                  live,
-                  language,
-                );
-
-                return (
-                  <tr key={device.id}>
-                    <td data-label={t('admin.employeeDevices.colEmployee')}>
-                      {name}
-                      {orphaned ? (
-                        <div className="admin-employee-devices__orphan-note">
-                          {t('admin.employeeDevices.orphanedDevice')}
-                        </div>
-                      ) : null}
-                    </td>
-                    <td data-label={t('admin.employeeDevices.colDevice')}>
-                      {device.deviceLabel}
-                      <div className="admin-employee-devices__player">
-                        {device.onesignalPlayerId}
-                      </div>
-                    </td>
-                    <td data-label={t('admin.employeeDevices.colStatus')}>
-                      {statusLabel(device.status, t)}
-                    </td>
-                    <td data-label={t('admin.employeeDevices.colPairedAt')}>
-                      {formatDate(device.pairedAt, language)}
-                    </td>
-                    <td data-label={t('admin.employeeDevices.colActions')}>
-                      {device.status === 'active' ? (
-                        <button
-                          className="admin-editor-btn admin-editor-btn--danger"
-                          disabled={isSaving}
-                          onClick={() => void handleRemove(device)}
-                          type="button"
-                        >
-                          {t('admin.employeeDevices.unpairDevice')}
-                        </button>
-                      ) : (
-                        '—'
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
-      </section>
     </section>
-  );
-}
-
-function resolveLinkedEmployeeLabel(
-  device: LinkedDevice,
-  live: LaundryEmployee | undefined,
-  language: string,
-) {
-  if (live) {
-    return language === 'ar' ? live.name.ar : live.name.en;
-  }
-
-  if (language === 'ar') {
-    return (
-      device.laundryEmployeeNameAr ||
-      device.laundryEmployeeNameEn ||
-      device.laundryEmployeeId
-    );
-  }
-
-  return (
-    device.laundryEmployeeNameEn ||
-    device.laundryEmployeeNameAr ||
-    device.laundryEmployeeId
   );
 }
 

@@ -9,6 +9,8 @@ export type AssetItem = {
   id: string;
   name: string;
   createdAt: string;
+  /** False when retired from the shared catalog but kept for receipt history. */
+  isActive?: boolean;
 };
 
 export type AssetEmployee = {

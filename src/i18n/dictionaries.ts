@@ -1111,7 +1111,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     'inventory.search.codePlaceholder': 'Search by Item Code',
     'inventory.search.namePlaceholder': 'Search by Item Name',
     'inventory.search.clearFilter': 'Clear',
-    'inventory.search.noResults': 'No matches found',
+    'inventory.search.noResults': 'No results found',
     'inventory.table.code': 'Item Code',
     'inventory.table.noCode': 'No Code',
     'inventory.table.name': 'Item Name',
