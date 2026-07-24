@@ -46,6 +46,16 @@
   border-inline-end: 1px solid rgb(214 183 110 / 14%);
 }
 
+.training-toolbar__group--media {
+  flex: 0 1 auto;
+  max-width: 100%;
+}
+
+.training-toolbar__group--media .training-toolbar__chip {
+  flex: 0 1 auto;
+  white-space: nowrap;
+}
+
 .training-toolbar__group:last-child {
   border-inline-end: 0;
 }
@@ -914,13 +924,45 @@
 }
 
 @media (max-width: 640px) {
-  .training-editor__prose {
-    min-height: 16rem;
-    padding: 0.85rem;
+  .training-editor {
+    border-radius: 1.1rem;
   }
 
   .training-toolbar {
-    gap: 0.3rem;
+    gap: 0.35rem;
+    padding: 0.65rem;
+  }
+
+  .training-toolbar__group {
+    gap: 0.25rem;
+    padding-inline-end: 0.35rem;
+  }
+
+  .training-toolbar__group--media {
+    display: inline-flex;
+    flex-wrap: wrap;
+    width: auto;
+    max-width: 100%;
+  }
+
+  .training-toolbar__chip,
+  .training-toolbar__more {
+    min-height: 2rem;
+    padding: 0.28rem 0.65rem;
+    font-size: 0.74rem;
+  }
+
+  .training-toolbar__btn,
+  .training-toolbar__select {
+    min-height: 2rem;
+    font-size: 0.76rem;
+  }
+
+  .training-editor .tiptap,
+  .training-editor__prose {
+    min-height: 18rem;
+    max-height: min(65vh, 40rem);
+    padding: 1rem 1.05rem 1.75rem;
   }
 
   .training-lux-dialog__grid {
