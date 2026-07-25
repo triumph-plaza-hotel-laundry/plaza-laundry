@@ -13,6 +13,8 @@
     "preview": "vite preview",
     "generate:icons": "node scripts/generate-icons.mjs",
     "test:supabase": "node scripts/test-supabase-sync.mjs",
+    "test:notification-identity": "node --test scripts/test-notification-identity-isolation.mjs",
+    "test": "npm run test:notification-identity",
     "setup:supabase": "node scripts/apply-supabase-migrations.mjs && npx vite-node scripts/seed-hydrate.ts",
     "generate:department-items-sql": "node scripts/generate-department-items-setup-sql.mjs",
     "generate:department-item-categories-sql": "node scripts/generate-department-item-categories-sql.mjs",

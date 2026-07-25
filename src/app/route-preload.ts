@@ -37,10 +37,8 @@ const routePreloaders: Record<string, () => Promise<unknown>> = {
     import('@/features/admin/pages/AdminHomeContentEditorPage'),
   '/admin/ai': () => import('@/features/admin/pages/AdminAiSettingsEditorPage'),
   '/admin/settings': () => import('@/features/admin/pages/AdminSettingsPage'),
-  '/admin/employee-devices': () =>
-    import('@/features/admin/pages/AdminEmployeeDevicesPage'),
-  '/admin/notification-diagnostics': () =>
-    import('@/features/admin/pages/AdminNotificationDiagnosticsPage'),
+  '/admin/notifications': () =>
+    import('@/features/notifications/ui/NotificationsAdminPage'),
   '/admin/hotel-employee-assets': () =>
     import('@/features/hotel-employee-assets'),
   '/hotel-employee-assets': () => import('@/features/hotel-employee-assets'),

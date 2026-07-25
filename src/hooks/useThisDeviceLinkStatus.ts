@@ -1,21 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
-  getActiveLinkedDeviceByPlayerId,
-  subscribeLinkedDevices,
-} from '@/features/employee-devices/device-pairing-service';
+  getActiveDeviceByPlayerId,
+  subscribeDevices,
+} from '@/features/notifications/devices';
 import {
   clearLocalDeviceLink,
   readLocalDeviceLink,
   subscribeLocalDeviceLink,
   writeLocalDeviceLink,
-} from '@/features/employee-devices/local-device-link';
+} from '@/features/notifications/pairing/local-device-link';
 import { getCurrentOneSignalPlayerId } from '@/features/employee-devices/onesignal-pairing';
-import { subscribePlatformSync } from '@/lib/notification-platform';
 
 /**
- * Tracks whether THIS browser/PWA is currently linked to an employee.
- * Used to hide "ربط جهاز الموظف" after successful pairing, and to show it
- * again immediately when Admin removes/replaces the device.
+ * Tracks whether THIS browser/PWA is linked to an employee.
+ * QR pairing page is shown only when unlinked; after Admin Unlink it returns.
  */
 export function useThisDeviceLinkStatus() {
   const [isLinked, setIsLinked] = useState(() => {
@@ -33,24 +31,21 @@ export function useThisDeviceLinkStatus() {
     try {
       const playerId = await getCurrentOneSignalPlayerId();
       if (!playerId) {
-        // Keep optimistic local linked state only briefly; if we have no player
-        // id we cannot confirm against the server yet.
         setIsLinked(Boolean(local?.linked));
         setIsReady(true);
         return;
       }
 
-      const active = await getActiveLinkedDeviceByPlayerId(playerId);
+      const active = await getActiveDeviceByPlayerId(playerId);
       if (active) {
         writeLocalDeviceLink({
           linked: true,
           onesignalPlayerId: playerId,
-          laundryEmployeeId: active.laundryEmployeeId,
-          pairedAt: active.pairedAt,
+          laundryEmployeeId: active.employeeId,
+          pairedAt: active.linkedAt,
         });
         setIsLinked(true);
       } else {
-        // Admin removed/replaced this device — pairing menu must return.
         if (local?.linked) {
           clearLocalDeviceLink();
         }
@@ -68,12 +63,7 @@ export function useThisDeviceLinkStatus() {
   }, [refresh]);
 
   useEffect(() => subscribeLocalDeviceLink(() => void refresh()), [refresh]);
-
-  // When Admin removes/replaces the device, update nav without reinstall.
-  useEffect(() => subscribeLinkedDevices(() => void refresh()), [refresh]);
-
-  // Platform live-sync (subscription rotation / cache heal) refreshes status.
-  useEffect(() => subscribePlatformSync(() => void refresh()), [refresh]);
+  useEffect(() => subscribeDevices(() => void refresh()), [refresh]);
 
   useEffect(() => {
     const onVisible = () => {
@@ -81,11 +71,11 @@ export function useThisDeviceLinkStatus() {
         void refresh();
       }
     };
+    window.addEventListener('focus', () => void refresh());
     document.addEventListener('visibilitychange', onVisible);
-    window.addEventListener('focus', onVisible);
     return () => {
+      window.removeEventListener('focus', () => void refresh());
       document.removeEventListener('visibilitychange', onVisible);
-      window.removeEventListener('focus', onVisible);
     };
   }, [refresh]);
 

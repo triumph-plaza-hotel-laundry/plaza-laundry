@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { preloadRoute } from '@/app/route-preload';
 import { adminDashboardModules } from '@/features/admin/config/admin-dashboard-modules';
-import { PrimaryAdminDevicePanel } from '@/features/primary-admin-device';
 import { isPrimaryAdminAccount } from '@/features/auth/owner-protection';
 import { useAuth, useLanguage } from '@/hooks';
 import { useSpecialAdminPermissions } from '@/hooks/useSpecialAdminPermissions';
@@ -54,8 +53,6 @@ export function AdminIndexPage() {
           </p>
         ) : null}
       </header>
-
-      <PrimaryAdminDevicePanel />
 
       <nav
         aria-label={t('admin.dashboard.title')}

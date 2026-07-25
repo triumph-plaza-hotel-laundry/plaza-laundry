@@ -1,0 +1,108 @@
+.notif-toggle {
+  --nt-gold: var(--shift-gold, #c9a227);
+  --nt-gold-soft: color-mix(in srgb, var(--nt-gold) 22%, transparent);
+  --nt-off: #3a3a3a;
+  --nt-off-track: #1a1a1a;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-shrink: 0;
+  padding: 0.2rem 0.35rem 0.2rem 0.2rem;
+  border: 1px solid color-mix(in srgb, var(--nt-gold) 28%, transparent);
+  border-radius: 999px;
+  background: linear-gradient(165deg, #161616, #0d0d0d);
+  color: #f3ead2;
+  font: inherit;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgb(0 0 0 / 28%);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.notif-toggle:hover:not(:disabled) {
+  border-color: var(--nt-gold);
+  box-shadow:
+    0 0 0 1px rgb(201 162 39 / 18%),
+    0 8px 20px rgb(0 0 0 / 34%);
+}
+
+.notif-toggle:focus-visible {
+  outline: 2px solid var(--nt-gold);
+  outline-offset: 2px;
+}
+
+.notif-toggle.is-disabled,
+.notif-toggle:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.notif-toggle__track {
+  position: relative;
+  width: 2.75rem;
+  height: 1.45rem;
+  border-radius: 999px;
+  background: var(--nt-off-track);
+  border: 1px solid var(--nt-off);
+  transition:
+    background 180ms ease,
+    border-color 180ms ease;
+}
+
+.notif-toggle.is-on .notif-toggle__track {
+  background: var(--nt-gold-soft);
+  border-color: var(--nt-gold);
+}
+
+.notif-toggle__thumb {
+  position: absolute;
+  top: 50%;
+  left: 0.15rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  background: #6b6b6b;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 45%);
+  transform: translateY(-50%);
+  transition:
+    left 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.notif-toggle.is-on .notif-toggle__thumb {
+  left: calc(100% - 1.25rem);
+  background: var(--nt-gold);
+  box-shadow: 0 0 10px rgb(201 162 39 / 45%);
+}
+
+.notif-toggle__label {
+  min-width: 2rem;
+  padding-inline-end: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #9a9a9a;
+}
+
+.notif-toggle.is-on .notif-toggle__label {
+  color: var(--nt-gold);
+}
+
+@media (max-width: 640px) {
+  .notif-toggle {
+    width: 100%;
+    justify-content: space-between;
+    padding: 0.45rem 0.65rem 0.45rem 0.45rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notif-toggle,
+  .notif-toggle__track,
+  .notif-toggle__thumb {
+    transition: none;
+  }
+}

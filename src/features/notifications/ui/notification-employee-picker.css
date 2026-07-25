@@ -1,0 +1,200 @@
+.notif-employee-picker {
+  --nep-gold: var(--shift-gold, #c9a227);
+  --nep-gold-soft: color-mix(in srgb, var(--nep-gold) 18%, transparent);
+  --nep-gold-border: color-mix(in srgb, var(--nep-gold) 42%, transparent);
+  --nep-bg: #0d0d0d;
+  --nep-bg-elevated: #121212;
+  --nep-text: #f3ead2;
+  --nep-muted: rgb(243 234 210 / 62%);
+  --nep-radius: 10px;
+  --nep-row-height: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+  margin-bottom: 0.85rem;
+}
+
+.notif-employee-picker__label {
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--nep-gold);
+}
+
+/* One connected black & gold control — field + inline expand */
+.notif-employee-picker__shell {
+  width: 100%;
+  border: 1px solid var(--nep-gold-border);
+  border-radius: var(--nep-radius);
+  background: linear-gradient(165deg, #161616, var(--nep-bg));
+  box-shadow: 0 8px 24px rgb(0 0 0 / 28%);
+  overflow: hidden;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.notif-employee-picker.is-open .notif-employee-picker__shell {
+  border-color: var(--nep-gold);
+  box-shadow:
+    0 0 0 1px rgb(201 162 39 / 22%),
+    0 12px 32px rgb(0 0 0 / 36%);
+}
+
+.notif-employee-picker__trigger,
+.notif-employee-picker__option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: var(--nep-row-height);
+  height: var(--nep-row-height);
+  padding: 0 0.95rem;
+  border: none;
+  background: transparent;
+  color: var(--nep-text);
+  font: inherit;
+  font-size: 0.95rem;
+  text-align: start;
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    color 140ms ease;
+}
+
+.notif-employee-picker__trigger {
+  justify-content: space-between;
+  border-bottom: 1px solid transparent;
+}
+
+.notif-employee-picker.is-open .notif-employee-picker__trigger {
+  border-bottom-color: rgb(201 162 39 / 28%);
+  background: color-mix(in srgb, var(--nep-gold) 10%, transparent);
+  color: var(--nep-gold);
+}
+
+.notif-employee-picker__trigger:hover {
+  background: var(--nep-gold-soft);
+  color: var(--nep-gold);
+}
+
+.notif-employee-picker__trigger:focus-visible,
+.notif-employee-picker__option:focus-visible {
+  outline: 2px solid var(--nep-gold);
+  outline-offset: -2px;
+}
+
+.notif-employee-picker.is-disabled .notif-employee-picker__trigger {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.notif-employee-picker__value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.notif-employee-picker__value.is-placeholder {
+  color: var(--nep-muted);
+  font-weight: 500;
+}
+
+.notif-employee-picker__chevron {
+  flex-shrink: 0;
+  color: var(--nep-gold);
+  transition: transform 200ms ease;
+}
+
+.notif-employee-picker.is-open .notif-employee-picker__chevron {
+  transform: rotate(180deg);
+}
+
+/* Inline expand — natural extension of the same shell */
+.notif-employee-picker__expand {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 220ms ease;
+}
+
+.notif-employee-picker.is-open .notif-employee-picker__expand {
+  grid-template-rows: 1fr;
+}
+
+.notif-employee-picker__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
+  overflow: hidden auto;
+  max-height: min(18rem, 50vh);
+  background: transparent;
+}
+
+.notif-employee-picker__list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.notif-employee-picker__list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notif-employee-picker__list::-webkit-scrollbar-thumb {
+  background: rgb(201 162 39 / 35%);
+  border-radius: 999px;
+}
+
+.notif-employee-picker__option {
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  border-top: 1px solid rgb(201 162 39 / 10%);
+}
+
+.notif-employee-picker__option:hover,
+.notif-employee-picker__option.is-active {
+  background: var(--nep-gold-soft);
+  color: var(--nep-gold);
+}
+
+.notif-employee-picker__option.is-selected {
+  background: color-mix(in srgb, var(--nep-gold) 24%, transparent);
+  color: var(--nep-gold);
+}
+
+.notif-employee-picker__option-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notif-employee-picker__option-code {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  opacity: 0.82;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 640px) {
+  .notif-employee-picker {
+    --nep-row-height: 3.15rem;
+  }
+
+  .notif-employee-picker__list {
+    max-height: min(16rem, 45vh);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notif-employee-picker__shell,
+  .notif-employee-picker__expand,
+  .notif-employee-picker__chevron,
+  .notif-employee-picker__trigger,
+  .notif-employee-picker__option {
+    transition: none;
+  }
+}

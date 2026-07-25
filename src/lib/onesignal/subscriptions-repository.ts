@@ -1,79 +1,20 @@
-import { getSupabaseClient } from '@/lib/supabase/client';
+/**
+ * onesignal_subscriptions table was removed.
+ * Player IDs live only on employee_notification_devices via claim RPC.
+ */
 
-export type OneSignalSubscriptionRecord = {
-  employeeId: string;
-  onesignalPlayerId: string;
-  device: string;
-  laundryEmployeeId?: string | null;
-};
-
-export async function upsertOneSignalSubscription(
-  record: OneSignalSubscriptionRecord,
-): Promise<void> {
-  const client = getSupabaseClient();
-  if (!client) {
-    return;
-  }
-
-  const updatedAt = new Date().toISOString();
-  const { error } = await client.from('onesignal_subscriptions').upsert(
-    {
-      employee_id: record.employeeId,
-      onesignal_player_id: record.onesignalPlayerId,
-      device: record.device,
-      laundry_employee_id: record.laundryEmployeeId ?? null,
-      updated_at: updatedAt,
-    },
-    { onConflict: 'onesignal_player_id' },
-  );
-
-  if (error && import.meta.env.DEV) {
-    console.error('[onesignal] Failed to upsert subscription:', error.message);
-  }
-}
-
-export async function removeOneSignalSubscriptionByPlayerId(
-  onesignalPlayerId: string,
-): Promise<void> {
-  const client = getSupabaseClient();
-  if (!client || !onesignalPlayerId) {
-    return;
-  }
-
-  const { error } = await client
-    .from('onesignal_subscriptions')
-    .delete()
-    .eq('onesignal_player_id', onesignalPlayerId);
-
-  if (error && import.meta.env.DEV) {
-    console.error('[onesignal] Failed to remove subscription:', error.message);
-  }
+export async function upsertOneSignalSubscription(_input: unknown): Promise<void> {
+  // no-op — identity is claim_notification_device only
 }
 
 export async function removeOneSignalSubscriptionsForEmployee(
-  employeeId: string,
-  onesignalPlayerId?: string | null,
+  _employeeId: string,
 ): Promise<void> {
-  const client = getSupabaseClient();
-  if (!client || !employeeId) {
-    return;
-  }
+  // no-op
+}
 
-  let query = client
-    .from('onesignal_subscriptions')
-    .delete()
-    .eq('employee_id', employeeId);
-
-  if (onesignalPlayerId) {
-    query = query.eq('onesignal_player_id', onesignalPlayerId);
-  }
-
-  const { error } = await query;
-
-  if (error && import.meta.env.DEV) {
-    console.error(
-      '[onesignal] Failed to remove employee subscriptions:',
-      error.message,
-    );
-  }
+export async function removeOneSignalSubscriptionByPlayerId(
+  _playerId: string,
+): Promise<void> {
+  // no-op
 }
