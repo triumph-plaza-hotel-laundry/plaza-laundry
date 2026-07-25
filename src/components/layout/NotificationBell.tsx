@@ -10,11 +10,19 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useNotifications } from '@/hooks/useNotifications';
 import type { AppNotification } from '@/lib/notifications';
+import {
+  bindOpenNotificationMessageListener,
+  consumeOpenNotificationQuery,
+  pushInboxLocalId,
+  subscribeOpenNotification,
+  syncPushInboxNotifications,
+} from '@/lib/notifications';
 import '@/components/layout/notification-bell.css';
 
 const ICON_STROKE = 1.75;
 const ICON_SIZE = 18;
 const PANEL_EXIT_MS = 180;
+const HIGHLIGHT_MS = 4500;
 
 function getEmployeeDisplayName(
   notification: AppNotification,
@@ -38,6 +46,7 @@ export function NotificationBell() {
   } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const [isPanelMounted, setIsPanelMounted] = useState(false);
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
   const lang = language === 'ar' ? 'ar' : 'en';
@@ -85,6 +94,41 @@ export function NotificationBell() {
       document.removeEventListener('keydown', onKeyDown);
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    let highlightTimer: number | undefined;
+
+    const openFromInboxId = async (inboxId: string) => {
+      const localId = pushInboxLocalId(inboxId);
+      await syncPushInboxNotifications();
+      markRead(localId);
+      setIsPanelMounted(true);
+      setIsOpen(true);
+      setHighlightedId(localId);
+      window.clearTimeout(highlightTimer);
+      highlightTimer = window.setTimeout(() => {
+        setHighlightedId((current) => (current === localId ? null : current));
+      }, HIGHLIGHT_MS);
+    };
+
+    const fromQuery = consumeOpenNotificationQuery();
+    if (fromQuery) {
+      void openFromInboxId(fromQuery);
+    }
+
+    const unsubEvent = subscribeOpenNotification((detail) => {
+      void openFromInboxId(detail.inboxId);
+    });
+    const unsubSw = bindOpenNotificationMessageListener();
+
+    return () => {
+      unsubEvent();
+      unsubSw();
+      window.clearTimeout(highlightTimer);
+    };
+    // Mount-only deep-link bus (query + SW message + CustomEvent).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleNotificationClick = (notification: AppNotification) => {
     markRead(notification.id);
@@ -181,21 +225,25 @@ export function NotificationBell() {
                   : isBirthday
                     ? t('employees.birthdayNotificationWish')
                     : '';
+                const isHighlighted = highlightedId === notification.id;
 
                 return (
                   <li
-                    className="notification-bell__list-item"
+                    className={`notification-bell__list-item${isHighlighted ? ' notification-bell__list-item--highlight' : ''}`}
                     key={notification.id}
                   >
                     <button
-                      className={`notification-bell__item${isBirthday ? ' notification-bell__item--birthday' : ''}${notification.read ? ' notification-bell__item--read' : ' notification-bell__item--unread'}`}
+                      className={`notification-bell__item${isBirthday ? ' notification-bell__item--birthday' : ''}${notification.read ? ' notification-bell__item--read' : ' notification-bell__item--unread'}${isHighlighted ? ' notification-bell__item--highlight' : ''}`}
                       onClick={() => handleNotificationClick(notification)}
                       type="button"
                     >
                       <span className="notification-bell__content">
                         <span className="notification-bell__item-title">
                           {isBirthday ? (
-                            <span aria-hidden="true" className="notification-bell__emoji">
+                            <span
+                              aria-hidden="true"
+                              className="notification-bell__emoji"
+                            >
                               🎉
                             </span>
                           ) : null}

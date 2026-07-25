@@ -94,12 +94,15 @@ async function sendOneSignalNotification(
   options?: {
     supabase?: ReturnType<typeof createClient>;
     historyId?: string | null;
+    data?: Record<string, unknown>;
+    launchUrl?: string;
   },
 ): Promise<{ ok: boolean; error?: string; invalidPlayerIds?: string[] }> {
   console.log('[shift-reminder] sendOneSignalNotification start', {
     subscriptionId: playerId,
     historyId: options?.historyId ?? null,
     titlePreview: title.slice(0, 40),
+    launchUrl: options?.launchUrl ?? null,
   });
 
   try {
@@ -110,6 +113,8 @@ async function sendOneSignalNotification(
       title,
       body,
       maxAttempts: 3,
+      data: options?.data,
+      launchUrl: options?.launchUrl,
     });
 
     if (options?.supabase) {
@@ -327,24 +332,27 @@ async function upsertInboxNotification(
     dedupeKey: string;
     createdAt?: string | null;
   },
-) {
-  const { error } = await supabase.from('employee_inbox_notifications').upsert(
-    {
-      employee_id: input.employeeId,
-      title: input.title,
-      body: input.body,
-      status: input.status,
-      source: 'push',
-      history_id: input.historyId,
-      dedupe_key: input.dedupeKey,
-      created_at: input.createdAt ?? new Date().toISOString(),
-    },
-    {
-      onConflict: 'employee_id,dedupe_key',
-      // Retests must update the same day/employee row so the bell reflects the latest send.
-      ignoreDuplicates: false,
-    },
-  );
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('employee_inbox_notifications')
+    .upsert(
+      {
+        employee_id: input.employeeId,
+        title: input.title,
+        body: input.body,
+        status: input.status,
+        source: 'push',
+        history_id: input.historyId,
+        dedupe_key: input.dedupeKey,
+        created_at: input.createdAt ?? new Date().toISOString(),
+      },
+      {
+        onConflict: 'employee_id,dedupe_key',
+        ignoreDuplicates: false,
+      },
+    )
+    .select('id')
+    .maybeSingle();
 
   if (error) {
     console.error('[shift-reminder] inbox upsert failed', error.message);
@@ -353,17 +361,29 @@ async function upsertInboxNotification(
       dedupeKey: input.dedupeKey,
       message: error.message,
     });
-  } else {
-    console.log('[push-trace:edge] STAGE inbox_upsert_ok', {
-      employeeId: input.employeeId,
-      dedupeKey: input.dedupeKey,
-      title: input.title,
-      status: input.status,
-      historyId: input.historyId,
-    });
+    return null;
   }
+
+  const inboxId = typeof data?.id === 'string' ? data.id : null;
+  console.log('[push-trace:edge] STAGE inbox_upsert_ok', {
+    employeeId: input.employeeId,
+    dedupeKey: input.dedupeKey,
+    title: input.title,
+    status: input.status,
+    historyId: input.historyId,
+    inboxId,
+  });
+  return inboxId;
 }
 
+function resolvePublicAppOrigin(): string {
+  const configured =
+    Deno.env.get('PUBLIC_APP_URL')?.trim() ||
+    Deno.env.get('APP_ORIGIN')?.trim() ||
+    Deno.env.get('VITE_PUBLIC_APP_URL')?.trim() ||
+    'https://plaza-laundry-xi.vercel.app';
+  return configured.replace(/\/$/, '');
+}
 async function hasCronReminderBeenSent(
   supabase: ReturnType<typeof createClient>,
   targetDate: string,
@@ -470,6 +490,23 @@ async function deliverAssignment(
       continue;
     }
 
+    const dedupeKey = `${type}:${assignment.targetDateKey}:${assignment.employeeId}:${triggeredBy}:${subscription.onesignal_player_id}`;
+
+    // Create/update inbox row before send so the OS notification can deep-link.
+    const pendingInboxId = await upsertInboxNotification(supabase, {
+      employeeId: assignment.employeeId,
+      title: message.title,
+      body: message.body,
+      status: 'pending',
+      historyId: null,
+      dedupeKey,
+    });
+
+    const appOrigin = resolvePublicAppOrigin();
+    const launchUrl = pendingInboxId
+      ? `${appOrigin}/?openNotification=${encodeURIComponent(pendingInboxId)}`
+      : `${appOrigin}/?notifications=1`;
+
     const result = await sendOneSignalNotification(
       appId,
       restKey,
@@ -478,12 +515,21 @@ async function deliverAssignment(
       message.body,
       {
         supabase,
+        data: {
+          tpl_action: 'open_notification',
+          inbox_id: pendingInboxId,
+          employee_id: assignment.employeeId,
+          type,
+        },
+        launchUrl,
       },
     );
 
     console.log('[shift-reminder] writing notification history', {
       status: result.ok ? 'sent' : 'failed',
       subscriptionId: subscription.onesignal_player_id,
+      inboxId: pendingInboxId,
+      launchUrl,
     });
 
     const sentAt = result.ok ? new Date().toISOString() : null;
@@ -525,7 +571,7 @@ async function deliverAssignment(
       body: message.body,
       status: result.ok ? 'sent' : 'failed',
       historyId,
-      dedupeKey: `${type}:${assignment.targetDateKey}:${assignment.employeeId}:${triggeredBy}:${subscription.onesignal_player_id}`,
+      dedupeKey,
       createdAt: sentAt,
     });
 
@@ -535,7 +581,6 @@ async function deliverAssignment(
       failed += 1;
     }
   }
-
   console.log('[shift-reminder] deliverAssignment done', {
     employeeId: assignment.employeeId,
     sent,

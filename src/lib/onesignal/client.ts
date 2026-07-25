@@ -187,13 +187,37 @@ async function bindSubscriptionChangeListener() {
   }
 
   try {
-    // Focus existing tab only — do not force in-app navigation on notification tap.
+    // Deep-link: open Notification Center for the tapped inbox row (never home-only).
     OneSignal.Notifications.addEventListener('click', (event) => {
-      platformLog('subscription', 'notification click — OS panel / focus only');
-      pushTrace('onesignal-click-bound-listener', {
-        title: event?.notification?.title ?? null,
-        notificationId: event?.notification?.notificationId ?? null,
+      const notification = event?.notification as
+        | {
+            title?: string;
+            notificationId?: string;
+            additionalData?: Record<string, unknown>;
+          }
+        | undefined;
+      const additional = notification?.additionalData ?? {};
+      const inboxIdRaw = additional.inbox_id;
+      const inboxId =
+        typeof inboxIdRaw === 'string' ? inboxIdRaw.trim() : '';
+
+      platformLog('subscription', 'notification click — open inbox deep link', {
+        inboxId: inboxId || null,
       });
+      pushTrace('onesignal-click-bound-listener', {
+        title: notification?.title ?? null,
+        notificationId: notification?.notificationId ?? null,
+        inboxId: inboxId || null,
+        additionalDataKeys: Object.keys(additional),
+      });
+
+      if (inboxId) {
+        void import('@/lib/notifications/open-notification').then(
+          ({ requestOpenNotification }) => {
+            requestOpenNotification(inboxId);
+          },
+        );
+      }
     });
   } catch (error) {
     logFail('bind notification click listener', error);
@@ -343,8 +367,9 @@ export function ensureOneSignalInitialized(): Promise<boolean> {
           // Keep the same browser subscribed; Player ID changes update the
           // existing device row — they never create a second link.
           autoResubscribe: true,
-          // Focus the open app; do not open a custom URL / force navigation.
-          notificationClickHandlerAction: 'focus',
+          // Navigate to payload url/web_url (?openNotification=…) so clicks
+          // deep-link into Notification Center instead of only focusing home.
+          notificationClickHandlerAction: 'navigate',
           promptOptions: {
             slidedown: {
               prompts: [
