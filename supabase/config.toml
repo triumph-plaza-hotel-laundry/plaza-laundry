@@ -10,7 +10,6 @@ major_version = 15
 [functions.shift-reminder]
 verify_jwt = false
 
-[functions.shift-reminder.schedule]
-# Poll every minute. Actual send time is read from app_settings.shift_reminder_time
-# (Africa/Cairo wall clock). History dedupe prevents duplicate deliveries.
-cron = "* * * * *"
+# Schedule is managed by pg_cron (see migrations), not config.toml.
+# Older CLI rejected [functions.shift-reminder.schedule].
+# cron = "* * * * *"

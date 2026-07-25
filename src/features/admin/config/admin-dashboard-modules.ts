@@ -17,7 +17,6 @@ import {
   Users,
   WashingMachine,
   BellRing,
-  Activity,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { TranslationKey } from '@/types/language';
@@ -127,16 +126,9 @@ export const adminDashboardModules: AdminDashboardModule[] = [
     requiresShiftNotificationPermission: true,
   },
   {
-    icon: Activity,
-    labelKey: 'admin.dashboard.notificationDiagnostics',
-    path: '/admin/notification-diagnostics',
-    descriptionKey: 'admin.dashboard.notificationDiagnosticsDesc',
-    ownerOnly: true,
-  },
-  {
     icon: Smartphone,
     labelKey: 'admin.dashboard.employeeDevices',
-    path: '/admin/employee-devices',
+    path: '/admin/notifications',
     descriptionKey: 'admin.dashboard.employeeDevicesDesc',
     requiresDevicePermission: true,
   },

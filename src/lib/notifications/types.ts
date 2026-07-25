@@ -1,4 +1,4 @@
-export type NotificationType = 'birthday';
+export type NotificationType = 'birthday' | 'push';
 
 export type AppNotification = {
   id: string;
@@ -8,10 +8,14 @@ export type AppNotification = {
     en: string;
     ar: string;
   };
-  /** Cairo calendar day `YYYY-MM-DD` this notification is valid for. */
+  /** Cairo calendar day `YYYY-MM-DD` this notification is valid for (birthdays). */
   dateKey: string;
   createdAt: string;
   read: boolean;
+  /** Push / shift content (same as OS notification). */
+  title?: string;
+  body?: string;
+  status?: 'sent' | 'failed' | 'skipped' | 'pending';
 };
 
 export function birthdayNotificationId(
@@ -19,4 +23,8 @@ export function birthdayNotificationId(
   dateKey: string,
 ): string {
   return `birthday:${employeeId}:${dateKey}`;
+}
+
+export function pushInboxNotificationId(serverId: string): string {
+  return `push:${serverId}`;
 }

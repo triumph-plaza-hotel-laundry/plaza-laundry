@@ -227,6 +227,8 @@ async function sendOnce(
     headings: { en: title },
     contents: { en: body },
     idempotency_key: key,
+    // Normal OS notification: no forced deep-link / navigation on tap.
+    // (Do not set url / web_url / app_url unless product later configures it.)
   };
 
   console.log('[onesignal-delivery] preparing payload', {

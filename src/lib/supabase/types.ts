@@ -796,205 +796,239 @@ export type Database = {
           },
         ];
       };
-      employee_device_pairing_sessions: {
+      employee_notification_devices: {
         Row: {
           id: string;
-          pairing_token: string;
-          onesignal_player_id: string;
-          device_label: string;
-          status: 'pending' | 'completed' | 'expired' | 'cancelled';
-          laundry_employee_id: string | null;
-          laundry_employee_name_en: string | null;
-          laundry_employee_name_ar: string | null;
-          paired_by_admin_id: string | null;
-          created_at: string;
-          expires_at: string;
-          completed_at: string | null;
-        };
-        Insert: {
-          id?: string;
-          pairing_token: string;
-          onesignal_player_id: string;
-          device_label?: string;
-          status?: 'pending' | 'completed' | 'expired' | 'cancelled';
-          laundry_employee_id?: string | null;
-          laundry_employee_name_en?: string | null;
-          laundry_employee_name_ar?: string | null;
-          paired_by_admin_id?: string | null;
-          created_at?: string;
-          expires_at: string;
-          completed_at?: string | null;
-        };
-        Update: {
-          id?: string;
-          pairing_token?: string;
-          onesignal_player_id?: string;
-          device_label?: string;
-          status?: 'pending' | 'completed' | 'expired' | 'cancelled';
-          laundry_employee_id?: string | null;
-          laundry_employee_name_en?: string | null;
-          laundry_employee_name_ar?: string | null;
-          paired_by_admin_id?: string | null;
-          created_at?: string;
-          expires_at?: string;
-          completed_at?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'employee_device_pairing_sessions_paired_by_admin_id_fkey';
-            columns: ['paired_by_admin_id'];
-            isOneToOne: false;
-            referencedRelation: 'admin_users';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      employee_linked_devices: {
-        Row: {
-          id: string;
-          laundry_employee_id: string;
-          laundry_employee_name_en: string | null;
-          laundry_employee_name_ar: string | null;
-          onesignal_player_id: string;
-          device_label: string;
-          status: 'active' | 'replaced' | 'removed';
-          paired_at: string;
-          last_seen_at: string;
-          paired_by_admin_id: string | null;
-          replaced_at: string | null;
-          removed_at: string | null;
-          created_at: string;
-          updated_at: string;
-          last_synced_at: string | null;
-          subscription_status: 'active' | 'invalid' | 'unknown';
-        };
-        Insert: {
-          id?: string;
-          laundry_employee_id: string;
-          laundry_employee_name_en?: string | null;
-          laundry_employee_name_ar?: string | null;
-          onesignal_player_id: string;
-          device_label?: string;
-          status?: 'active' | 'replaced' | 'removed';
-          paired_at?: string;
-          last_seen_at?: string;
-          paired_by_admin_id?: string | null;
-          replaced_at?: string | null;
-          removed_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
-          last_synced_at?: string | null;
-          subscription_status?: 'active' | 'invalid' | 'unknown';
-        };
-        Update: {
-          id?: string;
-          laundry_employee_id?: string;
-          laundry_employee_name_en?: string | null;
-          laundry_employee_name_ar?: string | null;
-          onesignal_player_id?: string;
-          device_label?: string;
-          status?: 'active' | 'replaced' | 'removed';
-          paired_at?: string;
-          last_seen_at?: string;
-          paired_by_admin_id?: string | null;
-          replaced_at?: string | null;
-          removed_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
-          last_synced_at?: string | null;
-          subscription_status?: 'active' | 'invalid' | 'unknown';
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'employee_linked_devices_paired_by_admin_id_fkey';
-            columns: ['paired_by_admin_id'];
-            isOneToOne: false;
-            referencedRelation: 'admin_users';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      primary_admin_device: {
-        Row: {
-          id: string;
-          singleton: boolean;
+          employee_id: string;
+          player_id: string;
           device_id: string;
-          onesignal_subscription_id: string;
-          registered_at: string;
-          registered_by_admin_id: string | null;
+          device_name: string | null;
+          device_model: string | null;
+          operating_system: string | null;
+          browser: string | null;
+          app_version: string | null;
+          linked_at: string;
           updated_at: string;
+          status: 'active' | 'unlinked';
         };
         Insert: {
           id?: string;
-          singleton?: boolean;
-          device_id: string;
-          onesignal_subscription_id: string;
-          registered_at?: string;
-          registered_by_admin_id?: string | null;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          singleton?: boolean;
+          employee_id: string;
+          player_id: string;
           device_id?: string;
-          onesignal_subscription_id?: string;
-          registered_at?: string;
-          registered_by_admin_id?: string | null;
+          device_name?: string | null;
+          device_model?: string | null;
+          operating_system?: string | null;
+          browser?: string | null;
+          app_version?: string | null;
+          linked_at?: string;
           updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'primary_admin_device_registered_by_admin_id_fkey';
-            columns: ['registered_by_admin_id'];
-            isOneToOne: false;
-            referencedRelation: 'admin_users';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      onesignal_subscriptions: {
-        Row: {
-          id: string;
-          employee_id: string;
-          onesignal_player_id: string;
-          device: string;
-          laundry_employee_id: string | null;
-          created_at: string;
-          updated_at: string;
-          last_verified_at: string | null;
-          is_valid: boolean;
-        };
-        Insert: {
-          id?: string;
-          employee_id: string;
-          onesignal_player_id: string;
-          device?: string;
-          laundry_employee_id?: string | null;
-          created_at?: string;
-          updated_at?: string;
-          last_verified_at?: string | null;
-          is_valid?: boolean;
+          status?: 'active' | 'unlinked';
         };
         Update: {
           id?: string;
           employee_id?: string;
-          onesignal_player_id?: string;
-          device?: string;
-          laundry_employee_id?: string | null;
-          created_at?: string;
+          player_id?: string;
+          device_id?: string;
+          device_name?: string | null;
+          device_model?: string | null;
+          operating_system?: string | null;
+          browser?: string | null;
+          app_version?: string | null;
+          linked_at?: string;
           updated_at?: string;
-          last_verified_at?: string | null;
-          is_valid?: boolean;
+          status?: 'active' | 'unlinked';
         };
-        Relationships: [
-          {
-            foreignKeyName: 'onesignal_subscriptions_employee_id_fkey';
-            columns: ['employee_id'];
-            isOneToOne: false;
-            referencedRelation: 'admin_users';
-            referencedColumns: ['id'];
-          },
-        ];
+        Relationships: [];
+      };
+      employee_notification_link_tickets: {
+        Row: {
+          id: string;
+          employee_id: string;
+          token: string;
+          created_by_admin_id: string;
+          expires_at: string;
+          consumed_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          employee_id: string;
+          token: string;
+          created_by_admin_id: string;
+          expires_at: string;
+          consumed_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          employee_id?: string;
+          token?: string;
+          created_by_admin_id?: string;
+          expires_at?: string;
+          consumed_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      notification_system_settings: {
+        Row: {
+          key: string;
+          value: string;
+          updated_at: string;
+          updated_by_admin_id: string | null;
+        };
+        Insert: {
+          key: string;
+          value: string;
+          updated_at?: string;
+          updated_by_admin_id?: string | null;
+        };
+        Update: {
+          key?: string;
+          value?: string;
+          updated_at?: string;
+          updated_by_admin_id?: string | null;
+        };
+        Relationships: [];
+      };
+      notification_audit_log: {
+        Row: {
+          id: string;
+          action: string;
+          actor_admin_id: string | null;
+          target_employee_id: string | null;
+          detail: Json;
+          result: 'ok' | 'error' | 'denied';
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          action: string;
+          actor_admin_id?: string | null;
+          target_employee_id?: string | null;
+          detail?: Json;
+          result?: 'ok' | 'error' | 'denied';
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          action?: string;
+          actor_admin_id?: string | null;
+          target_employee_id?: string | null;
+          detail?: Json;
+          result?: 'ok' | 'error' | 'denied';
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      notification_diagnostics_history: {
+        Row: {
+          id: string;
+          component: string;
+          severity: 'healthy' | 'warning' | 'critical' | 'info';
+          issue_code: string;
+          message: string;
+          target_employee_id: string | null;
+          action_taken: string | null;
+          verification_result: string | null;
+          detail: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          component: string;
+          severity: 'healthy' | 'warning' | 'critical' | 'info';
+          issue_code: string;
+          message: string;
+          target_employee_id?: string | null;
+          action_taken?: string | null;
+          verification_result?: string | null;
+          detail?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          component?: string;
+          severity?: 'healthy' | 'warning' | 'critical' | 'info';
+          issue_code?: string;
+          message?: string;
+          target_employee_id?: string | null;
+          action_taken?: string | null;
+          verification_result?: string | null;
+          detail?: Json;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      notification_health_snapshots: {
+        Row: {
+          id: string;
+          component: string;
+          status: 'healthy' | 'warning' | 'critical' | 'unknown';
+          message: string;
+          detail: Json;
+          checked_at: string;
+        };
+        Insert: {
+          id?: string;
+          component: string;
+          status: 'healthy' | 'warning' | 'critical' | 'unknown';
+          message: string;
+          detail?: Json;
+          checked_at?: string;
+        };
+        Update: {
+          id?: string;
+          component?: string;
+          status?: 'healthy' | 'warning' | 'critical' | 'unknown';
+          message?: string;
+          detail?: Json;
+          checked_at?: string;
+        };
+        Relationships: [];
+      };
+      employee_inbox_notifications: {
+        Row: {
+          id: string;
+          employee_id: string;
+          title: string;
+          body: string;
+          status: 'sent' | 'failed' | 'skipped' | 'pending';
+          source: string;
+          history_id: string | null;
+          dedupe_key: string;
+          created_at: string;
+          read_at: string | null;
+          deleted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          employee_id: string;
+          title: string;
+          body: string;
+          status: 'sent' | 'failed' | 'skipped' | 'pending';
+          source?: string;
+          history_id?: string | null;
+          dedupe_key: string;
+          created_at?: string;
+          read_at?: string | null;
+          deleted_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          employee_id?: string;
+          title?: string;
+          body?: string;
+          status?: 'sent' | 'failed' | 'skipped' | 'pending';
+          source?: string;
+          history_id?: string | null;
+          dedupe_key?: string;
+          created_at?: string;
+          read_at?: string | null;
+          deleted_at?: string | null;
+        };
+        Relationships: [];
       };
       push_notification_history: {
         Row: {
@@ -1328,40 +1362,66 @@ export type Database = {
         };
         Returns: number;
       };
-      pair_employee_device: {
+      issue_notification_link_ticket: {
         Args: {
-          p_pairing_token: string;
-          p_laundry_employee_id: string;
-          p_laundry_employee_name_en: string;
-          p_laundry_employee_name_ar: string;
-          p_paired_by_admin_id: string;
-          p_replace_existing?: boolean;
+          p_employee_id: string;
+          p_admin_id: string;
+          p_ttl_minutes?: number;
         };
-        Returns: Json;
+        Returns: {
+          token: string;
+          employee_id: string;
+          expires_at: string;
+        }[];
       };
-      sync_onesignal_subscription_rotation: {
+      claim_notification_device: {
         Args: {
-          p_old_id: string | null;
-          p_new_id: string;
-          p_device_label?: string;
-          p_laundry_employee_id?: string | null;
-          p_admin_employee_id?: string | null;
-          p_primary_admin_device_id?: string | null;
-        };
-        Returns: Json;
-      };
-      notification_db_guardian_cleanup: {
-        Args: {
-          p_event_retention_days?: number;
-        };
-        Returns: Json;
-      };
-      mark_onesignal_subscription_invalid: {
-        Args: {
+          p_token: string;
           p_player_id: string;
-          p_reason?: string | null;
+          p_device_id?: string;
+          p_device_name?: string | null;
+          p_device_model?: string | null;
+          p_operating_system?: string | null;
+          p_browser?: string | null;
+          p_app_version?: string | null;
         };
-        Returns: undefined;
+        Returns: {
+          employee_id: string;
+          player_id: string;
+        }[];
+      };
+      unlink_notification_device: {
+        Args: {
+          p_employee_id: string;
+          p_admin_id?: string | null;
+        };
+        Returns: boolean;
+      };
+      expire_stale_notification_link_tickets: {
+        Args: Record<string, never>;
+        Returns: number;
+      };
+      refresh_notification_player_id: {
+        Args: {
+          p_employee_id: string;
+          p_new_player_id: string;
+          p_expected_player_id?: string | null;
+        };
+        Returns: boolean;
+      };
+      mark_inbox_notification_read: {
+        Args: {
+          p_id: string;
+          p_employee_id: string;
+        };
+        Returns: boolean;
+      };
+      delete_inbox_notification: {
+        Args: {
+          p_id: string;
+          p_employee_id: string;
+        };
+        Returns: boolean;
       };
     };
     Enums: {

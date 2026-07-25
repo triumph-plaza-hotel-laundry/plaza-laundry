@@ -1,7 +1,6 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
+import { Navigate, Route } from 'react-router-dom';
 import { AdminGuard } from '@/features/admin/guards/AdminGuard';
-import { OwnerGuard } from '@/features/admin/guards/OwnerGuard';
 import { ShiftNotificationsGuard } from '@/features/admin/guards/ShiftNotificationsGuard';
 import { AdminLayout } from '@/features/admin/layout/AdminLayout';
 
@@ -111,24 +110,18 @@ const AdminOwnerPushPage = lazy(() =>
   })),
 );
 
-const AdminNotificationDiagnosticsPage = lazy(() =>
-  import('@/features/admin/pages/AdminNotificationDiagnosticsPage').then(
-    (module) => ({
-      default: module.AdminNotificationDiagnosticsPage,
-    }),
-  ),
-);
-
 const AdminSettingsPage = lazy(() =>
   import('@/features/admin/pages/AdminSettingsPage').then((module) => ({
     default: module.AdminSettingsPage,
   })),
 );
 
-const AdminEmployeeDevicesPage = lazy(() =>
-  import('@/features/admin/pages/AdminEmployeeDevicesPage').then((module) => ({
-    default: module.AdminEmployeeDevicesPage,
-  })),
+const NotificationsAdminPage = lazy(() =>
+  import('@/features/notifications/ui/NotificationsAdminPage').then(
+    (module) => ({
+      default: module.NotificationsAdminPage,
+    }),
+  ),
 );
 
 const AdminHotelEmployeeAssetsPage = lazy(() =>
@@ -165,13 +158,16 @@ export const adminRoutes = (
       <Route element={<ShiftNotificationsGuard />}>
         <Route element={<AdminOwnerPushPage />} path="push-notifications" />
       </Route>
-      <Route element={<OwnerGuard />}>
-        <Route
-          element={<AdminNotificationDiagnosticsPage />}
-          path="notification-diagnostics"
-        />
-      </Route>
-      <Route element={<AdminEmployeeDevicesPage />} path="employee-devices" />
+      {/* Single Notification Center; old paths redirect here */}
+      <Route element={<NotificationsAdminPage />} path="notifications" />
+      <Route
+        element={<Navigate replace to="/admin/notifications" />}
+        path="notification-diagnostics"
+      />
+      <Route
+        element={<Navigate replace to="/admin/notifications" />}
+        path="employee-devices"
+      />
       <Route
         element={<AdminHotelEmployeeAssetsPage />}
         path="hotel-employee-assets"

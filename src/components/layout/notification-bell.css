@@ -455,6 +455,39 @@ html[dir='rtl'] .notification-bell__item-title {
   }
 }
 
+.notification-bell__list-item {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 0.25rem;
+}
+
+.notification-bell__delete {
+  flex-shrink: 0;
+  align-self: center;
+  border: none;
+  background: transparent;
+  color: inherit;
+  opacity: 0.55;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0.35rem 0.55rem;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.notification-bell__delete:hover {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.notification-bell__item-status {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+  opacity: 0.65;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .luxury-header__notification--birthday-pulse {
     animation: none;

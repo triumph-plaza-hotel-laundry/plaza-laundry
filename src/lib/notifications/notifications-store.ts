@@ -11,10 +11,11 @@ function isNotification(value: unknown): value is AppNotification {
 
   const item = value as Record<string, unknown>;
   const name = item.employeeName;
+  const typeOk = item.type === 'birthday' || item.type === 'push';
 
   return (
     typeof item.id === 'string' &&
-    item.type === 'birthday' &&
+    typeOk &&
     typeof item.employeeId === 'string' &&
     typeof item.dateKey === 'string' &&
     typeof item.createdAt === 'string' &&
@@ -84,5 +85,8 @@ export const notificationsStore = {
   },
   markAllRead() {
     setSnapshot(snapshot.map((item) => ({ ...item, read: true })));
+  },
+  remove(id: string) {
+    setSnapshot(snapshot.filter((item) => item.id !== id));
   },
 };

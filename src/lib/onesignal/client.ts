@@ -1,15 +1,7 @@
 import OneSignal from 'react-onesignal';
 import { onesignalConfig } from '@/lib/onesignal/config';
-import {
-  removeOneSignalSubscriptionsForEmployee,
-  upsertOneSignalSubscription,
-} from '@/lib/onesignal/subscriptions-repository';
-import { getActiveLinkedDeviceByPlayerId } from '@/features/employee-devices/device-pairing-service';
 import { readLocalDeviceLink } from '@/features/employee-devices/local-device-link';
-import { notificationPlatformConfig } from '@/lib/notification-platform/config';
-import { onSubscriptionIdChanged } from '@/lib/notification-platform/live-subscription-sync';
-import { platformLog } from '@/lib/notification-platform/logger';
-import { getOrCreatePrimaryAdminDeviceId } from '@/features/primary-admin-device/local-device-id';
+import { platformLog } from '@/lib/notification-platform';
 
 let initPromise: Promise<boolean> | null = null;
 let changeListenerBound = false;
@@ -97,20 +89,19 @@ async function persistCurrentSubscription(employeeId: string): Promise<void> {
     return;
   }
 
-  await upsertOneSignalSubscription({
-    employeeId,
-    onesignalPlayerId: playerId,
-    device: detectDeviceLabel(),
-    laundryEmployeeId: activeLaundryEmployeeId,
-  });
-  logStep('persist subscription OK', {
+  const localLink = readLocalDeviceLink();
+  logStep('subscription ready (no pool upsert)', {
     playerId,
     employeeId,
-    laundryEmployeeId: activeLaundryEmployeeId,
+    activeEmployeeId,
+    activeLaundryEmployeeId,
+    laundryEmployeeId: localLink?.laundryEmployeeId ?? null,
+    linked: Boolean(localLink?.linked),
+    deviceLabel: detectDeviceLabel(),
   });
 }
 
-function bindSubscriptionChangeListener() {
+async function bindSubscriptionChangeListener() {
   if (changeListenerBound) {
     return;
   }
@@ -130,42 +121,35 @@ function bindSubscriptionChangeListener() {
 
       const previousId = lastKnownSubscriptionId;
       lastKnownSubscriptionId = nextId;
+      const localLink = readLocalDeviceLink();
+      platformLog('subscription', 'player id changed — refresh in place if linked', {
+        previousId,
+        nextId,
+        linkedEmployeeId: localLink?.laundryEmployeeId ?? null,
+      });
 
-      const employeeId = activeEmployeeId;
-      const laundryEmployeeId =
-        activeLaundryEmployeeId ??
-        readLocalDeviceLink()?.laundryEmployeeId ??
-        null;
-
-      if (employeeId) {
-        void upsertOneSignalSubscription({
-          employeeId,
-          onesignalPlayerId: nextId,
-          device: detectDeviceLabel(),
-          laundryEmployeeId,
-        });
-      }
-
-      if (notificationPlatformConfig.isEnabled) {
-        let primaryAdminDeviceId: string | null = null;
-        try {
-          primaryAdminDeviceId = getOrCreatePrimaryAdminDeviceId();
-        } catch {
-          primaryAdminDeviceId = null;
-        }
-
-        void onSubscriptionIdChanged({
-          previousId,
-          nextId,
-          deviceLabel: detectDeviceLabel(),
-          laundryEmployeeId,
-          adminEmployeeId: employeeId,
-          primaryAdminDeviceId,
-        });
+      // Linked device only: UPDATE existing row. Never claim / never create.
+      if (localLink?.linked && localLink.laundryEmployeeId) {
+        void import('@/features/notifications/devices/refresh-player-id').then(
+          ({ refreshLinkedPlayerId }) =>
+            refreshLinkedPlayerId({
+              newPlayerId: nextId,
+              previousPlayerId: previousId ?? localLink.onesignalPlayerId,
+            }),
+        );
       }
     });
   } catch (error) {
     logFail('bind subscription change listener', error);
+  }
+
+  try {
+    // Focus existing tab only — do not force in-app navigation on notification tap.
+    OneSignal.Notifications.addEventListener('click', () => {
+      platformLog('subscription', 'notification click — OS panel / focus only');
+    });
+  } catch (error) {
+    logFail('bind notification click listener', error);
   }
 }
 
@@ -309,7 +293,11 @@ export function ensureOneSignalInitialized(): Promise<boolean> {
           serviceWorkerOverrideForTypical: true,
           serviceWorkerPath: 'onesignal/OneSignalSDKWorker.js',
           serviceWorkerParam: { scope: '/onesignal/' },
+          // Keep the same browser subscribed; Player ID changes update the
+          // existing device row — they never create a second link.
           autoResubscribe: true,
+          // Focus the open app; do not open a custom URL / force navigation.
+          notificationClickHandlerAction: 'focus',
           promptOptions: {
             slidedown: {
               prompts: [
@@ -475,25 +463,6 @@ export async function registerOneSignalForEmployee(
     const nextId = getPushSubscriptionId();
     lastKnownSubscriptionId = nextId;
 
-    if (nextId && notificationPlatformConfig.isEnabled) {
-      let primaryAdminDeviceId: string | null = null;
-      try {
-        primaryAdminDeviceId = getOrCreatePrimaryAdminDeviceId();
-      } catch {
-        primaryAdminDeviceId = null;
-      }
-
-      await onSubscriptionIdChanged({
-        previousId:
-          previousId && previousId !== nextId ? previousId : null,
-        nextId,
-        deviceLabel: detectDeviceLabel(),
-        laundryEmployeeId: activeLaundryEmployeeId,
-        adminEmployeeId: employeeId,
-        primaryAdminDeviceId,
-      });
-    }
-
     logStep('register complete', { previousId, nextId });
   } catch (error) {
     logFail('register', error);
@@ -501,12 +470,11 @@ export async function registerOneSignalForEmployee(
 }
 
 /**
- * Removes the current device subscription from Supabase and clears OneSignal identity.
- * If this browser is still an active employee-linked device, preserve DB rows so
- * shift push keeps working after admin logout on a QR-paired phone.
+ * Clears OneSignal identity on logout. Does not unlink employee devices —
+ * Admin Unlink is the only way to clear employee_notification_devices.
  */
 export async function unregisterOneSignalForEmployee(
-  employeeId?: string | null,
+  _employeeId?: string | null,
 ): Promise<void> {
   if (!onesignalConfig.isConfigured) {
     activeEmployeeId = null;
@@ -514,37 +482,14 @@ export async function unregisterOneSignalForEmployee(
     return;
   }
 
-  const playerId = getPushSubscriptionId();
-  const targetEmployeeId = employeeId ?? activeEmployeeId;
   activeEmployeeId = null;
   activeLaundryEmployeeId = null;
 
   try {
-    let preserveLinked = false;
-    if (playerId && notificationPlatformConfig.isEnabled) {
-      try {
-        const linked = await getActiveLinkedDeviceByPlayerId(playerId);
-        preserveLinked = Boolean(linked);
-      } catch {
-        preserveLinked = Boolean(readLocalDeviceLink()?.linked);
-      }
-    }
-
-    if (preserveLinked) {
+    if (readLocalDeviceLink()?.linked) {
       platformLog(
         'subscription',
-        'info',
-        'Unregister skipped DB delete — active linked device preserved',
-        {
-          onesignalPlayerId: playerId,
-          recoveryAction: 'preserve_linked_on_logout',
-          finalStatus: 'ok',
-        },
-      );
-    } else if (targetEmployeeId) {
-      await removeOneSignalSubscriptionsForEmployee(
-        targetEmployeeId,
-        playerId,
+        'Unregister skipped — local employee link preserved',
       );
     }
 

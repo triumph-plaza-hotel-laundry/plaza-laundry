@@ -121,8 +121,9 @@ const ITEM_NAME_AR: Record<string, string> = {
 /** Always bilingual: Arabic (English). UI language is ignored (kept for call-site compat). */
 export function displayAssetDepartmentName(
   name: string,
-  _language?: string,
+  language?: string,
 ): string {
+  void language;
   const mapped = DEPARTMENT_DISPLAY[name];
   if (mapped) {
     return `${mapped.ar} (${mapped.en})`;

@@ -280,8 +280,6 @@ export type TranslationKey =
   | 'admin.dashboard.aiSettingsDesc'
   | 'admin.dashboard.pushNotifications'
   | 'admin.dashboard.pushNotificationsDesc'
-  | 'admin.dashboard.notificationDiagnostics'
-  | 'admin.dashboard.notificationDiagnosticsDesc'
   | 'admin.push.titleEn'
   | 'admin.push.titleAr'
   | 'admin.push.subtitle'

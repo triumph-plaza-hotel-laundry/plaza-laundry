@@ -19,5 +19,4 @@ export {
   parsePairingPayload,
   removeLinkedDevice,
   type LinkedDevice,
-  type PairingSession,
 } from '@/features/employee-devices/device-pairing-service';

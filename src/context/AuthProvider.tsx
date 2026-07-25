@@ -71,10 +71,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       })
         .catch(() => undefined)
         .finally(() => {
-          void runRecoveryPass('session_change');
+          void runRecoveryPass();
         });
     } else {
-      void runRecoveryPass('session_change');
+      void runRecoveryPass();
     }
   }, [session?.user]);
 
