@@ -1,15 +1,14 @@
 /**
- * TEMP client-side push pipeline tracer.
- * Dump with: window.__tplDumpPushTrace()
- * Clear with: window.__tplClearPushTrace()
+ * Client + SW push pipeline tracer (OS notification diagnosis).
+ * In-app viewer: /employee-device-pairing → “Push client logs”.
  */
 
 const PREFIX = '[push-trace:client]';
 const DB_NAME = 'tpl-push-trace';
 const STORE = 'events';
-const MAX_MEMORY = 200;
+const MAX_MEMORY = 300;
 
-type TraceEntry = {
+export type PushTraceEntry = {
   stage: string;
   detail?: unknown;
   at: string;
@@ -17,18 +16,93 @@ type TraceEntry = {
   source?: string;
 };
 
-const memory: TraceEntry[] = [];
-let wired = false;
+/** Ordered stages used to locate where the OS tray path stops. */
+export const PUSH_PIPELINE_STAGES = [
+  'push-received',
+  'payload-parsed',
+  'showNotification-called',
+  'showNotification-resolved',
+  'notificationclick',
+  'foregroundWillDisplay',
+] as const;
 
-function pushMemory(entry: TraceEntry) {
+export type PushPipelineStage = (typeof PUSH_PIPELINE_STAGES)[number];
+
+export type PushPipelineAnalysis = {
+  entries: PushTraceEntry[];
+  seen: Record<string, number>;
+  firstMissing: PushPipelineStage | null;
+  stoppedAt: string | null;
+  note: string;
+  hasThrow: boolean;
+  lastThrow: PushTraceEntry | null;
+};
+
+const memory: PushTraceEntry[] = [];
+let wired = false;
+const liveListeners = new Set<(entry: PushTraceEntry) => void>();
+
+function pushMemory(entry: PushTraceEntry) {
   memory.push(entry);
   if (memory.length > MAX_MEMORY) {
     memory.splice(0, memory.length - MAX_MEMORY);
   }
+  for (const listener of liveListeners) {
+    try {
+      listener(entry);
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
+function openTraceDb(): Promise<IDBDatabase | null> {
+  if (typeof indexedDB === 'undefined') {
+    return Promise.resolve(null);
+  }
+
+  return new Promise((resolve) => {
+    try {
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onerror = () => resolve(null);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(STORE)) {
+          db.createObjectStore(STORE, { autoIncrement: true });
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+    } catch {
+      resolve(null);
+    }
+  });
+}
+
+async function persistClientEntry(entry: PushTraceEntry): Promise<void> {
+  const db = await openTraceDb();
+  if (!db) return;
+  try {
+    await new Promise<void>((resolve) => {
+      try {
+        const tx = db.transaction(STORE, 'readwrite');
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => resolve();
+        tx.objectStore(STORE).add(entry);
+      } catch {
+        resolve();
+      }
+    });
+  } finally {
+    try {
+      db.close();
+    } catch {
+      /* ignore */
+    }
+  }
 }
 
 export function pushTrace(stage: string, detail?: unknown) {
-  const entry: TraceEntry = {
+  const entry: PushTraceEntry = {
     stage,
     detail: detail ?? null,
     at: new Date().toISOString(),
@@ -36,73 +110,171 @@ export function pushTrace(stage: string, detail?: unknown) {
   };
   pushMemory(entry);
   console.info(PREFIX, stage, detail ?? '');
+  void persistClientEntry(entry);
 }
 
-async function readIndexedDbEvents(): Promise<TraceEntry[]> {
-  if (typeof indexedDB === 'undefined') {
-    return [];
-  }
+export function subscribePushTraceLive(
+  listener: (entry: PushTraceEntry) => void,
+): () => void {
+  liveListeners.add(listener);
+  return () => {
+    liveListeners.delete(listener);
+  };
+}
 
-  return new Promise((resolve) => {
+export async function readPushTraceEntries(): Promise<PushTraceEntry[]> {
+  const db = await openTraceDb();
+  const fromDb: PushTraceEntry[] = [];
+  if (db) {
     try {
-      const req = indexedDB.open(DB_NAME, 1);
-      req.onerror = () => resolve([]);
-      req.onupgradeneeded = () => {
-        const db = req.result;
-        if (!db.objectStoreNames.contains(STORE)) {
-          db.createObjectStore(STORE, { autoIncrement: true });
-        }
-      };
-      req.onsuccess = () => {
+      const rows = await new Promise<PushTraceEntry[]>((resolve) => {
         try {
-          const db = req.result;
           if (!db.objectStoreNames.contains(STORE)) {
             resolve([]);
             return;
           }
           const tx = db.transaction(STORE, 'readonly');
-          const store = tx.objectStore(STORE);
-          const getAll = store.getAll();
+          const getAll = tx.objectStore(STORE).getAll();
           getAll.onsuccess = () => {
-            resolve((getAll.result as TraceEntry[]) ?? []);
+            resolve((getAll.result as PushTraceEntry[]) ?? []);
           };
           getAll.onerror = () => resolve([]);
         } catch {
           resolve([]);
         }
-      };
-    } catch {
-      resolve([]);
+      });
+      fromDb.push(...rows);
+    } finally {
+      try {
+        db.close();
+      } catch {
+        /* ignore */
+      }
     }
-  });
+  }
+
+  const merged = [...fromDb, ...memory].sort((a, b) =>
+    a.at.localeCompare(b.at),
+  );
+
+  // De-dupe identical stage+at+source triples from SW broadcast + IDB.
+  const seen = new Set<string>();
+  const unique: PushTraceEntry[] = [];
+  for (const entry of merged) {
+    const key = `${entry.at}|${entry.stage}|${entry.source ?? ''}|${JSON.stringify(entry.detail ?? null)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(entry);
+  }
+  return unique;
 }
 
-async function dumpPushTrace() {
-  const swEvents = await readIndexedDbEvents();
-  const report = {
-    memory,
-    serviceWorkerIndexedDb: swEvents,
-    merged: [...swEvents, ...memory].sort((a, b) => a.at.localeCompare(b.at)),
+export function analyzePushPipeline(
+  entries: PushTraceEntry[],
+): PushPipelineAnalysis {
+  const seen: Record<string, number> = {};
+  for (const entry of entries) {
+    seen[entry.stage] = (seen[entry.stage] ?? 0) + 1;
+  }
+
+  const throws = entries.filter((e) => e.stage === 'showNotification-threw');
+  const hasThrow = throws.length > 0;
+
+  let firstMissing: PushPipelineStage | null = null;
+  for (const stage of PUSH_PIPELINE_STAGES) {
+    // foregroundWillDisplay only applies when a page is visible — skip as "missing stop"
+    // unless push-received happened while we later need it for diagnosis.
+    if (stage === 'foregroundWillDisplay') {
+      continue;
+    }
+    // notificationclick only after user taps — not a delivery stop.
+    if (stage === 'notificationclick') {
+      continue;
+    }
+    if (!seen[stage]) {
+      firstMissing = stage;
+      break;
+    }
+  }
+
+  let stoppedAt: string | null = null;
+  let note = '';
+
+  if (hasThrow) {
+    stoppedAt = 'showNotification-threw';
+    note =
+      'showNotification() threw on this device — OS tray cannot appear until this error is fixed.';
+  } else if (!seen['push-received']) {
+    stoppedAt = 'push-received';
+    note =
+      'No push event reached this Service Worker. FCM may be delivering elsewhere, SW not controlling the push subscription, or SW not updated yet. Hard-refresh / reopen the site, then retest with the app backgrounded.';
+  } else if (!seen['showNotification-called'] && !seen['payload-parsed']) {
+    stoppedAt = 'showNotification-called';
+    note =
+      'Push reached the SW, but showNotification() was never called. OneSignal SW handler did not display (possible payload handling failure after push).';
+  } else if (seen['showNotification-called'] && !seen['showNotification-resolved'] && !hasThrow) {
+    stoppedAt = 'showNotification-resolved';
+    note =
+      'showNotification() was called but never resolved — promise hung or SW terminated mid-call.';
+  } else if (seen['showNotification-resolved']) {
+    stoppedAt = null;
+    note =
+      'Client pipeline reached showNotification resolved. If the OS tray still missing, the block is below the web app (Chrome site notification channel / Android notification settings), not subscription or SW.';
+  } else {
+    stoppedAt = firstMissing;
+    note = firstMissing
+      ? `Pipeline incomplete; first missing stage: ${firstMissing}.`
+      : 'No conclusive stop detected.';
+  }
+
+  return {
+    entries,
+    seen,
+    firstMissing,
+    stoppedAt,
+    note,
+    hasThrow,
+    lastThrow: throws.length ? throws[throws.length - 1]! : null,
   };
-  console.info(PREFIX, 'DUMP', report);
-  return report;
 }
 
-async function clearPushTrace() {
+export async function loadPushTraceReport(): Promise<{
+  entries: PushTraceEntry[];
+  analysis: PushPipelineAnalysis;
+}> {
+  const entries = await readPushTraceEntries();
+  return { entries, analysis: analyzePushPipeline(entries) };
+}
+
+export async function clearPushTrace(): Promise<void> {
   memory.length = 0;
-  if (typeof indexedDB === 'undefined') {
+  const db = await openTraceDb();
+  if (!db) {
+    pushTrace('cleared');
     return;
   }
-  await new Promise<void>((resolve) => {
+  try {
+    await new Promise<void>((resolve) => {
+      try {
+        if (!db.objectStoreNames.contains(STORE)) {
+          resolve();
+          return;
+        }
+        const tx = db.transaction(STORE, 'readwrite');
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => resolve();
+        tx.objectStore(STORE).clear();
+      } catch {
+        resolve();
+      }
+    });
+  } finally {
     try {
-      const req = indexedDB.deleteDatabase(DB_NAME);
-      req.onsuccess = () => resolve();
-      req.onerror = () => resolve();
-      req.onblocked = () => resolve();
+      db.close();
     } catch {
-      resolve();
+      /* ignore */
     }
-  });
+  }
   pushTrace('cleared');
 }
 
@@ -113,13 +285,17 @@ function bindServiceWorkerMessages() {
   }
 
   navigator.serviceWorker.addEventListener('message', (event) => {
-    const data = event.data as { type?: string; entry?: TraceEntry } | null;
+    const data = event.data as { type?: string; entry?: PushTraceEntry } | null;
     if (!data || data.type !== 'tpl-push-trace' || !data.entry) {
       return;
     }
-    const entry = { ...data.entry, source: 'sw-message' };
+    const entry: PushTraceEntry = {
+      ...data.entry,
+      source: data.entry.source ?? 'sw-message',
+    };
     pushMemory(entry);
     console.info(PREFIX, 'SW→page', entry.stage, entry.detail ?? '');
+    // SW already persisted; avoid duplicate IDB rows for the same SW entry.
   });
 }
 
@@ -164,6 +340,20 @@ async function logServiceWorkerAndPushState() {
     permission:
       typeof Notification !== 'undefined' ? Notification.permission : 'unavailable',
   });
+
+  try {
+    const OneSignal = (await import('react-onesignal')).default;
+    pushTrace('onesignal-subscription-snapshot', {
+      subscriptionId: OneSignal.User.PushSubscription.id ?? null,
+      optedIn: OneSignal.User.PushSubscription.optedIn ?? null,
+      permissionNative: OneSignal.Notifications.permissionNative ?? null,
+      externalId: OneSignal.User.externalId ?? null,
+    });
+  } catch (error) {
+    pushTrace('onesignal-subscription-snapshot-failed', {
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
 }
 
 /**
@@ -179,11 +369,11 @@ export async function installPushTraceClient(): Promise<void> {
     bindServiceWorkerMessages();
     (
       window as Window & {
-        __tplDumpPushTrace?: typeof dumpPushTrace;
+        __tplDumpPushTrace?: typeof loadPushTraceReport;
         __tplClearPushTrace?: typeof clearPushTrace;
         __tplPushTrace?: typeof pushTrace;
       }
-    ).__tplDumpPushTrace = dumpPushTrace;
+    ).__tplDumpPushTrace = loadPushTraceReport;
     (
       window as Window & {
         __tplClearPushTrace?: typeof clearPushTrace;
@@ -194,7 +384,7 @@ export async function installPushTraceClient(): Promise<void> {
         __tplPushTrace?: typeof pushTrace;
       }
     ).__tplPushTrace = pushTrace;
-    pushTrace('client-wired');
+    pushTrace('client-wired', { version: 2 });
   }
 
   await logServiceWorkerAndPushState();
@@ -204,10 +394,12 @@ export async function installPushTraceClient(): Promise<void> {
     OneSignal.Notifications.addEventListener(
       'foregroundWillDisplay',
       (event) => {
-        pushTrace('onesignal-foregroundWillDisplay', {
+        pushTrace('foregroundWillDisplay', {
           title: event?.notification?.title ?? null,
           body: event?.notification?.body ?? null,
           notificationId: event?.notification?.notificationId ?? null,
+          visibility:
+            typeof document !== 'undefined' ? document.visibilityState : null,
         });
       },
     );

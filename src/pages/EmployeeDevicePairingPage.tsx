@@ -14,6 +14,8 @@ import {
 } from '@/features/employee-devices/onesignal-pairing';
 import { useLanguage } from '@/hooks';
 import { useThisDeviceLinkStatus } from '@/hooks/useThisDeviceLinkStatus';
+import { PushClientTracePanel } from '@/features/employee-devices/PushClientTracePanel';
+import { installPushTraceClient } from '@/lib/onesignal';
 import '@/features/employee-devices/employee-device-pairing.css';
 
 type UiState =
@@ -54,6 +56,11 @@ export function EmployeeDevicePairingPage() {
       setUiState('already-linked');
     }
   }, [isLinked, linkReady]);
+
+  useEffect(() => {
+    if (!isLinked) return;
+    void installPushTraceClient();
+  }, [isLinked]);
 
   useEffect(() => {
     if (!linkReady || isLinked) return;
@@ -223,6 +230,7 @@ export function EmployeeDevicePairingPage() {
         <button type="button" onClick={() => navigate('/', { replace: true })}>
           Continue
         </button>
+        <PushClientTracePanel />
       </div>
     );
   }

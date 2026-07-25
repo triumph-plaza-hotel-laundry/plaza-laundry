@@ -23,4 +23,15 @@ export {
 export {
   installPushTraceClient,
   pushTrace,
+  loadPushTraceReport,
+  clearPushTrace,
+  readPushTraceEntries,
+  analyzePushPipeline,
+  subscribePushTraceLive,
+  PUSH_PIPELINE_STAGES,
+} from '@/lib/onesignal/push-trace';
+export type {
+  PushTraceEntry,
+  PushPipelineAnalysis,
+  PushPipelineStage,
 } from '@/lib/onesignal/push-trace';
