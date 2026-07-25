@@ -234,6 +234,7 @@ AS $$
 DECLARE
   v_ticket employee_notification_link_tickets%ROWTYPE;
   v_employee_id TEXT;
+  v_player_id TEXT;
 BEGIN
   IF p_token IS NULL OR trim(p_token) = '' THEN
     RAISE EXCEPTION 'token is required';
@@ -242,9 +243,11 @@ BEGIN
     RAISE EXCEPTION 'player_id is required';
   END IF;
 
+  v_player_id := trim(p_player_id);
+
   SELECT * INTO v_ticket
-  FROM employee_notification_link_tickets
-  WHERE token = trim(p_token)
+  FROM employee_notification_link_tickets AS t
+  WHERE t.token = trim(p_token)
   FOR UPDATE;
 
   IF NOT FOUND THEN
@@ -260,20 +263,22 @@ BEGIN
   v_employee_id := trim(v_ticket.employee_id);
 
   -- Same player claimed for another employee → unlink prior owner
-  UPDATE employee_notification_devices
+  UPDATE employee_notification_devices AS d
   SET status = 'unlinked', updated_at = now()
-  WHERE player_id = trim(p_player_id)
-    AND status = 'active'
-    AND employee_id <> v_employee_id;
+  WHERE d.player_id = v_player_id
+    AND d.status = 'active'
+    AND d.employee_id <> v_employee_id;
 
   -- Upsert single active row for this employee
   IF EXISTS (
-    SELECT 1 FROM employee_notification_devices
-    WHERE employee_id = v_employee_id AND status = 'active'
+    SELECT 1
+    FROM employee_notification_devices AS d
+    WHERE d.employee_id = v_employee_id
+      AND d.status = 'active'
   ) THEN
-    UPDATE employee_notification_devices
+    UPDATE employee_notification_devices AS d
     SET
-      player_id = trim(p_player_id),
+      player_id = v_player_id,
       device_id = COALESCE(NULLIF(trim(p_device_id), ''), 'web'),
       device_name = p_device_name,
       device_model = p_device_model,
@@ -281,14 +286,15 @@ BEGIN
       browser = p_browser,
       app_version = p_app_version,
       updated_at = now()
-    WHERE employee_id = v_employee_id AND status = 'active';
+    WHERE d.employee_id = v_employee_id
+      AND d.status = 'active';
   ELSE
     INSERT INTO employee_notification_devices (
       employee_id, player_id, device_id, device_name, device_model,
       operating_system, browser, app_version, status
     ) VALUES (
       v_employee_id,
-      trim(p_player_id),
+      v_player_id,
       COALESCE(NULLIF(trim(p_device_id), ''), 'web'),
       p_device_name,
       p_device_model,
@@ -299,20 +305,21 @@ BEGIN
     );
   END IF;
 
-  UPDATE employee_notification_link_tickets
+  UPDATE employee_notification_link_tickets AS t
   SET consumed_at = now()
-  WHERE id = v_ticket.id;
+  WHERE t.id = v_ticket.id;
 
   INSERT INTO notification_audit_log (action, actor_admin_id, target_employee_id, detail, result)
   VALUES (
     'claim_device',
     v_ticket.created_by_admin_id,
     v_employee_id,
-    jsonb_build_object('player_id', trim(p_player_id)),
+    jsonb_build_object('player_id', v_player_id),
     'ok'
   );
 
-  RETURN QUERY SELECT v_employee_id, trim(p_player_id);
+  RETURN QUERY
+  SELECT v_employee_id, v_player_id;
 END;
 $$;
 
