@@ -70,6 +70,11 @@ export function NotificationsAdminPage({ initialTab = 'devices' }: Props) {
 
   useEffect(() => subscribeDevices(() => void refresh()), [refresh]);
 
+  useEffect(() => {
+    if (!qrDataUrl || !qrEmployeeId) return;
+    qrModalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [qrDataUrl, qrEmployeeId]);
+
   const activeByEmployee = useMemo(() => {
     const map = new Map<string, NotificationDevice>();
     for (const d of devices) {
@@ -164,11 +169,6 @@ export function NotificationsAdminPage({ initialTab = 'devices' }: Props) {
       setBusy(false);
     }
   };
-
-  useEffect(() => {
-    if (!qrDataUrl || !qrEmployeeId) return;
-    qrModalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, [qrDataUrl, qrEmployeeId]);
 
   const onUnlink = async (employeeId: string) => {
     if (!window.confirm(`Unlink device for ${nameOf(employeeId)}?`)) return;
