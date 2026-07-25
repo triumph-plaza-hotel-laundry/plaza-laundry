@@ -260,7 +260,10 @@ function waitForProductionSubscriptionId(timeoutMs: number): Promise<string | nu
  * Production anonymous flow:
  *   ensureOneSignalInitialized → bootstrapOneSignalWebPush
  *   → autoResubscribe / permission creates PushSubscription.id
- *   → listen for subscription id (no optIn, no login)
+ *   → listen for subscription id (no optIn await hang, no admin login)
+ *
+ * After claim, the pairing page calls ensureEmployeeOneSignalIdentity(employeeId)
+ * so external_user_id becomes employee:<laundryEmployeeId>.
  */
 export async function prepareDeviceForPairing(): Promise<{
   onesignalPlayerId: string;

@@ -28,16 +28,17 @@ import { ensureUsersStoreReady } from '@/features/auth/users';
 import { ensureInventoryPermissionsBootstrapped } from '@/features/inventory/inventory-permissions-service';
 import { isPrimaryAdminAccount } from '@/features/auth/owner-protection';
 import {
-  registerOneSignalForEmployee,
-  unregisterOneSignalForEmployee,
+  clearAdminOneSignalSession,
+  ensureEmployeeOneSignalIdentity,
+  registerAdminOneSignalPush,
 } from '@/lib/onesignal';
+import { readLocalDeviceLink } from '@/features/notifications/pairing/local-device-link';
 import { runRecoveryPass } from '@/lib/notification-platform';
 import type {
   AuthSession,
   PermissionAction,
   PermissionResource,
 } from '@/features/auth/types';
-
 type AuthProviderProps = {
   children: ReactNode;
 };
@@ -62,22 +63,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
     );
 
     const user = session.user;
-    const shouldRegisterPush =
-      Boolean(user.laundryEmployeeId) || isPrimaryAdminAccount(user);
+    const localLink = readLocalDeviceLink();
 
-    if (shouldRegisterPush) {
-      void registerOneSignalForEmployee(user.id, {
-        laundryEmployeeId: user.laundryEmployeeId,
-      })
+    // Employee-linked phones are push endpoints for laundry employees only.
+    // Admin login must never OneSignal.login(adminId) on those devices.
+    if (localLink?.linked && localLink.laundryEmployeeId) {
+      void ensureEmployeeOneSignalIdentity(localLink.laundryEmployeeId)
         .catch(() => undefined)
         .finally(() => {
           void runRecoveryPass();
         });
-    } else {
-      void runRecoveryPass();
+      return;
     }
-  }, [session?.user]);
 
+    if (isPrimaryAdminAccount(user)) {
+      void registerAdminOneSignalPush(user.id)
+        .catch(() => undefined)
+        .finally(() => {
+          void runRecoveryPass();
+        });
+      return;
+    }
+
+    void runRecoveryPass();
+  }, [session?.user]);
   const user = session?.user ?? null;
   const role = user?.role ?? null;
 
@@ -110,13 +119,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
         action: 'logout',
         page: 'auth',
       }).catch(() => undefined);
-      void unregisterOneSignalForEmployee(user.id).catch(() => undefined);
+      void clearAdminOneSignalSession().catch(() => undefined);
     }
 
     clearAuthSession();
     setSession(null);
   }, [user]);
-
   const can = useCallback(
     (resource: PermissionResource, action: PermissionAction) => {
       if (!role) {

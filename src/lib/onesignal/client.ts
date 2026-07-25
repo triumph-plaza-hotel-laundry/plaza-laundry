@@ -3,11 +3,14 @@ import { onesignalConfig } from '@/lib/onesignal/config';
 import { readLocalDeviceLink } from '@/features/employee-devices/local-device-link';
 import { platformLog } from '@/lib/notification-platform';
 import { installPushTraceClient, pushTrace } from '@/lib/onesignal/push-trace';
+import {
+  onesignalAdminExternalId,
+  onesignalEmployeeExternalId,
+} from '@/lib/onesignal/identity';
 
 let initPromise: Promise<boolean> | null = null;
 let changeListenerBound = false;
-let activeEmployeeId: string | null = null;
-let activeLaundryEmployeeId: string | null = null;
+let activeExternalId: string | null = null;
 let permissionPromptInFlight: Promise<boolean> | null = null;
 let lastKnownSubscriptionId: string | null = null;
 
@@ -20,8 +23,7 @@ export function resetOneSignalClientStateForResubscribe(): void {
   changeListenerBound = false;
   permissionPromptInFlight = null;
   lastKnownSubscriptionId = null;
-  activeEmployeeId = null;
-  activeLaundryEmployeeId = null;
+  activeExternalId = null;
   logStep('client state reset for resubscribe');
 }
 
@@ -94,7 +96,7 @@ function getPushSubscriptionId(): string | null {
   }
 }
 
-async function persistCurrentSubscription(employeeId: string): Promise<void> {
+async function persistCurrentSubscription(): Promise<void> {
   const playerId = getPushSubscriptionId();
   if (!playerId) {
     logFail(
@@ -107,13 +109,39 @@ async function persistCurrentSubscription(employeeId: string): Promise<void> {
   const localLink = readLocalDeviceLink();
   logStep('subscription ready (no pool upsert)', {
     playerId,
-    employeeId,
-    activeEmployeeId,
-    activeLaundryEmployeeId,
+    activeExternalId,
     laundryEmployeeId: localLink?.laundryEmployeeId ?? null,
     linked: Boolean(localLink?.linked),
     deviceLabel: detectDeviceLabel(),
   });
+}
+
+async function loginOneSignalExternalId(externalId: string): Promise<void> {
+  try {
+    logStep('OneSignal.login()', externalId);
+    await OneSignal.login(externalId);
+    activeExternalId = externalId;
+    logStep('OneSignal.login() OK', externalId);
+  } catch (loginError) {
+    const message =
+      loginError instanceof Error
+        ? loginError.message
+        : String(loginError ?? '');
+    const is409 = /\b409\b/.test(message) || /conflict/i.test(message);
+    if (is409) {
+      logFail(
+        'OneSignal.login 409 — identity already exists on another User; not transferring',
+        message,
+      );
+      return;
+    }
+    throw loginError;
+  }
+}
+
+function isThisBrowserEmployeeLinked(): boolean {
+  const local = readLocalDeviceLink();
+  return Boolean(local?.linked && local.laundryEmployeeId);
 }
 
 async function bindSubscriptionChangeListener() {
@@ -423,165 +451,174 @@ export async function bootstrapOneSignalWebPush(): Promise<void> {
 }
 
 /**
- * Registers the current browser with OneSignal for a logged-in staff user
- * and upserts the subscription id into Supabase.
+ * Bind this browser's OneSignal User to a laundry employee identity.
+ * Used after QR claim / this-device push reset. Never uses admin ids.
  */
-export async function registerOneSignalForEmployee(
-  employeeId: string,
-  options?: { laundryEmployeeId?: string | null },
+export async function ensureEmployeeOneSignalIdentity(
+  laundryEmployeeId: string,
 ): Promise<void> {
-  logStep('register start', {
-    employeeId,
-    laundryEmployeeId: options?.laundryEmployeeId,
-  });
-
-  if (!employeeId) {
-    logFail('register', 'employeeId is empty');
-    return;
-  }
+  const externalId = onesignalEmployeeExternalId(laundryEmployeeId);
+  logStep('ensure employee identity', { laundryEmployeeId, externalId });
 
   if (!onesignalConfig.isConfigured) {
-    logFail('register', 'VITE_ONESIGNAL_APP_ID is not configured');
+    logFail('ensure employee identity', 'VITE_ONESIGNAL_APP_ID is not configured');
     return;
   }
 
   const ready = await ensureOneSignalInitialized();
   if (!ready) {
-    logFail('register', 'OneSignal.init did not complete successfully');
+    logFail('ensure employee identity', 'OneSignal.init failed');
+    return;
+  }
+
+  await loginOneSignalExternalId(externalId);
+  lastKnownSubscriptionId = getPushSubscriptionId();
+  await persistCurrentSubscription();
+}
+
+/**
+ * Admin-only push registration for a non-employee-linked browser.
+ * Hard no-op when this device is an employee notification endpoint.
+ */
+export async function registerAdminOneSignalPush(
+  adminUserId: string,
+): Promise<void> {
+  const externalId = onesignalAdminExternalId(adminUserId);
+  logStep('register admin push', { adminUserId, externalId });
+
+  if (!adminUserId) {
+    logFail('register admin push', 'adminUserId is empty');
+    return;
+  }
+
+  if (isThisBrowserEmployeeLinked()) {
+    const local = readLocalDeviceLink();
+    logStep(
+      'register admin push skipped — this device is employee-linked',
+      {
+        laundryEmployeeId: local?.laundryEmployeeId,
+        playerId: local?.onesignalPlayerId,
+        refusedAdminId: adminUserId,
+      },
+    );
+    // Keep the employee identity authoritative on this phone.
+    if (local?.laundryEmployeeId) {
+      await ensureEmployeeOneSignalIdentity(local.laundryEmployeeId);
+    }
+    return;
+  }
+
+  if (!onesignalConfig.isConfigured) {
+    logFail('register admin push', 'VITE_ONESIGNAL_APP_ID is not configured');
+    return;
+  }
+
+  const ready = await ensureOneSignalInitialized();
+  if (!ready) {
+    logFail('register admin push', 'OneSignal.init failed');
     return;
   }
 
   if (!OneSignal.Notifications.isPushSupported()) {
-    logFail(
-      'push support',
-      'OneSignal.Notifications.isPushSupported() returned false for this browser',
-    );
+    logFail('register admin push', 'push not supported');
     return;
   }
-  logStep('push is supported');
-
-  activeEmployeeId = employeeId;
-  activeLaundryEmployeeId = options?.laundryEmployeeId ?? null;
 
   try {
-    const localLink = readLocalDeviceLink();
-    // Employee-linked phones are push endpoints keyed by claim/player_id.
-    // Calling OneSignal.login(adminUserId) here causes identity 409 conflicts
-    // and can rotate the subscription away from the claimed player_id.
-    if (localLink?.linked) {
-      logStep(
-        'OneSignal.login skipped — this device is employee-linked',
-        {
-          laundryEmployeeId: localLink.laundryEmployeeId,
-          playerId: localLink.onesignalPlayerId,
-          authUserId: employeeId,
-        },
-      );
-    } else {
-      try {
-        logStep('OneSignal.login()', employeeId);
-        await OneSignal.login(employeeId);
-        logStep('OneSignal.login() OK');
-      } catch (loginError) {
-        const message =
-          loginError instanceof Error
-            ? loginError.message
-            : String(loginError ?? '');
-        const is409 =
-          /\b409\b/.test(message) || /conflict/i.test(message);
-        if (is409) {
-          logFail(
-            'OneSignal.login 409 — identity already exists elsewhere; continuing without transfer',
-            message,
-          );
-        } else {
-          throw loginError;
-        }
-      }
-    }
+    await loginOneSignalExternalId(externalId);
 
     const permitted = await requestBrowserPushPermission();
     if (!permitted) {
-      logFail(
-        'permission prompt',
-        'User did not grant notification permission (or browser blocked the prompt)',
-      );
+      logFail('register admin push', 'notification permission not granted');
       return;
     }
 
     try {
       if (!OneSignal.User.PushSubscription.optedIn) {
-        logStep('PushSubscription.optIn()');
         await OneSignal.User.PushSubscription.optIn();
       }
     } catch (error) {
-      logFail('PushSubscription.optIn()', error);
+      logFail('admin PushSubscription.optIn()', error);
     }
 
-    const previousId =
-      lastKnownSubscriptionId ??
-      readLocalDeviceLink()?.onesignalPlayerId ??
-      null;
-    await persistCurrentSubscription(employeeId);
-    const nextId = getPushSubscriptionId();
-    lastKnownSubscriptionId = nextId;
-
-    // If subscription rotated while linked, update the existing server row.
-    if (
-      nextId &&
-      localLink?.linked &&
-      localLink.laundryEmployeeId &&
-      nextId !== localLink.onesignalPlayerId
-    ) {
-      void import('@/features/notifications/devices/refresh-player-id').then(
-        ({ refreshLinkedPlayerId }) =>
-          refreshLinkedPlayerId({
-            newPlayerId: nextId,
-            previousPlayerId: previousId ?? localLink.onesignalPlayerId,
-          }),
-      );
-    }
-
-    logStep('register complete', { previousId, nextId });
+    lastKnownSubscriptionId = getPushSubscriptionId();
+    await persistCurrentSubscription();
+    logStep('register admin push complete', {
+      externalId,
+      playerId: lastKnownSubscriptionId,
+    });
   } catch (error) {
-    logFail('register', error);
+    logFail('register admin push', error);
   }
 }
 
 /**
- * Clears OneSignal identity on logout. Does not unlink employee devices —
- * Admin Unlink is the only way to clear employee_notification_devices.
+ * Admin logout only. Never runs OneSignal.logout on an employee-linked phone.
+ */
+export async function clearAdminOneSignalSession(): Promise<void> {
+  if (!onesignalConfig.isConfigured) {
+    activeExternalId = null;
+    return;
+  }
+
+  if (isThisBrowserEmployeeLinked()) {
+    platformLog(
+      'subscription',
+      'Admin logout ignored — employee push subscription preserved',
+    );
+    logStep('clearAdminOneSignalSession skipped — employee-linked device');
+    return;
+  }
+
+  activeExternalId = null;
+
+  try {
+    const ready = await ensureOneSignalInitialized();
+    if (ready) {
+      await OneSignal.logout();
+      logStep('OneSignal.logout() OK (admin session)');
+    }
+  } catch (error) {
+    logFail('clearAdminOneSignalSession', error);
+  }
+}
+
+/**
+ * @deprecated Use ensureEmployeeOneSignalIdentity / registerAdminOneSignalPush.
+ * Kept as a safe no-op router so older call sites cannot bind admin→employee.
+ */
+export async function registerOneSignalForEmployee(
+  adminOrUserId: string,
+  options?: { laundryEmployeeId?: string | null },
+): Promise<void> {
+  if (isThisBrowserEmployeeLinked()) {
+    const local = readLocalDeviceLink();
+    if (local?.laundryEmployeeId) {
+      await ensureEmployeeOneSignalIdentity(local.laundryEmployeeId);
+    }
+    return;
+  }
+
+  // Prefer explicit laundry employee only when THIS browser is pairing as that
+  // employee — never map primary-admin id onto an employee subscription.
+  if (options?.laundryEmployeeId) {
+    logStep(
+      'legacy register ignored laundryEmployeeId on non-linked browser — using admin identity',
+      {
+        adminOrUserId,
+        laundryEmployeeId: options.laundryEmployeeId,
+      },
+    );
+  }
+
+  await registerAdminOneSignalPush(adminOrUserId);
+}
+
+/**
+ * @deprecated Use clearAdminOneSignalSession.
  */
 export async function unregisterOneSignalForEmployee(
   _employeeId?: string | null,
 ): Promise<void> {
-  if (!onesignalConfig.isConfigured) {
-    activeEmployeeId = null;
-    activeLaundryEmployeeId = null;
-    return;
-  }
-
-  activeEmployeeId = null;
-  activeLaundryEmployeeId = null;
-
-  try {
-    if (readLocalDeviceLink()?.linked) {
-      // Do not OneSignal.logout() on an employee-linked device — that detaches
-      // the push subscription identity used by claim_notification_device.
-      platformLog(
-        'subscription',
-        'Unregister skipped — local employee link preserved (no OneSignal.logout)',
-      );
-      logStep('unregister skipped — employee-linked device');
-      return;
-    }
-
-    const ready = await ensureOneSignalInitialized();
-    if (ready) {
-      await OneSignal.logout();
-      logStep('OneSignal.logout() OK');
-    }
-  } catch (error) {
-    logFail('unregister', error);
-  }
+  await clearAdminOneSignalSession();
 }

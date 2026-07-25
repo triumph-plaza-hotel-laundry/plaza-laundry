@@ -6,6 +6,7 @@ import {
 } from '@/features/notifications/pairing';
 import { writeLocalDeviceLink } from '@/features/notifications/pairing/local-device-link';
 import { resetThisDevicePushSubscription } from '@/features/notifications/devices/reset-this-device-push';
+import { ensureEmployeeOneSignalIdentity } from '@/lib/onesignal';
 import {
   PairingPrepareError,
   formatPairingDiagnosticReport,
@@ -125,6 +126,10 @@ export function EmployeeDevicePairingPage() {
         onesignalPlayerId: result.playerId,
         laundryEmployeeId: result.employeeId,
         pairedAt: new Date().toISOString(),
+      });
+      // Bind OneSignal User to employee:<id> — never admin:primary-admin-kamel.
+      void ensureEmployeeOneSignalIdentity(result.employeeId).catch((error) => {
+        console.warn('[device-link] employee OneSignal identity bind failed', error);
       });
       console.info('[device-link] claim wrote local link', {
         employeeId: result.employeeId,

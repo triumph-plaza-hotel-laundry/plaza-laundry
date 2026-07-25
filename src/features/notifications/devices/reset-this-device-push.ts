@@ -266,12 +266,14 @@ export async function resetThisDevicePushSubscription(): Promise<DevicePushReset
     pairedAt: new Date().toISOString(),
   });
 
+  const { ensureEmployeeOneSignalIdentity } = await import('@/lib/onesignal');
+  await ensureEmployeeOneSignalIdentity(row.employee_id as string);
+
   console.info(LOG, 'reset complete', {
     employeeId: row.employee_id,
     oldPlayerId,
     newPlayerId: row.player_id,
   });
-
   return {
     employeeId: row.employee_id as string,
     oldPlayerId,

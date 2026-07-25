@@ -64,6 +64,8 @@ export function assertPrimaryAdminSessionImmutable(user: AuthUser): AuthUser {
     isProtected: true,
     isActive: true,
     adminType: 'Admin',
+    // Never couple primary admin auth to laundry employee wts-01 (or any other).
+    laundryEmployeeId: null,
   };
 }
 
