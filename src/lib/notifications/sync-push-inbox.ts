@@ -26,6 +26,11 @@ export async function syncPushInboxNotifications(): Promise<void> {
   const link = readLocalDeviceLink();
   if (!link?.linked || !link.laundryEmployeeId) {
     // Drop push items if this device is not linked.
+    console.info('[push-trace:inbox] sync skipped — no local device link', {
+      hasLink: Boolean(link),
+      linked: link?.linked ?? false,
+      laundryEmployeeId: link?.laundryEmployeeId ?? null,
+    });
     notificationsStore.update((current) =>
       current.filter((n) => n.type !== 'push'),
     );
@@ -52,8 +57,18 @@ export async function syncPushInboxNotifications(): Promise<void> {
 
   if (error) {
     console.warn('[notifications/inbox] sync failed', error.message);
+    console.info('[push-trace:inbox] sync failed', {
+      employeeId,
+      message: error.message,
+    });
     return;
   }
+
+  console.info('[push-trace:inbox] sync ok', {
+    employeeId,
+    rowCount: (data ?? []).length,
+    titles: ((data ?? []) as InboxRow[]).slice(0, 5).map((row) => row.title),
+  });
 
   const pushItems: AppNotification[] = ((data ?? []) as InboxRow[]).map(
     (row) => ({

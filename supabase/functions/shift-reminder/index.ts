@@ -305,6 +305,12 @@ async function logHistory(
       return null;
     }
     console.error('[shift-reminder] history insert failed', error.message);
+    console.error('[push-trace:edge] STAGE history_insert_failed', {
+      message: error.message,
+      laundry_employee_id: row.laundry_employee_id,
+      admin_user_id: row.admin_user_id,
+      onesignal_player_id: row.onesignal_player_id,
+    });
     return null;
   }
   return typeof data?.id === 'string' ? data.id : null;
@@ -333,11 +339,28 @@ async function upsertInboxNotification(
       dedupe_key: input.dedupeKey,
       created_at: input.createdAt ?? new Date().toISOString(),
     },
-    { onConflict: 'employee_id,dedupe_key', ignoreDuplicates: true },
+    {
+      onConflict: 'employee_id,dedupe_key',
+      // Retests must update the same day/employee row so the bell reflects the latest send.
+      ignoreDuplicates: false,
+    },
   );
 
   if (error) {
     console.error('[shift-reminder] inbox upsert failed', error.message);
+    console.error('[push-trace:edge] STAGE inbox_upsert_failed', {
+      employeeId: input.employeeId,
+      dedupeKey: input.dedupeKey,
+      message: error.message,
+    });
+  } else {
+    console.log('[push-trace:edge] STAGE inbox_upsert_ok', {
+      employeeId: input.employeeId,
+      dedupeKey: input.dedupeKey,
+      title: input.title,
+      status: input.status,
+      historyId: input.historyId,
+    });
   }
 }
 
@@ -464,13 +487,16 @@ async function deliverAssignment(
     });
 
     const sentAt = result.ok ? new Date().toISOString() : null;
+    // admin_user_id FK → admin_users.id. Never store laundry employee ids here.
+    const adminUserId =
+      triggeredBy && triggeredBy !== 'cron' ? triggeredBy : null;
     const historyId = await logHistory(supabase, {
       type,
       target_date: assignment.targetDateKey,
       laundry_employee_id: assignment.employeeId,
       employee_name_en: assignment.employeeNameEn,
       employee_name_ar: assignment.employeeNameAr,
-      admin_user_id: subscription.employee_id,
+      admin_user_id: adminUserId,
       onesignal_player_id: subscription.onesignal_player_id,
       title_en: message.title,
       body_en: message.body,
@@ -483,6 +509,14 @@ async function deliverAssignment(
       triggered_by: triggeredBy,
       audience,
       sent_at: sentAt,
+    });
+
+    console.log('[push-trace:edge] STAGE history_write', {
+      historyId,
+      adminUserId,
+      playerId: subscription.onesignal_player_id,
+      status: result.ok ? 'sent' : 'failed',
+      wrote: Boolean(historyId),
     });
 
     await upsertInboxNotification(supabase, {

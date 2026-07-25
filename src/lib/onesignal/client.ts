@@ -2,6 +2,7 @@ import OneSignal from 'react-onesignal';
 import { onesignalConfig } from '@/lib/onesignal/config';
 import { readLocalDeviceLink } from '@/features/employee-devices/local-device-link';
 import { platformLog } from '@/lib/notification-platform';
+import { installPushTraceClient, pushTrace } from '@/lib/onesignal/push-trace';
 
 let initPromise: Promise<boolean> | null = null;
 let changeListenerBound = false;
@@ -145,8 +146,12 @@ async function bindSubscriptionChangeListener() {
 
   try {
     // Focus existing tab only — do not force in-app navigation on notification tap.
-    OneSignal.Notifications.addEventListener('click', () => {
+    OneSignal.Notifications.addEventListener('click', (event) => {
       platformLog('subscription', 'notification click — OS panel / focus only');
+      pushTrace('onesignal-click-bound-listener', {
+        title: event?.notification?.title ?? null,
+        notificationId: event?.notification?.notificationId ?? null,
+      });
     });
   } catch (error) {
     logFail('bind notification click listener', error);
@@ -327,6 +332,13 @@ export function ensureOneSignalInitialized(): Promise<boolean> {
         logStep('OneSignal.init() OK');
         bindSubscriptionChangeListener();
         await logActiveServiceWorkers();
+        // TEMP: wire push/SW/OneSignal stage tracers for delivery diagnosis.
+        void installPushTraceClient();
+        pushTrace('onesignal-init-ok', {
+          origin: window.location.origin,
+          playerId: getPushSubscriptionId(),
+          localLink: readLocalDeviceLink(),
+        });
 
         return true;
       } catch (error) {

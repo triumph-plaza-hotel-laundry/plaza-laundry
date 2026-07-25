@@ -10,3 +10,7 @@ export {
   removeOneSignalSubscriptionByPlayerId,
   removeOneSignalSubscriptionsForEmployee,
 } from '@/lib/onesignal/subscriptions-repository';
+export {
+  installPushTraceClient,
+  pushTrace,
+} from '@/lib/onesignal/push-trace';

@@ -231,6 +231,16 @@ async function sendOnce(
     // (Do not set url / web_url / app_url unless product later configures it.)
   };
 
+  console.log('[push-trace:edge] STAGE create_request', {
+    endpoint: ONESIGNAL_NOTIFICATIONS_URL,
+    appIdPrefix: maskSecret(appId, 8),
+    subscriptionId,
+    idempotencyKey: key,
+    targeting: 'include_subscription_ids',
+    target_channel: 'push',
+    fullPayload: payload,
+  });
+
   console.log('[onesignal-delivery] preparing payload', {
     attemptNumber,
     endpoint: ONESIGNAL_NOTIFICATIONS_URL,
@@ -265,6 +275,12 @@ async function sendOnce(
   }
 
   const rawText = await response.text();
+  console.log('[push-trace:edge] STAGE create_response', {
+    attemptNumber,
+    httpStatus: response.status,
+    ok: response.ok,
+    rawBody: rawText.slice(0, 2000),
+  });
   console.log('[onesignal-delivery] received response', {
     attemptNumber,
     httpStatus: response.status,
@@ -320,6 +336,18 @@ async function sendOnce(
       failed: failedCount,
       errored,
       converted,
+    });
+    console.log('[push-trace:edge] STAGE view_message', {
+      notificationId: onesignalNotificationId,
+      subscriptionId,
+      successful,
+      failed: failedCount,
+      errored,
+      converted,
+      received: outcome.raw?.received ?? null,
+      platform_delivery_stats: outcome.raw?.platform_delivery_stats ?? null,
+      remaining: outcome.raw?.remaining ?? null,
+      completed_at: outcome.raw?.completed_at ?? null,
     });
   }
 
