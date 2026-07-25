@@ -34,6 +34,7 @@ export function NotificationBell() {
     unreadBirthdayCount,
     markRead,
     markAllRead,
+    deleteNotification,
   } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const [isPanelMounted, setIsPanelMounted] = useState(false);
@@ -89,6 +90,7 @@ export function NotificationBell() {
     markRead(notification.id);
     setIsOpen(false);
 
+    // Push: stay in place (no forced navigation). Birthday: existing highlight.
     if (notification.type === 'birthday' && notification.employeeId) {
       navigate(
         `/employees?highlight=${encodeURIComponent(notification.employeeId)}`,
@@ -167,13 +169,18 @@ export function NotificationBell() {
             <ul className="notification-bell__list">
               {notifications.map((notification) => {
                 const isBirthday = notification.type === 'birthday';
+                const isPush = notification.type === 'push';
                 const employeeName = getEmployeeDisplayName(notification, lang);
-                const title = isBirthday
-                  ? t('employees.birthdayNotificationTitle')
-                  : t('common.notifications');
-                const message = isBirthday
-                  ? t('employees.birthdayNotificationWish')
-                  : '';
+                const title = isPush
+                  ? notification.title || t('common.notifications')
+                  : isBirthday
+                    ? t('employees.birthdayNotificationTitle')
+                    : t('common.notifications');
+                const message = isPush
+                  ? notification.body || ''
+                  : isBirthday
+                    ? t('employees.birthdayNotificationWish')
+                    : '';
 
                 return (
                   <li
@@ -187,12 +194,14 @@ export function NotificationBell() {
                     >
                       <span className="notification-bell__content">
                         <span className="notification-bell__item-title">
-                          <span aria-hidden="true" className="notification-bell__emoji">
-                            🎉
-                          </span>
+                          {isBirthday ? (
+                            <span aria-hidden="true" className="notification-bell__emoji">
+                              🎉
+                            </span>
+                          ) : null}
                           {title}
                         </span>
-                        {employeeName ? (
+                        {isBirthday && employeeName ? (
                           <span className="notification-bell__item-name">
                             {employeeName}
                           </span>
@@ -200,6 +209,12 @@ export function NotificationBell() {
                         {message ? (
                           <span className="notification-bell__item-message">
                             {message}
+                          </span>
+                        ) : null}
+                        {isPush && notification.status ? (
+                          <span className="notification-bell__item-status">
+                            {notification.status} ·{' '}
+                            {new Date(notification.createdAt).toLocaleString()}
                           </span>
                         ) : null}
                       </span>
@@ -213,6 +228,19 @@ export function NotificationBell() {
                         </span>
                       ) : null}
                     </button>
+                    {isPush ? (
+                      <button
+                        type="button"
+                        className="notification-bell__delete"
+                        aria-label="Delete"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          deleteNotification(notification.id);
+                        }}
+                      >
+                        ×
+                      </button>
+                    ) : null}
                   </li>
                 );
               })}

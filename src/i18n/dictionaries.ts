@@ -322,9 +322,6 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.dashboard.pushNotifications': 'Shift Push Notifications',
     'admin.dashboard.pushNotificationsDesc':
       'Automatic shift reminders and owner manual OneSignal broadcasts.',
-    'admin.dashboard.notificationDiagnostics': 'Notification Diagnostics',
-    'admin.dashboard.notificationDiagnosticsDesc':
-      'Self-healing platform health: OneSignal, workers, subscriptions, and recovery.',
     'admin.push.titleEn': 'Shift Push Notifications',
     'admin.push.titleAr': 'إشعارات الشفت',
     'admin.push.subtitle':
@@ -418,9 +415,9 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.settings.specialPermissionsSaved': 'Special permissions updated.',
     'admin.settings.confirmDelete':
       'Permanently delete administrator “{name}”?',
-    'admin.dashboard.employeeDevices': 'Employee Device Management',
+    'admin.dashboard.employeeDevices': 'Notifications Center',
     'admin.dashboard.employeeDevicesDesc':
-      'Scan pairing codes and manage linked employee devices.',
+      'Link devices, health, diagnostics, settings, and audit — desktop and mobile.',
     'admin.dashboard.hotelEmployeeAssets': 'Hotel Employee Assets',
     'admin.dashboard.hotelEmployeeAssetsDesc':
       'Manage hotel staff custody receipts by department.',
@@ -1598,9 +1595,6 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.dashboard.pushNotifications': 'إشعارات الشفت',
     'admin.dashboard.pushNotificationsDesc':
       'تذكيرات الشفت التلقائية وإرسال يدوي عبر OneSignal للمالك فقط.',
-    'admin.dashboard.notificationDiagnostics': 'تشخيص الإشعارات',
-    'admin.dashboard.notificationDiagnosticsDesc':
-      'صحة منصة الإصلاح الذاتي: OneSignal والعمال والاشتراكات والاستعادة.',
     'admin.push.titleEn': 'Shift Push Notifications',
     'admin.push.titleAr': 'إشعارات الشفت',
     'admin.push.subtitle':
@@ -1688,9 +1682,9 @@ export const dictionaries: Record<Language, Dictionary> = {
     'admin.settings.permShiftNotifications': 'إدارة إشعارات الشفت',
     'admin.settings.specialPermissionsSaved': 'تم تحديث الصلاحيات الخاصة.',
     'admin.settings.confirmDelete': 'حذف المسؤول «{name}» نهائيًا؟',
-    'admin.dashboard.employeeDevices': 'إدارة أجهزة الموظفين',
+    'admin.dashboard.employeeDevices': 'مركز الإشعارات',
     'admin.dashboard.employeeDevicesDesc':
-      'مسح رموز الربط وإدارة أجهزة الموظفين المرتبطة.',
+      'ربط الأجهزة والصحة والتشخيص والإعدادات والسجل — من الكمبيوتر أو الهاتف.',
     'admin.dashboard.hotelEmployeeAssets': 'عهدة موظفي الفندق',
     'admin.dashboard.hotelEmployeeAssetsDesc':
       'إدارة عهدة موظفي الفندق حسب الأقسام.',

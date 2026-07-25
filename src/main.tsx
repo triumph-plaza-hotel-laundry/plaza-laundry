@@ -20,7 +20,7 @@ function bootstrapPushOnce() {
     void bootstrapOneSignalWebPush()
       .catch(() => undefined)
       .finally(() => {
-        startNotificationPlatform({ trigger: 'app_start' });
+        startNotificationPlatform();
       });
   }, 2500);
 }
