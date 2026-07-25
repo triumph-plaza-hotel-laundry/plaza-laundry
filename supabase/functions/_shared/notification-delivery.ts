@@ -212,10 +212,6 @@ async function sendOnce(
   body: string,
   attemptNumber: number,
   idempotencyKey: string,
-  extras?: {
-    data?: Record<string, unknown>;
-    launchUrl?: string;
-  },
 ): Promise<DeliveryAttemptResult> {
   const key = ensureUuidV4IdempotencyKey(idempotencyKey);
 
@@ -224,7 +220,6 @@ async function sendOnce(
   // - Authorization: Key <REST API Key>
   // - target_channel: push (explicit; avoids channel ambiguity)
   // - idempotency_key must be UUID v4
-  // - data + url/web_url power notificationclick deep links
   const payload: Record<string, unknown> = {
     app_id: appId,
     include_subscription_ids: [subscriptionId],
@@ -232,17 +227,9 @@ async function sendOnce(
     headings: { en: title },
     contents: { en: body },
     idempotency_key: key,
+    // Normal OS notification: no forced deep-link / navigation on tap.
+    // (Do not set url / web_url / app_url unless product later configures it.)
   };
-
-  if (extras?.data && Object.keys(extras.data).length > 0) {
-    payload.data = extras.data;
-  }
-
-  const launchUrl = extras?.launchUrl?.trim();
-  if (launchUrl) {
-    payload.url = launchUrl;
-    payload.web_url = launchUrl;
-  }
 
   console.log('[push-trace:edge] STAGE create_request', {
     endpoint: ONESIGNAL_NOTIFICATIONS_URL,
@@ -251,8 +238,6 @@ async function sendOnce(
     idempotencyKey: key,
     targeting: 'include_subscription_ids',
     target_channel: 'push',
-    hasData: Boolean(extras?.data),
-    launchUrl: launchUrl || null,
     fullPayload: payload,
   });
 
@@ -302,6 +287,7 @@ async function sendOnce(
     ok: response.ok,
     rawPreview: rawText.slice(0, 500),
   });
+
   let parsed: unknown = null;
   try {
     parsed = rawText ? JSON.parse(rawText) : null;
@@ -459,10 +445,6 @@ export async function sendToSubscriptionId(options: {
   backoffMs?: readonly number[];
   /** Optional UUID v4. Non-UUID values are ignored and replaced. */
   idempotencyKey?: string;
-  /** Deep-link / click payload for the client + service worker. */
-  data?: Record<string, unknown>;
-  /** Absolute HTTPS URL opened on notification tap. */
-  launchUrl?: string;
 }): Promise<SmartDeliveryResult> {
   const maxAttempts = options.maxAttempts ?? 3;
   const backoff = options.backoffMs ?? DEFAULT_BACKOFF_MS;
@@ -540,10 +522,6 @@ export async function sendToSubscriptionId(options: {
         options.body,
         attempt,
         idempotencyKey,
-        {
-          data: options.data,
-          launchUrl: options.launchUrl,
-        },
       );
     } catch (error) {
       console.error('[onesignal-delivery] sendOnce catch', error);

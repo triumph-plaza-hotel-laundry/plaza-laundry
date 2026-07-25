@@ -13,14 +13,3 @@ export {
   markPushInboxRead,
   deletePushInbox,
 } from '@/lib/notifications/sync-push-inbox';
-export {
-  OPEN_NOTIFICATION_EVENT,
-  OPEN_NOTIFICATION_QUERY,
-  pushInboxLocalId,
-  requestOpenNotification,
-  subscribeOpenNotification,
-  consumeOpenNotificationQuery,
-  buildOpenNotificationPath,
-  bindOpenNotificationMessageListener,
-  type OpenNotificationDetail,
-} from '@/lib/notifications/open-notification';
