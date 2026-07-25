@@ -166,12 +166,27 @@
   background: color-mix(in srgb, #3d8f4a 30%, transparent);
 }
 
+.notif-admin__qr-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgb(0 0 0 / 55%);
+}
+
 .notif-admin__qr-modal {
   text-align: center;
-  padding: 1rem;
+  padding: 1.25rem 1.1rem;
   border: 1px solid var(--shift-gold, #c9a227);
   border-radius: 12px;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
+  max-width: min(360px, 100%);
+  width: 100%;
+  background: var(--shift-panel, #141414);
+  box-shadow: 0 16px 48px rgb(0 0 0 / 45%);
 }
 
 .notif-admin__qr-modal img {
@@ -181,6 +196,14 @@
   background: #fff;
   padding: 0.5rem;
   border-radius: 8px;
+  display: block;
+}
+
+.notif-admin__qr-link {
+  word-break: break-all;
+  font-size: 0.75rem;
+  max-height: 4.5rem;
+  overflow: auto;
 }
 
 .notif-admin__toolbar {

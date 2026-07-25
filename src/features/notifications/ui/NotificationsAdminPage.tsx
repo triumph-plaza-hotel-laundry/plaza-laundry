@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import QRCode from 'qrcode';
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import { toDataURL as qrToDataUrl } from 'qrcode';
 import type { LaundryEmployee } from '@/data/laundry-employees';
 import { employeesRepository } from '@/data/repositories/employees-repository';
 import { AdminPageHeader } from '@/features/admin/components/AdminPageHeader';
@@ -48,7 +48,9 @@ export function NotificationsAdminPage({ initialTab = 'devices' }: Props) {
   const [busy, setBusy] = useState(false);
   const [qrEmployeeId, setQrEmployeeId] = useState<string | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [qrLinkUrl, setQrLinkUrl] = useState<string | null>(null);
   const [qrExpiresAt, setQrExpiresAt] = useState<string | null>(null);
+  const qrModalRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     void employeesRepository.hydrate();
@@ -116,25 +118,57 @@ export function NotificationsAdminPage({ initialTab = 'devices' }: Props) {
     return language === 'ar' ? emp.name.ar : emp.name.en;
   };
 
+  const clearQrModal = () => {
+    setQrEmployeeId(null);
+    setQrDataUrl(null);
+    setQrLinkUrl(null);
+    setQrExpiresAt(null);
+  };
+
   const onIssueQr = async (employeeId: string) => {
     if (!user?.id) return;
     setBusy(true);
     setError(null);
     setMessage(null);
+    clearQrModal();
     try {
       const ticket = await issueLinkTicket(employeeId, user.id);
-      const payload = encodeLinkPayload(ticket.token);
-      const url = await QRCode.toDataURL(payload, { width: 280, margin: 2 });
-      setQrEmployeeId(employeeId);
-      setQrDataUrl(url);
+      if (!ticket.token?.trim()) {
+        throw new Error('Link ticket RPC returned no token');
+      }
+
+      const pairingUrl = encodeLinkPayload(ticket.token);
+      if (!pairingUrl.startsWith('http')) {
+        throw new Error(`Invalid pairing URL: ${pairingUrl}`);
+      }
+
+      const dataUrl = await qrToDataUrl(pairingUrl, {
+        width: 280,
+        margin: 2,
+        errorCorrectionLevel: 'M',
+      });
+      if (!dataUrl?.startsWith('data:image')) {
+        throw new Error('QR image generation returned an empty result');
+      }
+
+      // Open dialog only after image is ready so the condition never races.
+      setQrLinkUrl(pairingUrl);
       setQrExpiresAt(ticket.expiresAt);
+      setQrEmployeeId(employeeId);
+      setQrDataUrl(dataUrl);
       setMessage(`QR ready for ${nameOf(employeeId)}`);
     } catch (caught) {
+      clearQrModal();
       setError(caught instanceof Error ? caught.message : 'Failed to issue QR');
     } finally {
       setBusy(false);
     }
   };
+
+  useEffect(() => {
+    if (!qrDataUrl || !qrEmployeeId) return;
+    qrModalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [qrDataUrl, qrEmployeeId]);
 
   const onUnlink = async (employeeId: string) => {
     if (!window.confirm(`Unlink device for ${nameOf(employeeId)}?`)) return;
@@ -143,8 +177,7 @@ export function NotificationsAdminPage({ initialTab = 'devices' }: Props) {
     try {
       await unlinkDevice(employeeId, user?.id);
       if (qrEmployeeId === employeeId) {
-        setQrEmployeeId(null);
-        setQrDataUrl(null);
+        clearQrModal();
       }
       setMessage(`Unlinked ${nameOf(employeeId)}`);
       await refresh();
@@ -216,15 +249,13 @@ export function NotificationsAdminPage({ initialTab = 'devices' }: Props) {
           busy={busy}
           qrEmployeeId={qrEmployeeId}
           qrDataUrl={qrDataUrl}
+          qrLinkUrl={qrLinkUrl}
           qrExpiresAt={qrExpiresAt}
+          qrModalRef={qrModalRef}
           onIssueQr={onIssueQr}
           onUnlink={onUnlink}
           onTest={onTest}
-          onCloseQr={() => {
-            setQrEmployeeId(null);
-            setQrDataUrl(null);
-            setQrExpiresAt(null);
-          }}
+          onCloseQr={clearQrModal}
         />
       ) : null}
 
@@ -271,7 +302,9 @@ function DevicesPanel(props: {
   busy: boolean;
   qrEmployeeId: string | null;
   qrDataUrl: string | null;
+  qrLinkUrl: string | null;
   qrExpiresAt: string | null;
+  qrModalRef: RefObject<HTMLDivElement | null>;
   onIssueQr: (id: string) => void;
   onUnlink: (id: string) => void;
   onTest: (id: string) => void;
@@ -287,21 +320,33 @@ function DevicesPanel(props: {
       />
 
       {props.qrDataUrl && props.qrEmployeeId ? (
-        <div className="notif-admin__qr-modal">
-          <h3>Scan to link — {props.nameOf(props.qrEmployeeId)}</h3>
-          <img src={props.qrDataUrl} alt="Link QR code" />
-          {props.qrExpiresAt ? (
+        <div
+          className="notif-admin__qr-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Scan to link ${props.nameOf(props.qrEmployeeId)}`}
+        >
+          <div className="notif-admin__qr-modal" ref={props.qrModalRef}>
+            <h3>Scan to link — {props.nameOf(props.qrEmployeeId)}</h3>
+            <img src={props.qrDataUrl} alt="Link QR code" />
+            {props.qrExpiresAt ? (
+              <p className="notif-admin__muted">
+                Expires {new Date(props.qrExpiresAt).toLocaleString()}
+              </p>
+            ) : null}
+            {props.qrLinkUrl ? (
+              <p className="notif-admin__muted notif-admin__qr-link">
+                {props.qrLinkUrl}
+              </p>
+            ) : null}
             <p className="notif-admin__muted">
-              Expires {new Date(props.qrExpiresAt).toLocaleString()}
+              Employee scans this QR with their phone camera — it opens the
+              pairing page and links automatically (no in-app scanner).
             </p>
-          ) : null}
-          <p className="notif-admin__muted">
-            Employee scans this QR with their phone camera — it opens the
-            pairing page and links automatically (no in-app scanner).
-          </p>
-          <button type="button" onClick={props.onCloseQr}>
-            Close
-          </button>
+            <button type="button" onClick={props.onCloseQr}>
+              Close
+            </button>
+          </div>
         </div>
       ) : null}
 

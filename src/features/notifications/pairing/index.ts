@@ -15,7 +15,12 @@ const PAIRING_PATH = '/employee-device-pairing';
 export function getPairingAppOrigin(): string {
   const configured = import.meta.env.VITE_PUBLIC_APP_URL?.trim();
   if (configured) {
-    return configured.replace(/\/$/, '');
+    const trimmed = configured.replace(/\/$/, '');
+    if (/^https?:\/\//i.test(trimmed)) {
+      return trimmed;
+    }
+    // Vercel-style host without scheme still must be a valid URL base.
+    return `https://${trimmed}`;
   }
   if (typeof window !== 'undefined' && window.location?.origin) {
     return window.location.origin;
@@ -32,8 +37,12 @@ export function encodeLinkPayload(token: string): string {
   if (!origin) {
     throw new Error('Cannot build pairing URL — app origin is unknown');
   }
+  const rawToken = String(token ?? '').trim();
+  if (!rawToken) {
+    throw new Error('Cannot build pairing URL — token is empty');
+  }
   const url = new URL(PAIRING_PATH, `${origin}/`);
-  url.searchParams.set('token', token.trim());
+  url.searchParams.set('token', rawToken);
   return url.toString();
 }
 
@@ -110,14 +119,27 @@ export async function issueLinkTicket(
   if (error) {
     throw new Error(error.message);
   }
-  const row = Array.isArray(data) ? data[0] : data;
-  if (!row?.token) {
-    throw new Error('Failed to issue link ticket');
+
+  const rows = Array.isArray(data) ? data : data ? [data] : [];
+  const row = rows[0] as
+    | {
+        token?: unknown;
+        employee_id?: unknown;
+        expires_at?: unknown;
+      }
+    | undefined;
+
+  const token = typeof row?.token === 'string' ? row.token.trim() : '';
+  if (!token) {
+    throw new Error(
+      'Failed to issue link ticket — RPC returned no token in client data',
+    );
   }
+
   return {
-    token: row.token as string,
-    employeeId: row.employee_id as string,
-    expiresAt: row.expires_at as string,
+    token,
+    employeeId: String(row?.employee_id ?? employeeId),
+    expiresAt: String(row?.expires_at ?? ''),
   };
 }
 
