@@ -339,6 +339,11 @@ export function ensureOneSignalInitialized(): Promise<boolean> {
           playerId: getPushSubscriptionId(),
           localLink: readLocalDeviceLink(),
         });
+        // Restore local device link from server if player_id still maps,
+        // or keep/repair cache when this phone is already employee-linked.
+        void import('@/features/notifications/pairing/reconcile-local-link').then(
+          ({ reconcileLocalDeviceLink }) => reconcileLocalDeviceLink(),
+        );
 
         return true;
       } catch (error) {
@@ -445,9 +450,41 @@ export async function registerOneSignalForEmployee(
   activeLaundryEmployeeId = options?.laundryEmployeeId ?? null;
 
   try {
-    logStep('OneSignal.login()', employeeId);
-    await OneSignal.login(employeeId);
-    logStep('OneSignal.login() OK');
+    const localLink = readLocalDeviceLink();
+    // Employee-linked phones are push endpoints keyed by claim/player_id.
+    // Calling OneSignal.login(adminUserId) here causes identity 409 conflicts
+    // and can rotate the subscription away from the claimed player_id.
+    if (localLink?.linked) {
+      logStep(
+        'OneSignal.login skipped — this device is employee-linked',
+        {
+          laundryEmployeeId: localLink.laundryEmployeeId,
+          playerId: localLink.onesignalPlayerId,
+          authUserId: employeeId,
+        },
+      );
+    } else {
+      try {
+        logStep('OneSignal.login()', employeeId);
+        await OneSignal.login(employeeId);
+        logStep('OneSignal.login() OK');
+      } catch (loginError) {
+        const message =
+          loginError instanceof Error
+            ? loginError.message
+            : String(loginError ?? '');
+        const is409 =
+          /\b409\b/.test(message) || /conflict/i.test(message);
+        if (is409) {
+          logFail(
+            'OneSignal.login 409 — identity already exists elsewhere; continuing without transfer',
+            message,
+          );
+        } else {
+          throw loginError;
+        }
+      }
+    }
 
     const permitted = await requestBrowserPushPermission();
     if (!permitted) {
@@ -475,6 +512,22 @@ export async function registerOneSignalForEmployee(
     const nextId = getPushSubscriptionId();
     lastKnownSubscriptionId = nextId;
 
+    // If subscription rotated while linked, update the existing server row.
+    if (
+      nextId &&
+      localLink?.linked &&
+      localLink.laundryEmployeeId &&
+      nextId !== localLink.onesignalPlayerId
+    ) {
+      void import('@/features/notifications/devices/refresh-player-id').then(
+        ({ refreshLinkedPlayerId }) =>
+          refreshLinkedPlayerId({
+            newPlayerId: nextId,
+            previousPlayerId: previousId ?? localLink.onesignalPlayerId,
+          }),
+      );
+    }
+
     logStep('register complete', { previousId, nextId });
   } catch (error) {
     logFail('register', error);
@@ -499,10 +552,14 @@ export async function unregisterOneSignalForEmployee(
 
   try {
     if (readLocalDeviceLink()?.linked) {
+      // Do not OneSignal.logout() on an employee-linked device — that detaches
+      // the push subscription identity used by claim_notification_device.
       platformLog(
         'subscription',
-        'Unregister skipped — local employee link preserved',
+        'Unregister skipped — local employee link preserved (no OneSignal.logout)',
       );
+      logStep('unregister skipped — employee-linked device');
+      return;
     }
 
     const ready = await ensureOneSignalInitialized();

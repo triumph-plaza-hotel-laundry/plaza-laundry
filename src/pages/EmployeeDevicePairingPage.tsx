@@ -124,6 +124,10 @@ export function EmployeeDevicePairingPage() {
         laundryEmployeeId: result.employeeId,
         pairedAt: new Date().toISOString(),
       });
+      console.info('[device-link] claim wrote local link', {
+        employeeId: result.employeeId,
+        playerId: result.playerId,
+      });
       setUiState('success');
       window.setTimeout(() => navigate('/', { replace: true }), 1600);
     } catch (caught) {

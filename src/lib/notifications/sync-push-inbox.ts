@@ -23,9 +23,25 @@ type InboxRow = {
  * Birthdays remain client-generated; push rows come from employee_inbox_notifications.
  */
 export async function syncPushInboxNotifications(): Promise<void> {
-  const link = readLocalDeviceLink();
+  let link = readLocalDeviceLink();
   if (!link?.linked || !link.laundryEmployeeId) {
-    // Drop push items if this device is not linked.
+    // One more restore attempt — local cache may have been wiped by an older
+    // aggressive reconcile while the server link is still active.
+    try {
+      const { reconcileLocalDeviceLink } = await import(
+        '@/features/notifications/pairing/reconcile-local-link'
+      );
+      await reconcileLocalDeviceLink();
+      link = readLocalDeviceLink();
+    } catch (error) {
+      console.warn(
+        '[push-trace:inbox] reconcile before sync failed',
+        error instanceof Error ? error.message : error,
+      );
+    }
+  }
+
+  if (!link?.linked || !link.laundryEmployeeId) {
     console.info('[push-trace:inbox] sync skipped — no local device link', {
       hasLink: Boolean(link),
       linked: link?.linked ?? false,

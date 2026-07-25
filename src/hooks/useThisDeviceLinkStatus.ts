@@ -1,19 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
+import { subscribeDevices } from '@/features/notifications/devices';
 import {
-  getActiveDeviceByPlayerId,
-  subscribeDevices,
-} from '@/features/notifications/devices';
-import {
-  clearLocalDeviceLink,
   readLocalDeviceLink,
   subscribeLocalDeviceLink,
-  writeLocalDeviceLink,
 } from '@/features/notifications/pairing/local-device-link';
-import { getCurrentOneSignalPlayerId } from '@/features/employee-devices/onesignal-pairing';
+import { reconcileLocalDeviceLink } from '@/features/notifications/pairing/reconcile-local-link';
 
 /**
  * Tracks whether THIS browser/PWA is linked to an employee.
  * QR pairing page is shown only when unlinked; after Admin Unlink it returns.
+ *
+ * Local cache is reconciled against the server — never cleared solely because
+ * the live OneSignal player_id does not match yet (rotation / identity 409).
  */
 export function useThisDeviceLinkStatus() {
   const [isLinked, setIsLinked] = useState(() => {
@@ -23,35 +21,14 @@ export function useThisDeviceLinkStatus() {
   const [isReady, setIsReady] = useState(false);
 
   const refresh = useCallback(async () => {
-    const local = readLocalDeviceLink();
-    if (local?.linked) {
-      setIsLinked(true);
-    }
-
     try {
-      const playerId = await getCurrentOneSignalPlayerId();
-      if (!playerId) {
-        setIsLinked(Boolean(local?.linked));
-        setIsReady(true);
-        return;
-      }
-
-      const active = await getActiveDeviceByPlayerId(playerId);
-      if (active) {
-        writeLocalDeviceLink({
-          linked: true,
-          onesignalPlayerId: playerId,
-          laundryEmployeeId: active.employeeId,
-          pairedAt: active.linkedAt,
-        });
-        setIsLinked(true);
-      } else {
-        if (local?.linked) {
-          clearLocalDeviceLink();
-        }
-        setIsLinked(false);
-      }
-    } catch {
+      const result = await reconcileLocalDeviceLink();
+      setIsLinked(result.linked);
+    } catch (error) {
+      console.warn(
+        '[device-link] refresh failed — keeping cached link state',
+        error instanceof Error ? error.message : error,
+      );
       setIsLinked(Boolean(readLocalDeviceLink()?.linked));
     } finally {
       setIsReady(true);
@@ -71,10 +48,11 @@ export function useThisDeviceLinkStatus() {
         void refresh();
       }
     };
-    window.addEventListener('focus', () => void refresh());
+    const onFocus = () => void refresh();
+    window.addEventListener('focus', onFocus);
     document.addEventListener('visibilitychange', onVisible);
     return () => {
-      window.removeEventListener('focus', () => void refresh());
+      window.removeEventListener('focus', onFocus);
       document.removeEventListener('visibilitychange', onVisible);
     };
   }, [refresh]);

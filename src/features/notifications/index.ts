@@ -19,3 +19,5 @@ export {
   clearLocalDeviceLink,
   subscribeLocalDeviceLink,
 } from '@/features/notifications/pairing/local-device-link';
+
+export { reconcileLocalDeviceLink } from '@/features/notifications/pairing/reconcile-local-link';
