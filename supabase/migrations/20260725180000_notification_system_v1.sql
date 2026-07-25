@@ -178,7 +178,7 @@ CREATE OR REPLACE FUNCTION issue_notification_link_ticket(
 RETURNS TABLE (token TEXT, employee_id TEXT, expires_at TIMESTAMPTZ)
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 AS $$
 DECLARE
   v_token TEXT;
@@ -193,7 +193,8 @@ BEGIN
   END IF;
 
   v_ttl := GREATEST(COALESCE(p_ttl_minutes, 15), 1);
-  v_token := encode(gen_random_bytes(24), 'hex');
+  -- pgcrypto lives in extensions on Supabase (not public)
+  v_token := encode(extensions.gen_random_bytes(24), 'hex');
   v_expires := now() + make_interval(mins => v_ttl);
 
   INSERT INTO employee_notification_link_tickets (
@@ -400,3 +401,14 @@ BEGIN
     ALTER PUBLICATION supabase_realtime ADD TABLE public.employee_notification_devices;
   END IF;
 END $$;
+
+GRANT EXECUTE ON FUNCTION public.issue_notification_link_ticket(TEXT, TEXT, INT)
+  TO anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.claim_notification_device(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT)
+  TO anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.unlink_notification_device(TEXT, TEXT)
+  TO anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.expire_stale_notification_link_tickets()
+  TO anon, authenticated, service_role;
+
+NOTIFY pgrst, 'reload schema';
