@@ -296,7 +296,8 @@ function DevicesPanel(props: {
             </p>
           ) : null}
           <p className="notif-admin__muted">
-            Employee opens pairing on their phone and scans this code.
+            Employee scans this QR with their phone camera — it opens the
+            pairing page and links automatically (no in-app scanner).
           </p>
           <button type="button" onClick={props.onCloseQr}>
             Close

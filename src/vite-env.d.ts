@@ -9,6 +9,8 @@ interface ImportMetaEnv {
   /** Set to "false" to disable self-healing notification platform client. */
   readonly VITE_NOTIFICATION_PLATFORM_V2?: string;
   readonly VITE_APP_BUILD_ID?: string;
+  /** Public site origin for pairing QR links (e.g. https://laundry.example.com). */
+  readonly VITE_PUBLIC_APP_URL?: string;
 }
 
 interface ImportMeta {

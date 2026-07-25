@@ -9,18 +9,74 @@ import {
   type LinkTicket,
 } from '@/features/notifications/shared/types';
 
+const PAIRING_PATH = '/employee-device-pairing';
+
+/** Production/public origin for QR links (phones must open the live site). */
+export function getPairingAppOrigin(): string {
+  const configured = import.meta.env.VITE_PUBLIC_APP_URL?.trim();
+  if (configured) {
+    return configured.replace(/\/$/, '');
+  }
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return window.location.origin;
+  }
+  return '';
+}
+
+/**
+ * QR payload: HTTPS URL so the phone camera opens pairing directly.
+ * Example: https://app.example.com/employee-device-pairing?token=…
+ */
 export function encodeLinkPayload(token: string): string {
-  const payload: LinkQrPayload = {
-    v: 1,
-    type: LINK_QR_PAYLOAD_TYPE,
-    token,
-  };
-  return JSON.stringify(payload);
+  const origin = getPairingAppOrigin();
+  if (!origin) {
+    throw new Error('Cannot build pairing URL — app origin is unknown');
+  }
+  const url = new URL(PAIRING_PATH, `${origin}/`);
+  url.searchParams.set('token', token.trim());
+  return url.toString();
+}
+
+function tokenFromUrlString(raw: string): string | null {
+  try {
+    const url = new URL(raw.trim());
+    const fromQuery =
+      url.searchParams.get('token')?.trim() ||
+      url.searchParams.get('t')?.trim();
+    if (fromQuery) {
+      return fromQuery;
+    }
+    // Hash-router style: /#/employee-device-pairing?token=…
+    if (url.hash.includes('token=')) {
+      const hashQuery = url.hash.includes('?')
+        ? url.hash.slice(url.hash.indexOf('?') + 1)
+        : '';
+      const params = new URLSearchParams(hashQuery);
+      const hashToken =
+        params.get('token')?.trim() || params.get('t')?.trim();
+      if (hashToken) {
+        return hashToken;
+      }
+    }
+  } catch {
+    /* not a URL */
+  }
+  return null;
 }
 
 export function parseLinkPayload(raw: string): LinkQrPayload | null {
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const fromUrl = tokenFromUrlString(trimmed);
+  if (fromUrl) {
+    return { v: 1, type: LINK_QR_PAYLOAD_TYPE, token: fromUrl };
+  }
+
   try {
-    const parsed = JSON.parse(raw) as LinkQrPayload;
+    const parsed = JSON.parse(trimmed) as LinkQrPayload;
     if (
       parsed?.v === 1 &&
       parsed.type === LINK_QR_PAYLOAD_TYPE &&
@@ -29,15 +85,14 @@ export function parseLinkPayload(raw: string): LinkQrPayload | null {
     ) {
       return parsed;
     }
-    return null;
   } catch {
-    // Allow bare token for manual entry
-    const token = raw.trim();
-    if (token && !token.startsWith('{')) {
-      return { v: 1, type: LINK_QR_PAYLOAD_TYPE, token };
+    // Bare token for manual entry
+    if (!trimmed.startsWith('{') && !trimmed.includes('://')) {
+      return { v: 1, type: LINK_QR_PAYLOAD_TYPE, token: trimmed };
     }
-    return null;
   }
+
+  return null;
 }
 
 export async function issueLinkTicket(

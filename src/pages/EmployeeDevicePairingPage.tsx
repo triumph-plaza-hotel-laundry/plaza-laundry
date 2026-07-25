@@ -1,13 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Html5Qrcode } from 'html5-qrcode';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   claimDevice,
   parseLinkPayload,
 } from '@/features/notifications/pairing';
-import {
-  writeLocalDeviceLink,
-} from '@/features/notifications/pairing/local-device-link';
+import { writeLocalDeviceLink } from '@/features/notifications/pairing/local-device-link';
 import {
   PairingPrepareError,
   formatPairingDiagnosticReport,
@@ -17,15 +14,23 @@ import { useLanguage } from '@/hooks';
 import { useThisDeviceLinkStatus } from '@/hooks/useThisDeviceLinkStatus';
 import '@/features/employee-devices/employee-device-pairing.css';
 
-type UiState = 'preparing' | 'scanning' | 'claiming' | 'success' | 'already-linked' | 'error';
+type UiState =
+  | 'preparing'
+  | 'ready'
+  | 'claiming'
+  | 'success'
+  | 'already-linked'
+  | 'error';
 
 /**
  * Employee phone pairing gate.
- * Visible only when this device is not linked. Admin shows QR; phone scans.
+ * Primary path: Admin QR encodes an HTTPS URL; phone camera opens this page
+ * with ?token=… then this device claims automatically (no in-app scanner).
  */
 export function EmployeeDevicePairingPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isLinked, isReady: linkReady } = useThisDeviceLinkStatus();
   const [uiState, setUiState] = useState<UiState>('preparing');
   const [error, setError] = useState<string | null>(null);
@@ -33,10 +38,12 @@ export function EmployeeDevicePairingPage() {
   const [statusStep, setStatusStep] = useState('Starting…');
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [manualToken, setManualToken] = useState('');
-  const scannerRef = useRef<Html5Qrcode | null>(null);
   const claimingRef = useRef(false);
   const successHandled = useRef(false);
-  const scannerRegionId = 'employee-link-qr-reader';
+  const autoClaimStarted = useRef(false);
+
+  const urlToken =
+    searchParams.get('token')?.trim() || searchParams.get('t')?.trim() || '';
 
   useEffect(() => {
     if (!linkReady) return;
@@ -53,14 +60,18 @@ export function EmployeeDevicePairingPage() {
     const start = async () => {
       setUiState('preparing');
       setError(null);
-      setStatusStep('Preparing OneSignal…');
+      setStatusStep('Preparing notifications…');
       try {
         const prepared = await prepareDeviceForPairing();
         if (cancelled) return;
         setPlayerId(prepared.onesignalPlayerId);
         setDiagnostic(formatPairingDiagnosticReport(prepared.report));
-        setUiState('scanning');
-        setStatusStep('Scan the Admin QR code');
+        setUiState('ready');
+        setStatusStep(
+          urlToken
+            ? 'Link ticket found — finishing…'
+            : 'Open the Admin QR with this phone’s camera, or paste a token below.',
+        );
       } catch (caught) {
         if (cancelled) return;
         if (caught instanceof PairingPrepareError) {
@@ -77,97 +88,34 @@ export function EmployeeDevicePairingPage() {
     return () => {
       cancelled = true;
     };
-  }, [isLinked, linkReady]);
+  }, [isLinked, linkReady, urlToken]);
 
-  useEffect(() => {
-    if (uiState !== 'scanning' || !playerId) return;
-
-    let disposed = false;
-    const scanner = new Html5Qrcode(scannerRegionId);
-    scannerRef.current = scanner;
-
-    const onScan = async (decoded: string) => {
-      if (claimingRef.current || successHandled.current) return;
-      const payload = parseLinkPayload(decoded);
-      if (!payload) {
-        setError('Unrecognized QR — ask Admin for a Notifications link QR');
-        return;
-      }
-      claimingRef.current = true;
-      setUiState('claiming');
-      setStatusStep('Linking device…');
-      try {
-        await scanner.stop().catch(() => undefined);
-      } catch {
-        /* ignore */
-      }
-
-      try {
-        const result = await claimDevice({
-          token: payload.token,
-          playerId,
-          deviceId: 'web',
-          deviceName: typeof navigator !== 'undefined' ? navigator.userAgent.slice(0, 80) : 'web',
-          browser: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-          operatingSystem: typeof navigator !== 'undefined' ? navigator.platform : undefined,
-        });
-        successHandled.current = true;
-        writeLocalDeviceLink({
-          linked: true,
-          onesignalPlayerId: result.playerId,
-          laundryEmployeeId: result.employeeId,
-          pairedAt: new Date().toISOString(),
-        });
-        setUiState('success');
-        window.setTimeout(() => navigate('/', { replace: true }), 1600);
-      } catch (caught) {
-        claimingRef.current = false;
-        setError(caught instanceof Error ? caught.message : 'Claim failed');
-        setUiState('error');
-      }
-    };
-
-    void scanner
-      .start(
-        { facingMode: 'environment' },
-        { fps: 8, qrbox: { width: 240, height: 240 } },
-        (text) => {
-          if (!disposed) void onScan(text);
-        },
-        () => undefined,
-      )
-      .catch((err: unknown) => {
-        if (!disposed) {
-          setError(
-            err instanceof Error
-              ? err.message
-              : 'Camera unavailable — paste the ticket token below',
-          );
-        }
-      });
-
-    return () => {
-      disposed = true;
-      void scanner.stop().catch(() => undefined);
-      scannerRef.current = null;
-    };
-  }, [uiState, playerId, navigate]);
-
-  const submitManual = async () => {
-    if (!playerId || claimingRef.current) return;
-    const payload = parseLinkPayload(manualToken.trim());
+  const runClaim = async (rawToken: string, onesignalPlayerId: string) => {
+    if (claimingRef.current || successHandled.current) return;
+    const payload = parseLinkPayload(rawToken);
     if (!payload) {
-      setError('Invalid token');
+      setError('Invalid pairing link or token');
+      setUiState('error');
       return;
     }
+
     claimingRef.current = true;
     setUiState('claiming');
+    setStatusStep('Linking device…');
+    setError(null);
+
     try {
       const result = await claimDevice({
         token: payload.token,
-        playerId,
+        playerId: onesignalPlayerId,
         deviceId: 'web',
-        deviceName: 'manual-entry',
+        deviceName:
+          typeof navigator !== 'undefined'
+            ? navigator.userAgent.slice(0, 80)
+            : 'web',
+        browser: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+        operatingSystem:
+          typeof navigator !== 'undefined' ? navigator.platform : undefined,
       });
       successHandled.current = true;
       writeLocalDeviceLink({
@@ -180,9 +128,25 @@ export function EmployeeDevicePairingPage() {
       window.setTimeout(() => navigate('/', { replace: true }), 1600);
     } catch (caught) {
       claimingRef.current = false;
+      autoClaimStarted.current = false;
       setError(caught instanceof Error ? caught.message : 'Claim failed');
       setUiState('error');
     }
+  };
+
+  useEffect(() => {
+    if (uiState !== 'ready' || !playerId || !urlToken) return;
+    if (autoClaimStarted.current || claimingRef.current || successHandled.current) {
+      return;
+    }
+    autoClaimStarted.current = true;
+    void runClaim(urlToken, playerId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uiState, playerId, urlToken]);
+
+  const submitManual = async () => {
+    if (!playerId) return;
+    await runClaim(manualToken.trim(), playerId);
   };
 
   if (!linkReady) {
@@ -209,16 +173,16 @@ export function EmployeeDevicePairingPage() {
     <div className="employee-device-pairing">
       <h1>Link this device</h1>
       <p className="employee-device-pairing__lead">
-        Ask Admin to open Notifications → Generate QR for your name, then scan it here.
+        Ask Admin to open Notifications → Generate QR for your name. Scan that
+        QR with this phone’s built-in camera — it opens this page and links
+        automatically.
       </p>
       <p className="employee-device-pairing__step">{statusStep}</p>
 
-      {uiState === 'scanning' || uiState === 'claiming' ? (
-        <div id={scannerRegionId} className="employee-device-pairing__scanner" />
-      ) : null}
-
       {uiState === 'success' ? (
-        <p className="employee-device-pairing__success">Linked successfully. Opening app…</p>
+        <p className="employee-device-pairing__success">
+          Linked successfully. Opening app…
+        </p>
       ) : null}
 
       {error ? <p className="employee-device-pairing__error">{error}</p> : null}
@@ -226,20 +190,34 @@ export function EmployeeDevicePairingPage() {
         <pre className="employee-device-pairing__diag">{diagnostic}</pre>
       ) : null}
 
-      {(uiState === 'scanning' || uiState === 'error') && playerId ? (
+      {(uiState === 'ready' || uiState === 'error') && playerId && !urlToken ? (
         <div className="employee-device-pairing__manual">
           <label>
-            Or paste ticket token
+            Or paste pairing link / token
             <input
               value={manualToken}
               onChange={(e) => setManualToken(e.target.value)}
-              placeholder="token or QR JSON"
+              placeholder="https://…/employee-device-pairing?token=… or token"
             />
           </label>
           <button type="button" onClick={() => void submitManual()}>
             Claim
           </button>
         </div>
+      ) : null}
+
+      {uiState === 'error' && urlToken && playerId ? (
+        <button
+          type="button"
+          className="employee-device-pairing__retry"
+          onClick={() => {
+            claimingRef.current = false;
+            autoClaimStarted.current = false;
+            void runClaim(urlToken, playerId);
+          }}
+        >
+          Retry link
+        </button>
       ) : null}
     </div>
   );
