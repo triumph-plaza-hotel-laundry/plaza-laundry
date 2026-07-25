@@ -595,12 +595,87 @@ Deno.serve(async (request) => {
       return jsonResponse({ error: 'Supabase not configured' }, 500);
     }
 
-    const earlyBody = (await request.json().catch(() => ({}))) as RequestBody;
+    const earlyBody = (await request.json().catch(() => ({}))) as RequestBody & {
+      subscriptionId?: string;
+      notificationId?: string;
+    };
     if (earlyBody.action === 'health_ping') {
       return jsonResponse({
         ok: true,
         service: 'shift-reminder',
         ts: new Date().toISOString(),
+      });
+    }
+
+    // TEMP diagnostics only — inspect OneSignal subscription / notification.
+    if (
+      earlyBody.action === 'inspect_subscription' ||
+      earlyBody.action === 'inspect_notification'
+    ) {
+      if (!oneSignalAppId || !oneSignalRestKey) {
+        return jsonResponse({ error: 'OneSignal not configured' }, 500);
+      }
+      const headers = {
+        Authorization: `Key ${oneSignalRestKey}`,
+        Accept: 'application/json',
+      };
+
+      if (earlyBody.action === 'inspect_subscription') {
+        const subscriptionId = (
+          earlyBody.subscriptionId ||
+          earlyBody.employeeId ||
+          ''
+        ).trim();
+        if (!subscriptionId) {
+          return jsonResponse({ error: 'subscriptionId required' }, 400);
+        }
+        const urls = [
+          `https://api.onesignal.com/apps/${oneSignalAppId}/subscriptions/${subscriptionId}`,
+          `https://onesignal.com/api/v1/players/${subscriptionId}?app_id=${encodeURIComponent(oneSignalAppId)}`,
+        ];
+        const results = [];
+        for (const url of urls) {
+          const response = await fetch(url, { method: 'GET', headers });
+          const text = await response.text();
+          let json: unknown = null;
+          try {
+            json = text ? JSON.parse(text) : null;
+          } catch {
+            json = text;
+          }
+          results.push({
+            url: url.replace(oneSignalAppId, 'APP_ID'),
+            httpStatus: response.status,
+            body: json,
+          });
+        }
+        return jsonResponse({
+          ok: true,
+          action: 'inspect_subscription',
+          subscriptionId,
+          results,
+        });
+      }
+
+      const notificationId = (earlyBody.notificationId || '').trim();
+      if (!notificationId) {
+        return jsonResponse({ error: 'notificationId required' }, 400);
+      }
+      const url = `https://api.onesignal.com/notifications/${notificationId}?app_id=${encodeURIComponent(oneSignalAppId)}`;
+      const response = await fetch(url, { method: 'GET', headers });
+      const text = await response.text();
+      let json: unknown = null;
+      try {
+        json = text ? JSON.parse(text) : null;
+      } catch {
+        json = text;
+      }
+      return jsonResponse({
+        ok: true,
+        action: 'inspect_notification',
+        notificationId,
+        httpStatus: response.status,
+        body: json,
       });
     }
 

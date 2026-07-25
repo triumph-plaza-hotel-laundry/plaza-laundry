@@ -1390,6 +1390,23 @@ export type Database = {
           player_id: string;
         }[];
       };
+      rotate_notification_device_subscription: {
+        Args: {
+          p_employee_id: string;
+          p_old_player_id: string;
+          p_new_player_id: string;
+          p_device_id?: string | null;
+          p_device_name?: string | null;
+          p_device_model?: string | null;
+          p_operating_system?: string | null;
+          p_browser?: string | null;
+          p_app_version?: string | null;
+        };
+        Returns: {
+          employee_id: string;
+          player_id: string;
+        }[];
+      };
       unlink_notification_device: {
         Args: {
           p_employee_id: string;

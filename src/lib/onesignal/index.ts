@@ -4,6 +4,7 @@ export {
   ensureOneSignalInitialized,
   registerOneSignalForEmployee,
   unregisterOneSignalForEmployee,
+  resetOneSignalClientStateForResubscribe,
 } from '@/lib/onesignal/client';
 export {
   upsertOneSignalSubscription,

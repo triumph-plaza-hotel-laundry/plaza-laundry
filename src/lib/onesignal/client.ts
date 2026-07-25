@@ -11,6 +11,20 @@ let activeLaundryEmployeeId: string | null = null;
 let permissionPromptInFlight: Promise<boolean> | null = null;
 let lastKnownSubscriptionId: string | null = null;
 
+/**
+ * Allow a full re-subscribe after wiping this browser's push stack.
+ * Does not touch other devices.
+ */
+export function resetOneSignalClientStateForResubscribe(): void {
+  initPromise = null;
+  changeListenerBound = false;
+  permissionPromptInFlight = null;
+  lastKnownSubscriptionId = null;
+  activeEmployeeId = null;
+  activeLaundryEmployeeId = null;
+  logStep('client state reset for resubscribe');
+}
+
 function logStep(step: string, detail?: unknown) {
   if (detail !== undefined) {
     console.info(`[onesignal] ${step}`, detail);

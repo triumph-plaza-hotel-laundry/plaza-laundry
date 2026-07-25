@@ -41,7 +41,7 @@ export const navigationItems: NavigationItem[] = [
     path: '/employee-device-pairing',
     icon: QrCode,
     resource: 'dashboard',
-    requireUnlinkedDevice: true,
+    // Keep visible when linked so this phone can reset a stale push subscription.
   },
   {
     labelKey: 'nav.programs',

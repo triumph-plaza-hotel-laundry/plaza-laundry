@@ -100,6 +100,7 @@ export async function unlinkDevice(employeeId: string, adminId?: string | null) 
 }
 
 export { refreshLinkedPlayerId } from '@/features/notifications/devices/refresh-player-id';
+export { resetThisDevicePushSubscription } from '@/features/notifications/devices/reset-this-device-push';
 
 export function subscribeDevices(onChange: () => void) {
   const client = requireSupabase();

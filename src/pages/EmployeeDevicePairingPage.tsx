@@ -5,6 +5,7 @@ import {
   parseLinkPayload,
 } from '@/features/notifications/pairing';
 import { writeLocalDeviceLink } from '@/features/notifications/pairing/local-device-link';
+import { resetThisDevicePushSubscription } from '@/features/notifications/devices/reset-this-device-push';
 import {
   PairingPrepareError,
   formatPairingDiagnosticReport,
@@ -20,8 +21,8 @@ type UiState =
   | 'claiming'
   | 'success'
   | 'already-linked'
+  | 'resetting'
   | 'error';
-
 /**
  * Employee phone pairing gate.
  * Primary path: Admin QR encodes an HTTPS URL; phone camera opens this page
@@ -31,13 +32,14 @@ export function EmployeeDevicePairingPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { isLinked, isReady: linkReady } = useThisDeviceLinkStatus();
+  const { isLinked, isReady: linkReady, refresh } = useThisDeviceLinkStatus();
   const [uiState, setUiState] = useState<UiState>('preparing');
   const [error, setError] = useState<string | null>(null);
   const [diagnostic, setDiagnostic] = useState<string | null>(null);
   const [statusStep, setStatusStep] = useState('Starting…');
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [manualToken, setManualToken] = useState('');
+  const [resetSummary, setResetSummary] = useState<string | null>(null);
   const claimingRef = useRef(false);
   const successHandled = useRef(false);
   const autoClaimStarted = useRef(false);
@@ -153,6 +155,34 @@ export function EmployeeDevicePairingPage() {
     await runClaim(manualToken.trim(), playerId);
   };
 
+  const onResetThisDevice = async () => {
+    if (
+      !window.confirm(
+        'Reset push notifications on THIS phone only?\n\nOther employees’ devices will not be changed. You will stay linked to the same employee with a new subscription.',
+      )
+    ) {
+      return;
+    }
+
+    setUiState('resetting');
+    setError(null);
+    setResetSummary(null);
+    setStatusStep('Resetting this phone’s push subscription…');
+
+    try {
+      const result = await resetThisDevicePushSubscription();
+      setResetSummary(
+        `Reset OK. Employee ${result.employeeId}\nOld: ${result.oldPlayerId}\nNew: ${result.newPlayerId}`,
+      );
+      setStatusStep('Push subscription reset. Send a test notification next.');
+      await refresh();
+      setUiState('already-linked');
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Push reset failed');
+      setUiState('already-linked');
+    }
+  };
+
   if (!linkReady) {
     return (
       <div className="employee-device-pairing">
@@ -161,11 +191,30 @@ export function EmployeeDevicePairingPage() {
     );
   }
 
-  if (uiState === 'already-linked') {
+  if (uiState === 'already-linked' || uiState === 'resetting') {
     return (
       <div className="employee-device-pairing">
         <h1>{t('pairing.alreadyLinked' as never) || 'Device already linked'}</h1>
-        <p>This phone is linked. The pairing page is hidden until Admin unlinks.</p>
+        <p>
+          This phone is linked. If notifications never appear on this phone
+          only, reset the push subscription here — other devices are untouched.
+        </p>
+        {resetSummary ? (
+          <pre className="employee-device-pairing__diag">{resetSummary}</pre>
+        ) : null}
+        {error ? <p className="employee-device-pairing__error">{error}</p> : null}
+        {uiState === 'resetting' ? (
+          <p className="employee-device-pairing__step">{statusStep}</p>
+        ) : null}
+        <button
+          type="button"
+          disabled={uiState === 'resetting'}
+          onClick={() => void onResetThisDevice()}
+        >
+          {uiState === 'resetting'
+            ? 'Resetting…'
+            : 'Reset push on this phone only'}
+        </button>
         <button type="button" onClick={() => navigate('/', { replace: true })}>
           Continue
         </button>
