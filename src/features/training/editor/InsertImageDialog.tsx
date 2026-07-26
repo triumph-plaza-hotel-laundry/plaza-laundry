@@ -1,6 +1,8 @@
 import type { Editor } from '@tiptap/react';
 import { useEffect, useId, useRef, useState } from 'react';
-import { optimizeTrainingImage } from '@/features/training/image-optimize';
+import { optimizeTrainingImageToBlob } from '@/features/training/image-optimize';
+import { getCurrentTrainingMonthKey } from '@/features/training/cms/month-key';
+import { uploadTrainingMedia } from '@/features/training/storage/upload-training-media';
 
 type InsertImageDialogProps = {
   open: boolean;
@@ -20,6 +22,7 @@ export function InsertImageDialog({
   const [preview, setPreview] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<number | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -28,6 +31,7 @@ export function InsertImageDialog({
     setPreview(null);
     setStatus(null);
     setBusy(false);
+    setProgress(null);
   }, [open]);
 
   if (!open) {
@@ -50,16 +54,25 @@ export function InsertImageDialog({
 
   const handleUpload = async (file: File) => {
     setBusy(true);
-    setStatus('جاري تحسين الصورة…');
+    setStatus('جاري تحسين ورفع الصورة…');
+    setProgress(0);
     try {
-      const optimized = await optimizeTrainingImage(file);
-      setPreview(optimized.dataUrl);
+      const optimized = await optimizeTrainingImageToBlob(file);
+      const uploaded = await uploadTrainingMedia({
+        bucket: 'training-lesson-media',
+        file: optimized.blob,
+        contentType: optimized.mimeType,
+        folder: `lessons/${getCurrentTrainingMonthKey()}`,
+        onProgress: setProgress,
+      });
+      setPreview(uploaded.publicUrl);
       setStatus(null);
-      await insertSrc(optimized.dataUrl);
+      await insertSrc(uploaded.publicUrl);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'تعذر رفع الصورة.');
     } finally {
       setBusy(false);
+      setProgress(null);
     }
   };
 
@@ -161,6 +174,12 @@ export function InsertImageDialog({
         )}
 
         {status ? <p className="training-lux-status">{status}</p> : null}
+        {progress !== null ? (
+          <div className="training-cms-progress">
+            <div style={{ width: `${progress}%` }} />
+            <span>{progress}%</span>
+          </div>
+        ) : null}
 
         <div className="training-lux-dialog__actions">
           <button

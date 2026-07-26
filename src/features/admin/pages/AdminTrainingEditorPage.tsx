@@ -1,294 +1,212 @@
-import { Eye, Save, Trash2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AdminPageHeader } from '@/features/admin/components/AdminPageHeader';
-import { useDraftState } from '@/features/admin/hooks/useDraftState';
+import type { TrainingCmsStats, TrainingSearchHit } from '@/data/training-cms';
+import { getTrainingCmsStats } from '@/data/repositories/training-lessons-repository';
 import {
-  createEmptyLesson,
-  isTrainingContentEmpty,
-  lessonHasVideos,
-  lessonIsPublishable,
-  type TrainingLesson,
-} from '@/data/training-content';
-import { trainingRepository } from '@/data/repositories';
+  ensureTrainingMonthArchived,
+  searchTrainingCms,
+} from '@/data/repositories/training-archives-repository';
+import { migrateLegacyTrainingIfNeeded } from '@/features/training/cms/migrate-legacy-training';
 import { useAuth } from '@/hooks';
-import { LessonVideosManager } from '@/features/training/admin/LessonVideosManager';
-import { TrainingRichEditor } from '@/features/training/editor/TrainingRichEditor';
-import { sanitizeTrainingHtml } from '@/features/training/sanitize';
+import { TrainingArchivesPanel } from '@/features/training/admin/cms/TrainingArchivesPanel';
+import { TrainingCmsSearch } from '@/features/training/admin/cms/TrainingCmsSearch';
+import { TrainingCmsStatsBar } from '@/features/training/admin/cms/TrainingCmsStatsBar';
 import {
-  getYoutubeEmbedUrl,
-  getYoutubeThumbnail,
-} from '@/features/training/youtube';
+  TrainingCmsToast,
+  useTrainingToast,
+} from '@/features/training/admin/cms/TrainingCmsToast';
+import { TrainingImagesPanel } from '@/features/training/admin/cms/TrainingImagesPanel';
+import { TrainingLessonsPanel } from '@/features/training/admin/cms/TrainingLessonsPanel';
+import { TrainingVideosPanel } from '@/features/training/admin/cms/TrainingVideosPanel';
+import { downloadLessonsPdf } from '@/features/training/export/download-lesson-pdf';
+import { printTrainingLessons } from '@/features/training/export/print-lesson';
 import '@/features/admin/admin-editor.css';
 import '@/features/training/admin/training-admin.css';
 import '@/features/training/public/training-public.css';
 
+type CmsTab = 'images' | 'videos' | 'lessons' | 'archives';
+
+const TABS: Array<{ id: CmsTab; label: string }> = [
+  { id: 'images', label: 'الصور' },
+  { id: 'videos', label: 'الفيديوهات' },
+  { id: 'lessons', label: 'التدريب المكتوب' },
+  { id: 'archives', label: 'الأرشيف' },
+];
+
 export function AdminTrainingEditorPage() {
-  const { assertCan, logAction } = useAuth();
-  const { draft, isDirty, setDraft, resetDraft, commitDraft } =
-    useDraftState(trainingRepository);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveNotice, setSaveNotice] = useState<string | null>(null);
-  const [saveNoticeIsError, setSaveNoticeIsError] = useState(false);
-  const [previewOpen, setPreviewOpen] = useState(false);
+  const { assertCan } = useAuth();
+  const { toast, showToast } = useTrainingToast();
+  const [tab, setTab] = useState<CmsTab>('lessons');
+  const [stats, setStats] = useState<TrainingCmsStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<TrainingSearchHit[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [focusLessonId, setFocusLessonId] = useState<string | null>(null);
 
-  const lesson: TrainingLesson = useMemo(
-    () => draft.lessons[0] ?? createEmptyLesson(),
-    [draft.lessons],
-  );
-
-  const updateLesson = (patch: Partial<TrainingLesson>) => {
-    const nextLesson: TrainingLesson = {
-      ...lesson,
-      ...patch,
-      videos: patch.videos ?? lesson.videos ?? [],
-      lastUpdated: new Date().toISOString().slice(0, 10),
-    };
-    setDraft({
-      ...draft,
-      lessons: [nextLesson],
-      videos: [],
-    });
-  };
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    setSaveNotice(null);
-    setSaveNoticeIsError(false);
+  const refreshStats = useCallback(async () => {
+    setStatsLoading(true);
     try {
-      assertCan('training', 'update');
-      const title = lesson.title.trim();
-      const videos = (lesson.videos ?? [])
-        .filter((video) => video.youtubeUrl.trim())
-        .map((video, index) => ({ ...video, displayOrder: index }));
-      const contentHtml = isTrainingContentEmpty(lesson.contentHtml)
-        ? ''
-        : lesson.contentHtml;
-
-      if (!title) {
-        setSaveNotice('عنوان التدريب مطلوب.');
-        setSaveNoticeIsError(true);
-        return;
-      }
-
-      const nextLesson: TrainingLesson = {
-        ...lesson,
-        title,
-        contentHtml,
-        videos,
-        lastUpdated: new Date().toISOString().slice(0, 10),
-      };
-
-      const next = {
-        lessons: [nextLesson],
-        videos: [],
-      };
-
-      await commitDraft(async () => {
-        await trainingRepository.replaceAll(next);
-        logAction({
-          action: 'training.replaceAll',
-          page: 'admin/training',
-          newValue: next,
-        });
-      });
-      setSaveNotice('تم الحفظ بنجاح');
-    } catch (error) {
-      setSaveNotice(
-        error instanceof Error ? error.message : 'تعذر الحفظ. حاول مرة أخرى.',
-      );
-      setSaveNoticeIsError(true);
+      setStats(await getTrainingCmsStats());
+    } catch {
+      setStats(null);
     } finally {
-      setIsSaving(false);
+      setStatsLoading(false);
     }
-  };
+  }, []);
 
-  const handleDelete = () => {
-    const confirmed = window.confirm(
-      'هل تريد حذف محتوى التدريب بالكامل؟ اضغط حفظ بعد الحذف لتثبيت التغيير.',
-    );
-    if (!confirmed) {
+  useEffect(() => {
+    void (async () => {
+      try {
+        await ensureTrainingMonthArchived();
+      } catch {
+        // Safety-net only; ignore if cron already archived or RPC unavailable.
+      }
+      try {
+        await migrateLegacyTrainingIfNeeded();
+      } catch {
+        // Non-blocking legacy import.
+      }
+      await refreshStats();
+    })();
+  }, [refreshStats]);
+
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (!q) {
+      setSearchResults([]);
       return;
     }
-    setDraft({ lessons: [], videos: [] });
-    setSaveNotice('تم مسح المحتوى — اضغط حفظ لتثبيت الحذف');
-    setSaveNoticeIsError(false);
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      void (async () => {
+        setSearchLoading(true);
+        try {
+          const hits = await searchTrainingCms(q);
+          if (!cancelled) setSearchResults(hits);
+        } catch {
+          if (!cancelled) setSearchResults([]);
+        } finally {
+          if (!cancelled) setSearchLoading(false);
+        }
+      })();
+    }, 280);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [searchQuery]);
+
+  const assertCanWrite = () => {
+    assertCan('training', 'update');
   };
 
-  const showContentInPreview = !isTrainingContentEmpty(lesson.contentHtml);
-  const previewVideos = (lesson.videos ?? []).filter(
-    (video) => video.active !== false && video.youtubeUrl.trim(),
-  );
+  const handleSearchSelect = (hit: TrainingSearchHit) => {
+    setSearchQuery('');
+    setSearchResults([]);
+    if (hit.kind === 'lesson') {
+      setTab(hit.archived ? 'archives' : 'lessons');
+      setFocusLessonId(hit.record.id);
+      return;
+    }
+    if (hit.kind === 'image') {
+      setTab(hit.archived ? 'archives' : 'images');
+      return;
+    }
+    setTab(hit.archived ? 'archives' : 'videos');
+  };
 
   return (
     <section
-      className="admin-editor-page training-admin-page training-admin-page--ar mx-auto"
+      className="admin-editor-page training-admin-page training-admin-page--ar training-cms-page mx-auto"
       dir="rtl"
       lang="ar"
     >
       <AdminPageHeader
-        subtitle="عنوان مطلوب — المحتوى والصور والجداول والفيديوهات اختيارية"
+        subtitle="صور · فيديوهات · دروس مكتوبة — وحدات مستقلة"
         titleAr="إدارة التدريب"
-        titleEn="إدارة التدريب"
+        titleEn="Training CMS"
       />
 
-      <div
-        className="training-admin-actions"
-        role="toolbar"
-        aria-label="أدوات التدريب"
-      >
-        <p
-          className={`training-admin-actions__hint${saveNoticeIsError ? ' is-error' : ''}${saveNotice && !saveNoticeIsError ? ' is-success' : ''}`}
-        >
-          {saveNotice ??
-            (isDirty ? 'هناك تغييرات غير محفوظة' : 'جميع التغييرات محفوظة')}
-        </p>
-        <div className="training-admin-actions__buttons">
+      <TrainingCmsStatsBar loading={statsLoading} stats={stats} />
+
+      <TrainingCmsSearch
+        loading={searchLoading}
+        onQueryChange={setSearchQuery}
+        onSelect={handleSearchSelect}
+        query={searchQuery}
+        results={searchResults}
+      />
+
+      <nav aria-label="أقسام التدريب" className="training-cms-tabs">
+        {TABS.map((item) => (
           <button
-            className="training-admin-btn"
-            onClick={() => setPreviewOpen(true)}
+            className={
+              tab === item.id
+                ? 'training-cms-tabs__btn is-active'
+                : 'training-cms-tabs__btn'
+            }
+            key={item.id}
+            onClick={() => setTab(item.id)}
             type="button"
           >
-            <Eye size={16} /> معاينة
+            {item.label}
           </button>
-          <button
-            className="training-admin-btn training-admin-btn--danger"
-            onClick={handleDelete}
-            type="button"
-          >
-            <Trash2 size={16} /> حذف
-          </button>
-          <button
-            className="training-admin-btn training-admin-btn--primary"
-            disabled={!isDirty || isSaving || !lessonIsPublishable(lesson)}
-            onClick={() => void handleSave()}
-            type="button"
-          >
-            <Save size={16} /> {isSaving ? 'جاري الحفظ…' : 'حفظ'}
-          </button>
-          {isDirty ? (
-            <button
-              className="training-admin-btn"
-              disabled={isSaving}
-              onClick={() => {
-                resetDraft();
-                setSaveNotice(null);
-                setSaveNoticeIsError(false);
-              }}
-              type="button"
-            >
-              إلغاء
-            </button>
-          ) : null}
-        </div>
-      </div>
+        ))}
+      </nav>
 
-      <section className="training-admin-section training-admin-section--simple training-admin-section--lux">
-        <div className="training-admin-field">
-          <label htmlFor="training-title-ar">
-            عنوان التدريب <span className="training-required">*</span>
-          </label>
-          <input
-            dir="rtl"
-            id="training-title-ar"
-            onChange={(event) => updateLesson({ title: event.target.value })}
-            placeholder="اكتب عنوان التدريب هنا (مطلوب)"
-            required
-            value={lesson.title}
-          />
-        </div>
-
-        <div className="training-admin-field">
-          <label>المحرر الفاخر — المحتوى والصور والجداول والفيديو داخل الدرس (اختياري)</label>
-          <TrainingRichEditor
-            key={lesson.id}
-            onChange={(html) => updateLesson({ contentHtml: html })}
-            placeholder="يمكنك ترك المحتوى فارغاً… أو إدراج صور وجداول وفيديوهات من الشريط أعلاه"
-            value={lesson.contentHtml}
-          />
-        </div>
-
-        <LessonVideosManager
-          onChange={(videos) => updateLesson({ videos })}
-          videos={lesson.videos ?? []}
+      {tab === 'images' ? (
+        <TrainingImagesPanel
+          assertCanWrite={assertCanWrite}
+          onChanged={() => void refreshStats()}
+          onToast={showToast}
         />
-      </section>
-
-      {previewOpen ? (
-        <div
-          aria-modal="true"
-          className="training-dialog-backdrop"
-          onClick={() => setPreviewOpen(false)}
-          role="dialog"
-        >
-          <div
-            className="training-preview-dialog"
-            dir="rtl"
-            lang="ar"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <header className="training-preview-dialog__header">
-              <h2>معاينة التدريب</h2>
-              <button
-                className="training-admin-btn"
-                onClick={() => setPreviewOpen(false)}
-                type="button"
-              >
-                إغلاق
-              </button>
-            </header>
-            <article className="training-preview-dialog__body">
-              <h3>{lesson.title.trim() || 'بدون عنوان'}</h3>
-              {showContentInPreview ? (
-                <div
-                  className="training-rich"
-                  dangerouslySetInnerHTML={{
-                    __html: sanitizeTrainingHtml(lesson.contentHtml),
-                  }}
-                />
-              ) : null}
-              {previewVideos.length > 0 ? (
-                <div className="training-lesson-videos-public">
-                  {previewVideos.map((video) => {
-                    const thumb =
-                      video.thumbnailUrl ||
-                      getYoutubeThumbnail(video.youtubeUrl);
-                    const embed = getYoutubeEmbedUrl(video.youtubeUrl);
-                    const isMp4 = video.sourceType === 'mp4';
-                    return (
-                      <div className="training-video" key={video.id}>
-                        {video.title ? <h4>{video.title}</h4> : null}
-                        {video.description ? <p>{video.description}</p> : null}
-                        {isMp4 ? (
-                          <video
-                            className="training-video__player"
-                            controls
-                            playsInline
-                            poster={thumb || undefined}
-                            preload="metadata"
-                            src={video.youtubeUrl}
-                          >
-                            <track kind="captions" />
-                          </video>
-                        ) : embed ? (
-                          <iframe
-                            allowFullScreen
-                            className="training-video__player"
-                            loading="lazy"
-                            src={embed}
-                            title={video.title || 'فيديو'}
-                          />
-                        ) : null}
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : !showContentInPreview && !lessonHasVideos(lesson) ? (
-                <p className="training-empty">لا يوجد محتوى إضافي بعد.</p>
-              ) : null}
-            </article>
-          </div>
-        </div>
       ) : null}
+      {tab === 'videos' ? (
+        <TrainingVideosPanel
+          assertCanWrite={assertCanWrite}
+          onChanged={() => void refreshStats()}
+          onToast={showToast}
+        />
+      ) : null}
+      {tab === 'lessons' ? (
+        <TrainingLessonsPanel
+          assertCanWrite={assertCanWrite}
+          focusLessonId={focusLessonId}
+          onChanged={() => void refreshStats()}
+          onToast={showToast}
+        />
+      ) : null}
+      {tab === 'archives' ? (
+        <TrainingArchivesPanel
+          assertCanWrite={assertCanWrite}
+          onChanged={() => void refreshStats()}
+          onDownloadMonth={(archive) => {
+            void downloadLessonsPdf(
+              archive.lessons_snapshot,
+              `training-archive-${archive.archive_month}.pdf`,
+              {
+                heading: `Training Archive ${archive.archive_month}`,
+              },
+            )
+              .then(() => showToast('Saved Successfully', 'success'))
+              .catch((error: unknown) =>
+                showToast(
+                  error instanceof Error ? error.message : 'Download failed',
+                  'error',
+                ),
+              );
+          }}
+          onPrintMonth={(archive) => {
+            printTrainingLessons(archive.lessons_snapshot, {
+              heading: `Training Archive ${archive.archive_month}`,
+            });
+          }}
+          onToast={showToast}
+        />
+      ) : null}
+
+      <TrainingCmsToast toast={toast} />
     </section>
   );
 }
