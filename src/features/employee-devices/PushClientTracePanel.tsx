@@ -76,7 +76,9 @@ export function PushClientTracePanel() {
   return (
     <section className="push-client-trace" aria-label="Push client logs">
       <div className="push-client-trace__header">
-        <h2 className="push-client-trace__title">Push client logs</h2>
+        <h2 className="push-client-trace__title">
+          Push client logs (Realme SW test)
+        </h2>
         <div className="push-client-trace__actions">
           <button
             type="button"

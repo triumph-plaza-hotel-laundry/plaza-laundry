@@ -218,6 +218,7 @@ export function EmployeeDevicePairingPage() {
         {uiState === 'resetting' ? (
           <p className="employee-device-pairing__step">{statusStep}</p>
         ) : null}
+        <PushClientTracePanel />
         <button
           type="button"
           disabled={uiState === 'resetting'}
@@ -230,7 +231,6 @@ export function EmployeeDevicePairingPage() {
         <button type="button" onClick={() => navigate('/', { replace: true })}>
           Continue
         </button>
-        <PushClientTracePanel />
       </div>
     );
   }

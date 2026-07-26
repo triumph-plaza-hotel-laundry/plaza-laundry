@@ -34,12 +34,9 @@ const updateSW = registerSW({
     bootstrapPushOnce();
   },
   onNeedRefresh() {
-    const shouldReload = window.confirm(
-      'A new version is available. Reload now?',
-    );
-    if (shouldReload) {
-      void updateSW(true);
-    }
+    // Always take the new build — required so phones pick up diagnostics
+    // and push fixes without relying on a dismissible confirm dialog.
+    void updateSW(true);
   },
   onOfflineReady() {
     if (import.meta.env.DEV) {
