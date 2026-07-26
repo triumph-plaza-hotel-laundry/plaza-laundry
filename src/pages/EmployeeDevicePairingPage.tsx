@@ -215,7 +215,7 @@ export function EmployeeDevicePairingPage() {
         <p className="employee-device-pairing__step">
           If you do not see “Push client logs” below, open{' '}
           <a href="/onesignal/clear-cache.html">
-            /onesignal/clear-cache.html
+            https://plaza-laundry-xi.vercel.app/onesignal/clear-cache.html
           </a>{' '}
           once to drop the stale PWA shell, then return here.
         </p>
