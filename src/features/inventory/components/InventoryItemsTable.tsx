@@ -13,6 +13,7 @@ import type {
 } from '@/features/inventory';
 import { InventoryItemActionsMenu } from '@/features/inventory/components/InventoryItemActionsMenu';
 import { InventorySearchCombobox } from '@/features/inventory/components/InventorySearchCombobox';
+import { EnterprisePrintButton } from '@/features/enterprise-print';
 import { useLanguage } from '@/hooks';
 
 const PAGE_SIZE = 12;
@@ -208,6 +209,7 @@ export function InventoryItemsTable({
   toolbarAction,
 }: InventoryItemsTableProps) {
   const { language, t } = useLanguage();
+  const printRef = useRef<HTMLDivElement>(null);
   const [codeQuery, setCodeQuery] = useState('');
   const [nameQuery, setNameQuery] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('code');
@@ -361,6 +363,11 @@ export function InventoryItemsTable({
             {t('inventory.sections.table')}
           </h2>
           <div className="inv-warehouse__table-toolbar-actions">
+            <EnterprisePrintButton
+              getSource={() => printRef.current}
+              label="Print"
+              title={t('inventory.sections.table')}
+            />
             {toolbarAction}
             <p className="inv-warehouse__table-meta">
               {filtered.length} {t('inventory.table.name')}
@@ -368,7 +375,7 @@ export function InventoryItemsTable({
           </div>
         </header>
 
-        <div className="inv-table-wrap inv-table-wrap--erp">
+        <div className="inv-table-wrap inv-table-wrap--erp" ref={printRef}>
           <table className="luxury-table inv-erp-table">
             <colgroup>
               <col className="inv-erp-col inv-erp-col--code" />

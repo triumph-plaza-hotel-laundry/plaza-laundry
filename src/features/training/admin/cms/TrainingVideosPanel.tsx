@@ -7,6 +7,10 @@ import {
   listTrainingVideos,
   updateTrainingVideo,
 } from '@/data/repositories/training-videos-repository';
+import {
+  buildPrintableTableHtml,
+  EnterprisePrintButton,
+} from '@/features/enterprise-print';
 import { downloadUrl } from '@/features/training/export/print-lesson';
 import { getYoutubeEmbedUrl } from '@/features/training/youtube';
 
@@ -207,6 +211,22 @@ export function TrainingVideosPanel({
         >
           <Film size={18} /> إضافة فيديو
         </button>
+        <EnterprisePrintButton
+          dir="rtl"
+          getSource={() =>
+            buildPrintableTableHtml({
+              headers: ['Title', 'Description', 'Type', 'Media'],
+              rows: items.map((item) => [
+                item.title,
+                item.description,
+                item.source_type,
+                item.media_url,
+              ]),
+            })
+          }
+          label="Print"
+          title="Training Videos"
+        />
       </header>
 
       {loading ? (

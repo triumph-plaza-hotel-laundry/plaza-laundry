@@ -19,6 +19,10 @@ import {
   formatTrainingMonthLabel,
   getCurrentTrainingMonthKey,
 } from '@/features/training/cms/month-key';
+import {
+  buildPrintableTableHtml,
+  EnterprisePrintButton,
+} from '@/features/enterprise-print';
 import { downloadLessonDocx } from '@/features/training/export/download-lesson-docx';
 import { downloadLessonsPdf } from '@/features/training/export/download-lesson-pdf';
 import {
@@ -132,6 +136,25 @@ export function TrainingPage() {
 
       {!loading && tab === 'images' ? (
         <div className="training-cms-gallery">
+          <div className="training-cms-tab-print">
+            <EnterprisePrintButton
+              dir="rtl"
+              disabled={images.length === 0}
+              getSource={() =>
+                buildPrintableTableHtml({
+                  headers: ['Title', 'Description', 'Month', 'URL'],
+                  rows: images.map((item) => [
+                    item.title,
+                    item.description,
+                    item.month_key,
+                    item.public_url,
+                  ]),
+                })
+              }
+              label="Print"
+              title="Training Images Gallery"
+            />
+          </div>
           {images.length === 0 ? (
             <p className="training-cms-empty">لا توجد صور</p>
           ) : (
@@ -171,6 +194,25 @@ export function TrainingPage() {
 
       {!loading && tab === 'videos' ? (
         <div className="training-cms-videos">
+          <div className="training-cms-tab-print">
+            <EnterprisePrintButton
+              dir="rtl"
+              disabled={videos.length === 0}
+              getSource={() =>
+                buildPrintableTableHtml({
+                  headers: ['Title', 'Description', 'Type', 'Media'],
+                  rows: videos.map((item) => [
+                    item.title,
+                    item.description,
+                    item.source_type,
+                    item.media_url,
+                  ]),
+                })
+              }
+              label="Print"
+              title="Training Videos"
+            />
+          </div>
           {videos.length === 0 ? (
             <p className="training-cms-empty">لا توجد فيديوهات</p>
           ) : (
@@ -323,7 +365,12 @@ export function TrainingPage() {
                                   <button
                                     className="training-admin-btn"
                                     onClick={() =>
-                                      printTrainingLessons([lesson])
+                                      printTrainingLessons([lesson], {
+                                        printedBy:
+                                          user?.displayName ||
+                                          user?.username ||
+                                          'Staff',
+                                      })
                                     }
                                     type="button"
                                   >

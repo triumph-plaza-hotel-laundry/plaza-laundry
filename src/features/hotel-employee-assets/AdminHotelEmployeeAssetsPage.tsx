@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { AdminPageHeader } from '@/features/admin/components/AdminPageHeader';
+import { EnterprisePrintButton } from '@/features/enterprise-print';
 import {
   createAssetEmployee,
   createAssetReceipt,
@@ -493,6 +494,15 @@ export function AdminHotelEmployeeAssetsPage() {
             value={search}
           />
         </label>
+        <EnterprisePrintButton
+          getSource={() =>
+            document.querySelector(
+              '.hotel-assets__accordion',
+            ) as HTMLElement | null
+          }
+          label="Print"
+          title="Hotel Employee Assets"
+        />
       </div>
 
       {error ? (
@@ -533,28 +543,42 @@ export function AdminHotelEmployeeAssetsPage() {
                 }
                 key={department.id}
               >
-                <button
-                  aria-expanded={isOpen}
-                  className="hotel-assets__dept-trigger"
-                  onClick={() => void openDepartment(department.id)}
-                  type="button"
-                >
-                  <span className="hotel-assets__dept-title">{deptName}</span>
-                  <span className="hotel-assets__dept-meta">
-                    <span className="hotel-assets__count">
-                      {(employeesByDept[department.id] ?? []).length}
+                <div className="hotel-assets__dept-trigger-row">
+                  <button
+                    aria-expanded={isOpen}
+                    className="hotel-assets__dept-trigger"
+                    onClick={() => void openDepartment(department.id)}
+                    type="button"
+                  >
+                    <span className="hotel-assets__dept-title">{deptName}</span>
+                    <span className="hotel-assets__dept-meta">
+                      <span className="hotel-assets__count">
+                        {(employeesByDept[department.id] ?? []).length}
+                      </span>
+                      <ChevronDown
+                        aria-hidden="true"
+                        className="hotel-assets__chevron"
+                        size={18}
+                        strokeWidth={1.75}
+                      />
                     </span>
-                    <ChevronDown
-                      aria-hidden="true"
-                      className="hotel-assets__chevron"
-                      size={18}
-                      strokeWidth={1.75}
-                    />
-                  </span>
-                </button>
+                  </button>
+                  <EnterprisePrintButton
+                    getSource={() =>
+                      document.getElementById(
+                        `admin-hotel-dept-print-${department.id}`,
+                      )
+                    }
+                    label="Print"
+                    title={`Department — ${deptName}`}
+                  />
+                </div>
 
                 {isOpen ? (
-                  <div className="hotel-assets__dept-panel">
+                  <div
+                    className="hotel-assets__dept-panel"
+                    id={`admin-hotel-dept-print-${department.id}`}
+                  >
                     <div className="hotel-assets__add-wrap">
                       <button
                         className="hotel-assets__btn"
@@ -658,7 +682,21 @@ export function AdminHotelEmployeeAssetsPage() {
                               </button>
 
                               {employeeOpen ? (
-                                <div className="hotel-assets__employee-panel">
+                                <div
+                                  className="hotel-assets__employee-panel"
+                                  id={`admin-hotel-emp-print-${employee.id}`}
+                                >
+                                  <div className="hotel-assets__employee-print-bar">
+                                    <EnterprisePrintButton
+                                      getSource={() =>
+                                        document.getElementById(
+                                          `admin-hotel-emp-print-${employee.id}`,
+                                        )
+                                      }
+                                      label="Print"
+                                      title={`Employee Assets — ${employee.employeeName}`}
+                                    />
+                                  </div>
                                   <dl className="hotel-assets__details">
                                     <div>
                                       <dt>{t('hotelAssets.employeeNumber')}</dt>

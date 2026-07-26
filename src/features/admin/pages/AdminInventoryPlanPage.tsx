@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ArchiveHistoryViewShell } from '@/features/admin/components/ArchiveHistoryViewShell';
 import { PlanArchiveHistoryView } from '@/features/admin/components/PlanArchiveHistoryView';
 import { useInventoryArchive } from '@/features/admin/context/useInventoryArchive';
+import { EnterprisePrintButton } from '@/features/enterprise-print';
 import {
   getCatalogOptionsForRow,
   getCustomCategoriesForDepartment,
@@ -493,6 +494,15 @@ function AdminInventoryPlanLivePage({
         <h1 className="admin-inventory-plan__title-ar">
           {t('admin.inventory.plan.titleAr')}
         </h1>
+        <EnterprisePrintButton
+          getSource={() =>
+            document.querySelector(
+              '.admin-inventory-plan__table-shell',
+            ) as HTMLElement | null
+          }
+          label="Print"
+          title="Monthly Uniform Plan"
+        />
       </header>
 
       {!catalogReady ? (

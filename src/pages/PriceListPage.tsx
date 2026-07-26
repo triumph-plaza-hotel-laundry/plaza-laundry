@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { OfficialFormActions } from '@/components/official-forms/OfficialFormActions';
 import { OfficialPriceListDocument } from '@/components/official-forms/OfficialPriceListDocument';
 import { type PriceListTab } from '@/data/repositories';
-import { useLanguage, usePriceListStorage } from '@/hooks';
+import { printEnterpriseDocument } from '@/features/enterprise-print';
+import { useAuth, useLanguage, usePriceListStorage } from '@/hooks';
 import type { TranslationKey } from '@/types/language';
 import '@/components/official-forms/official-form.css';
 
@@ -13,11 +14,24 @@ const tabLabelKeys: Record<PriceListTab, TranslationKey> = {
 
 export function PriceListPage() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const { items, prices } = usePriceListStorage();
   const [activeTab, setActiveTab] = useState<PriceListTab>('guest');
 
   const printForm = () => {
-    window.print();
+    const source = document.querySelector(
+      '.tpl-form-page__sheet-wrap',
+    ) as HTMLElement | null;
+    if (!source) {
+      window.alert('Nothing to print yet.');
+      return;
+    }
+    printEnterpriseDocument({
+      title: 'Price List',
+      subtitle: t(tabLabelKeys[activeTab]),
+      printedBy: user?.displayName || user?.username || 'Staff',
+      source,
+    });
   };
 
   return (

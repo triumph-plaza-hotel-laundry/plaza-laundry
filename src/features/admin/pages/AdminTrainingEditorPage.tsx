@@ -34,7 +34,7 @@ const TABS: Array<{ id: CmsTab; label: string }> = [
 ];
 
 export function AdminTrainingEditorPage() {
-  const { assertCan } = useAuth();
+  const { assertCan, user } = useAuth();
   const { toast, showToast } = useTrainingToast();
   const [tab, setTab] = useState<CmsTab>('lessons');
   const [stats, setStats] = useState<TrainingCmsStats | null>(null);
@@ -200,6 +200,7 @@ export function AdminTrainingEditorPage() {
           onPrintMonth={(archive) => {
             printTrainingLessons(archive.lessons_snapshot, {
               heading: `Training Archive ${archive.archive_month}`,
+              printedBy: user?.displayName || user?.username || 'Staff',
             });
           }}
           onToast={showToast}

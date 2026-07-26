@@ -1,8 +1,8 @@
-import { Printer } from 'lucide-react';
-
 import { ProgramCard } from '@/components/programs/ProgramCard';
 
 import { localizedText } from '@/data/laundry-chemicals';
+
+import { EnterprisePrintButton } from '@/features/enterprise-print';
 
 import { useLanguage, usePrograms } from '@/hooks';
 
@@ -25,10 +25,6 @@ export function ProgramsPage() {
     note: t('programs.table.note'),
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   return (
     <section className="luxury-page-shell programs-page mx-auto">
       <header className="programs-page__header">
@@ -41,19 +37,16 @@ export function ProgramsPage() {
             <p className="luxury-page-subtitle">{t('programs.subtitle')}</p>
           </div>
 
-          <button
-            className="luxury-print-btn programs-page__print"
-            onClick={handlePrint}
-            type="button"
-          >
-            <Printer
-              aria-hidden="true"
-              className="luxury-print-btn__icon"
-              strokeWidth={1.75}
-            />
-
-            {t('programs.print')}
-          </button>
+          <EnterprisePrintButton
+            className="programs-page__print"
+            getSource={() =>
+              document.querySelector(
+                '.programs-page__table-section',
+              ) as HTMLElement | null
+            }
+            label={t('programs.print')}
+            title="Wash Programs Catalog"
+          />
         </div>
       </header>
 

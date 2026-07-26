@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { AdminEmployeeModal } from '@/features/admin/components/AdminEmployeeModal';
 import { AdminEmployeesTable } from '@/features/admin/components/AdminEmployeesTable';
 import { AdminPageHeader } from '@/features/admin/components/AdminPageHeader';
+import { EnterprisePrintButton } from '@/features/enterprise-print';
 import {
   employeesRepository,
   normalizeEmployee,
@@ -312,6 +313,15 @@ export function AdminEmployeesEditorPage() {
           <Plus aria-hidden="true" size={18} strokeWidth={1.75} />
           {t('admin.editor.addEmployee')}
         </button>
+        <EnterprisePrintButton
+          getSource={() =>
+            document.querySelector(
+              '.admin-employees-dashboard__panel',
+            ) as HTMLElement | null
+          }
+          label="Print"
+          title="Employees Roster"
+        />
       </div>
 
       <div className="admin-employees-dashboard__panel">

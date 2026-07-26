@@ -2,18 +2,13 @@ import type { TrainingCmsStats } from '@/data/training-cms';
 
 const CARDS: Array<{
   key: keyof TrainingCmsStats;
-  labelAr: string;
-  labelEn: string;
+  label: string;
 }> = [
-  { key: 'activeLessons', labelAr: 'دروس نشطة', labelEn: 'Active Lessons' },
-  { key: 'archivedLessons', labelAr: 'دروس مؤرشفة', labelEn: 'Archived Lessons' },
-  { key: 'activeImages', labelAr: 'صور', labelEn: 'Images' },
-  { key: 'activeVideos', labelAr: 'فيديوهات', labelEn: 'Videos' },
-  {
-    key: 'currentMonthLessons',
-    labelAr: 'دروس الشهر الحالي',
-    labelEn: 'Current Month',
-  },
+  { key: 'activeLessons', label: 'دروس نشطة' },
+  { key: 'archivedLessons', label: 'مؤرشفة' },
+  { key: 'activeImages', label: 'صور' },
+  { key: 'activeVideos', label: 'فيديوهات' },
+  { key: 'currentMonthLessons', label: 'هذا الشهر' },
 ];
 
 export function TrainingCmsStatsBar({
@@ -27,8 +22,7 @@ export function TrainingCmsStatsBar({
     <div className="training-cms-stats" aria-busy={loading || undefined}>
       {CARDS.map((card) => (
         <article className="training-cms-stat-card" key={card.key}>
-          <p className="training-cms-stat-card__label">{card.labelAr}</p>
-          <p className="training-cms-stat-card__label-en">{card.labelEn}</p>
+          <p className="training-cms-stat-card__label">{card.label}</p>
           <p className="training-cms-stat-card__value">
             {loading || !stats ? '—' : stats[card.key]}
           </p>

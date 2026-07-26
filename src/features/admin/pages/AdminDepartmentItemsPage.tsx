@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { ChevronDown, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { AdminOnlyGuard } from '@/features/admin/guards/AdminOnlyGuard';
+import { EnterprisePrintButton } from '@/features/enterprise-print';
 import {
   createDepartmentItemCategory,
   deleteDepartmentItemCategory,
@@ -729,6 +730,15 @@ function AdminDepartmentItemsContent() {
             />
           </div>
         </label>
+        <EnterprisePrintButton
+          getSource={() =>
+            document.querySelector(
+              '.admin-employees-dashboard__panel .admin-inventory-plan__table-wrap',
+            ) as HTMLElement | null
+          }
+          label="Print"
+          title="Department Items Catalog"
+        />
       </div>
 
       {error ? <p className="inv-error">{error}</p> : null}

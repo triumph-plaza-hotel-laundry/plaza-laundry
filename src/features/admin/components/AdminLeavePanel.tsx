@@ -11,6 +11,10 @@ import {
 } from '@/data/laundry-leaves';
 import type { SaveLeaveInput } from '@/data/repositories';
 import { useLanguage, usePermissions } from '@/hooks';
+import {
+  buildPrintableTableHtml,
+  EnterprisePrintButton,
+} from '@/features/enterprise-print';
 import type { TranslationKey } from '@/types/language';
 import '@/components/shifts/shifts-page.css';
 
@@ -210,9 +214,42 @@ export function AdminLeavePanel({
             </p>
           </div>
         </div>
-        <span className="leave-panel__count">
-          {t('shifts.leaves.slots')}: {LEAVE_SLOT_COUNT}
-        </span>
+        <div className="leave-panel__header-actions">
+          <EnterprisePrintButton
+            getSource={() =>
+              buildPrintableTableHtml({
+                headers: [
+                  'Slot',
+                  'Employee',
+                  'Type',
+                  'Start',
+                  'End',
+                  'Days',
+                  'Status',
+                  'Reason',
+                ],
+                rows: displaySlots.map((slot, index) => {
+                  const entry = slot.entry;
+                  return [
+                    String(index + 1),
+                    entry?.employeeName || '—',
+                    entry ? t(leaveTypeKeys[entry.leaveType]) : '—',
+                    entry?.startDate || '—',
+                    entry?.endDate || '—',
+                    entry ? String(entry.totalDays) : '—',
+                    entry ? t(statusKeys[entry.status]) : '—',
+                    entry?.reason || '—',
+                  ];
+                }),
+              })
+            }
+            label="Print"
+            title="Employee Leaves Register"
+          />
+          <span className="leave-panel__count">
+            {t('shifts.leaves.slots')}: {LEAVE_SLOT_COUNT}
+          </span>
+        </div>
       </header>
 
       <div className="leave-panel__grid">

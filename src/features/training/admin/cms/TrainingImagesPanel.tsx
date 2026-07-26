@@ -30,6 +30,8 @@ import {
   reorderTrainingImages,
   updateTrainingImage,
 } from '@/data/repositories/training-images-repository';
+import { EnterprisePrintButton } from '@/features/enterprise-print';
+import { buildPrintableTableHtml } from '@/features/enterprise-print';
 import { downloadUrl } from '@/features/training/export/print-lesson';
 
 type Props = {
@@ -318,6 +320,22 @@ export function TrainingImagesPanel({
         >
           <ImagePlus size={18} /> إضافة صورة
         </button>
+        <EnterprisePrintButton
+          dir="rtl"
+          getSource={() =>
+            buildPrintableTableHtml({
+              headers: ['Title', 'Description', 'Month', 'URL'],
+              rows: items.map((item) => [
+                item.title,
+                item.description,
+                item.month_key,
+                item.public_url,
+              ]),
+            })
+          }
+          label="Print"
+          title="Training Images Gallery"
+        />
       </header>
 
       {loading ? (

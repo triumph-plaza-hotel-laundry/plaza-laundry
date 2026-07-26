@@ -6,6 +6,7 @@ import { bootstrapOneSignalWebPush } from '@/lib/onesignal';
 import { startNotificationPlatform } from '@/lib/notification-platform';
 import { ensureFreshAppShell } from '@/lib/pwa/ensure-fresh-shell';
 import '@/styles/index.css';
+import '@/features/enterprise-print/enterprise-print.css';
 
 let oneSignalBootstrapStarted = false;
 

@@ -2,6 +2,7 @@ import { ChevronDown } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState, type ReactNode } from 'react';
 import { dictionaries } from '@/i18n/dictionaries';
+import { EnterprisePrintButton } from '@/features/enterprise-print';
 import {
   PLAN_DEPARTMENTS,
   PLAN_DEPARTMENT_LABEL_KEYS,
@@ -199,6 +200,15 @@ export function PublicInventoryPlanPage() {
         <h1 className="admin-inventory-plan__title-ar">
           {t('admin.inventory.plan.titleAr')}
         </h1>
+        <EnterprisePrintButton
+          getSource={() =>
+            document.querySelector(
+              '.admin-inventory-plan__table-shell',
+            ) as HTMLElement | null
+          }
+          label="Print"
+          title="Monthly Uniform Plan"
+        />
       </header>
 
       {error ? (

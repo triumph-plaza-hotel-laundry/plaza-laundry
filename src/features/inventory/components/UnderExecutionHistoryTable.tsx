@@ -1,5 +1,7 @@
 import { Trash2 } from 'lucide-react';
+import { useRef } from 'react';
 import type { UnderExecutionRecord } from '@/features/inventory/under-execution-types';
+import { EnterprisePrintButton } from '@/features/enterprise-print';
 import { useLanguage } from '@/hooks';
 
 type UnderExecutionHistoryTableProps = {
@@ -31,6 +33,7 @@ export function UnderExecutionHistoryTable({
   onHideFromLive,
 }: UnderExecutionHistoryTableProps) {
   const { language, t } = useLanguage();
+  const printRef = useRef<HTMLDivElement>(null);
 
   const visibleRecords = allowHideFromLive
     ? records.filter((record) => !record.hiddenFromLive)
@@ -47,16 +50,24 @@ export function UnderExecutionHistoryTable({
             {t('inventory.underExecution.historyTitleAr')}
           </h2>
         </div>
-        {onClearHistory ? (
-          <button
-            className="admin-editor-btn admin-editor-btn--danger"
-            disabled={disabled || visibleRecords.length === 0}
-            onClick={onClearHistory}
-            type="button"
-          >
-            {t('inventory.underExecution.clearHistory')}
-          </button>
-        ) : null}
+        <div className="admin-under-execution__history-actions">
+          <EnterprisePrintButton
+            disabled={visibleRecords.length === 0}
+            getSource={() => printRef.current}
+            label="Print"
+            title="Under Execution History"
+          />
+          {onClearHistory ? (
+            <button
+              className="admin-editor-btn admin-editor-btn--danger"
+              disabled={disabled || visibleRecords.length === 0}
+              onClick={onClearHistory}
+              type="button"
+            >
+              {t('inventory.underExecution.clearHistory')}
+            </button>
+          ) : null}
+        </div>
       </header>
 
       {visibleRecords.length === 0 ? (
@@ -64,7 +75,10 @@ export function UnderExecutionHistoryTable({
           <p>{t('inventory.underExecution.historyEmpty')}</p>
         </div>
       ) : (
-        <div className="inv-table-wrap inv-table-wrap--erp">
+        <div
+          className="inv-table-wrap inv-table-wrap--erp"
+          ref={printRef}
+        >
           <table className="luxury-table inv-erp-table inv-erp-table--history">
             <colgroup>
               <col className="inv-erp-col inv-erp-col--code" />

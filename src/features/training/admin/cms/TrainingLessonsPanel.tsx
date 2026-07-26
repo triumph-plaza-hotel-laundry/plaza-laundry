@@ -47,6 +47,7 @@ import { TrainingRichEditor } from '@/features/training/editor/TrainingRichEdito
 import { downloadLessonDocx } from '@/features/training/export/download-lesson-docx';
 import { downloadLessonsPdf } from '@/features/training/export/download-lesson-pdf';
 import { printTrainingLessons } from '@/features/training/export/print-lesson';
+import { useAuth } from '@/hooks';
 
 type Props = {
   onChanged: () => void;
@@ -317,6 +318,8 @@ export function TrainingLessonsPanel({
   assertCanWrite,
   focusLessonId,
 }: Props) {
+  const { user } = useAuth();
+  const printedBy = user?.displayName || user?.username || 'Staff';
   const [lessons, setLessons] = useState<TrainingLessonRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -604,6 +607,7 @@ export function TrainingLessonsPanel({
       } else {
         printTrainingLessons(selected, {
           heading: 'Selected Training Lessons',
+          printedBy,
         });
       }
     } catch (error) {
@@ -749,7 +753,9 @@ export function TrainingLessonsPanel({
                                     ),
                                   );
                               }}
-                              onPrint={() => printTrainingLessons([lesson])}
+                              onPrint={() =>
+                                printTrainingLessons([lesson], { printedBy })
+                              }
                               onSave={() => void handleSave(lesson.id)}
                               onTitle={(title) =>
                                 setDrafts((prev) => ({

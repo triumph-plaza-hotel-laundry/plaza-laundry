@@ -1,7 +1,6 @@
 import {
   ChevronDown,
   FileSpreadsheet,
-  Printer,
   RotateCcw,
   Save,
 } from 'lucide-react';
@@ -16,6 +15,7 @@ import {
   type WeeklyCellAssignment,
 } from '@/data/laundry-shifts';
 import { dictionaries } from '@/i18n/dictionaries';
+import { EnterprisePrintButton } from '@/features/enterprise-print';
 import { useLanguage } from '@/hooks';
 import { exportWeeklyScheduleToExcel } from '@/lib/weekly-schedule-export';
 import {
@@ -270,10 +270,6 @@ export const WeeklyShiftScheduleTable = memo(function WeeklyShiftScheduleTable({
     exportWeeklyScheduleToExcel(weeklySchedule, weekDates, employees, language);
   }, [employees, language, weekDates, weeklySchedule]);
 
-  const handlePrint = useCallback(() => {
-    window.print();
-  }, []);
-
   const handleToggleDay = useCallback((day: WeekDayId) => {
     setExpandedDay((current) => (current === day ? null : day));
   }, []);
@@ -323,6 +319,16 @@ export const WeeklyShiftScheduleTable = memo(function WeeklyShiftScheduleTable({
                 <RotateCcw aria-hidden="true" strokeWidth={1.6} />
                 <span>{t('admin.shifts.resetChanges')}</span>
               </button>
+              <EnterprisePrintButton
+                className="shift-schedule-page__action"
+                getSource={() =>
+                  document.querySelector(
+                    '.shift-schedule-accordion',
+                  ) as HTMLElement | null
+                }
+                label={t('shifts.weekly.actions.printPdf')}
+                title="Weekly Shift Schedule"
+              />
             </>
           ) : (
             <>
@@ -334,14 +340,16 @@ export const WeeklyShiftScheduleTable = memo(function WeeklyShiftScheduleTable({
                 <FileSpreadsheet aria-hidden="true" strokeWidth={1.6} />
                 <span>{t('shifts.weekly.actions.exportExcel')}</span>
               </button>
-              <button
+              <EnterprisePrintButton
                 className="shift-schedule-page__action"
-                onClick={handlePrint}
-                type="button"
-              >
-                <Printer aria-hidden="true" strokeWidth={1.6} />
-                <span>{t('shifts.weekly.actions.printPdf')}</span>
-              </button>
+                getSource={() =>
+                  document.querySelector(
+                    '.shift-schedule-accordion',
+                  ) as HTMLElement | null
+                }
+                label={t('shifts.weekly.actions.printPdf')}
+                title="Weekly Shift Schedule"
+              />
             </>
           )}
         </div>

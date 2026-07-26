@@ -1,4 +1,5 @@
 import { useInventoryArchive } from '@/features/admin/context/useInventoryArchive';
+import { EnterprisePrintButton } from '@/features/enterprise-print';
 import { useLanguage } from '@/hooks';
 import type { ReactNode } from 'react';
 
@@ -37,6 +38,16 @@ export function ArchiveHistoryViewShell({
             {t('admin.inventory.history.readOnly')}
           </p>
         ) : null}
+        <EnterprisePrintButton
+          getSource={() =>
+            document.querySelector(
+              '.admin-archive-history-view__print-region',
+            ) as HTMLElement | null
+          }
+          label="Print"
+          subtitle={viewingMonth ? formatMonthLabel(viewingMonth) : undefined}
+          title={titleEn}
+        />
       </div>
 
       <header className="admin-archive-history-view__header">
@@ -44,7 +55,9 @@ export function ArchiveHistoryViewShell({
         <h2 className="admin-archive-history-view__title-ar">{titleAr}</h2>
       </header>
 
-      <div className="admin-archive-history-view__body">{children}</div>
+      <div className="admin-archive-history-view__body admin-archive-history-view__print-region">
+        {children}
+      </div>
     </section>
   );
 }

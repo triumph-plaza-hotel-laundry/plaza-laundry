@@ -1,8 +1,8 @@
-import { Printer } from 'lucide-react';
-
 import { ChemicalCard } from '@/components/chemicals/ChemicalCard';
 
 import { localizedText } from '@/data/repositories';
+
+import { EnterprisePrintButton } from '@/features/enterprise-print';
 
 import { useChemicals, useLanguage } from '@/hooks';
 
@@ -27,10 +27,6 @@ export function ChemicalsPage() {
     form: t('chemicals.table.form'),
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   return (
     <section className="luxury-page-shell chemicals-page mx-auto">
       <header className="chemicals-page__header">
@@ -43,19 +39,16 @@ export function ChemicalsPage() {
             <p className="luxury-page-subtitle">{t('chemicals.subtitle')}</p>
           </div>
 
-          <button
-            className="luxury-print-btn chemicals-page__print"
-            onClick={handlePrint}
-            type="button"
-          >
-            <Printer
-              aria-hidden="true"
-              className="luxury-print-btn__icon"
-              strokeWidth={1.75}
-            />
-
-            {t('chemicals.print')}
-          </button>
+          <EnterprisePrintButton
+            className="chemicals-page__print"
+            getSource={() =>
+              document.querySelector(
+                '.chemicals-page__table-section',
+              ) as HTMLElement | null
+            }
+            label={t('chemicals.print')}
+            title="Chemicals Catalog"
+          />
         </div>
       </header>
 

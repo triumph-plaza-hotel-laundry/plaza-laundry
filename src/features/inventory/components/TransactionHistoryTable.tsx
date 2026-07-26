@@ -2,9 +2,10 @@ import type {
   InventoryTransaction,
   InventoryTransactionType,
 } from '@/features/inventory';
+import { EnterprisePrintButton } from '@/features/enterprise-print';
 import { useLanguage } from '@/hooks';
 import type { TranslationKey } from '@/types/language';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 
 type TransactionHistoryTableProps = {
   transactions: InventoryTransaction[];
@@ -29,6 +30,7 @@ export function TransactionHistoryTable({
   transactionType,
 }: TransactionHistoryTableProps) {
   const { language, t } = useLanguage();
+  const printRef = useRef<HTMLDivElement>(null);
 
   const filteredTransactions = useMemo(
     () =>
@@ -60,10 +62,18 @@ export function TransactionHistoryTable({
       className={`inv-panel inv-panel--history inv-panel--history-${transactionType}`}
     >
       <header className="inv-panel__header">
-        <h2 className="inv-panel__title-en">{t(titleEnKey)}</h2>
-        <h2 className="inv-panel__title-ar">{t(titleArKey)}</h2>
+        <div>
+          <h2 className="inv-panel__title-en">{t(titleEnKey)}</h2>
+          <h2 className="inv-panel__title-ar">{t(titleArKey)}</h2>
+        </div>
+        <EnterprisePrintButton
+          getSource={() => printRef.current}
+          label="Print"
+          title={t(titleEnKey)}
+        />
       </header>
 
+      <div ref={printRef}>
       {filteredTransactions.length === 0 ? (
         <div className="inv-empty">
           <p>{t(emptyKey)}</p>
@@ -131,6 +141,7 @@ export function TransactionHistoryTable({
           </table>
         </div>
       )}
+      </div>
     </section>
   );
 }
