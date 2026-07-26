@@ -376,13 +376,13 @@ export function AdminOwnerPushPage() {
       }
 
       const wtsInclusion = result.inclusion?.find(
-        (row) => row.employeeId === 'wts-01',
+        (row) => row.employeeId === 'EMP-0006',
       );
       const targetingHint =
         audience === 'shift_tomorrow'
           ? ` · غدًا ${result.targetDate ?? tomorrowKey} · مستهدفون ${result.targeted ?? 0}${
               wtsInclusion
-                ? ` · wts-01: ${wtsInclusion.included ? 'مشمول' : `مستبعد (${wtsInclusion.reason})`}`
+                ? ` · EMP-0006: ${wtsInclusion.included ? 'مشمول' : `مستبعد (${wtsInclusion.reason})`}`
                 : ''
             }`
           : '';

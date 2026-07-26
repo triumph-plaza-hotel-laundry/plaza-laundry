@@ -62,7 +62,7 @@ const shiftRoles: ShiftRole[] = [
   'annualLeave',
 ];
 
-const MANAGER_IDS = new Set(['gm-01', 'dm-01']);
+const MANAGER_IDS = new Set(['EMP-0001', 'EMP-0002']);
 
 function isManagerEmployee(employee: LaundryEmployee): boolean {
   return (

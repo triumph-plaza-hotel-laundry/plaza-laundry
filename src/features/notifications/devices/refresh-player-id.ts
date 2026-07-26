@@ -18,7 +18,9 @@ export async function refreshLinkedPlayerId(input: {
   }
 
   const newId = input.newPlayerId.trim();
-  if (!newId) {
+  const expected =
+    input.previousPlayerId?.trim() || link.onesignalPlayerId?.trim() || '';
+  if (!newId || !expected) {
     return false;
   }
 
@@ -26,12 +28,19 @@ export async function refreshLinkedPlayerId(input: {
     return true;
   }
 
+  // Ownership proof: local cache must still believe it owned `expected`.
+  if (link.onesignalPlayerId && link.onesignalPlayerId !== expected) {
+    console.warn(
+      '[notifications] refresh refused — local player_id is not the expected prior id',
+    );
+    return false;
+  }
+
   const client = requireSupabase();
   const { data, error } = await client.rpc('refresh_notification_player_id', {
     p_employee_id: link.laundryEmployeeId,
     p_new_player_id: newId,
-    p_expected_player_id:
-      input.previousPlayerId?.trim() || link.onesignalPlayerId || null,
+    p_expected_player_id: expected,
   });
 
   if (error) {

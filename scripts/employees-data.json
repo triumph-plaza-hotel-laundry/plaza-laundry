@@ -1,11 +1,12 @@
 [
   {
-    "id": "gm-01",
-    "employeeId": "",
+    "id": "EMP-0001",
+    "employeeId": "EMP-0001",
     "tier": "generalManager",
+    "status": "active",
     "sortOrder": 0,
     "name": {
-      "en": "Ahmed Debaka",
+      "en": "Ahmed Debka",
       "ar": "أحمد دبكه"
     },
     "jobTitle": {
@@ -36,9 +37,10 @@
     }
   },
   {
-    "id": "dm-01",
-    "employeeId": "",
+    "id": "EMP-0002",
+    "employeeId": "EMP-0002",
     "tier": "departmentManager",
+    "status": "active",
     "sortOrder": 1,
     "name": {
       "en": "Ramadan Mahmoud",
@@ -72,12 +74,50 @@
     }
   },
   {
-    "id": "dm-02",
-    "employeeId": "",
-    "tier": "departmentManager",
-    "sortOrder": 1,
+    "id": "EMP-0003",
+    "employeeId": "EMP-0003",
+    "tier": "washingSupervisor",
+    "status": "active",
+    "sortOrder": 2,
     "name": {
-      "en": "Mohamed Hamid",
+      "en": "Ahmed Shaaban",
+      "ar": "أحمد شعبان"
+    },
+    "jobTitle": {
+      "en": "Senior Laundry Supervisor",
+      "ar": "مشرف أول مغسلة"
+    },
+    "department": {
+      "en": "Laundry Department",
+      "ar": "قسم المغسلة"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "EMP-0004",
+    "employeeId": "EMP-0004",
+    "tier": "departmentManager",
+    "status": "active",
+    "sortOrder": 3,
+    "name": {
+      "en": "Mohamed Hamed",
       "ar": "محمد حامد"
     },
     "jobTitle": {
@@ -108,10 +148,48 @@
     }
   },
   {
-    "id": "wts-01",
-    "employeeId": "",
+    "id": "EMP-0005",
+    "employeeId": "EMP-0005",
+    "tier": "departmentManager",
+    "status": "active",
+    "sortOrder": 4,
+    "name": {
+      "en": "Mostafa Mohamed",
+      "ar": "مصطفى محمد"
+    },
+    "jobTitle": {
+      "en": "Senior Linen Supervisor",
+      "ar": "مشرف أول لينين"
+    },
+    "department": {
+      "en": "Linen Room",
+      "ar": "غرفة اللينين"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "EMP-0006",
+    "employeeId": "EMP-0006",
     "tier": "washingTeamSupervisor",
-    "sortOrder": 2,
+    "status": "active",
+    "sortOrder": 5,
     "name": {
       "en": "Kamel Ahmed",
       "ar": "كامل أحمد"
@@ -144,94 +222,22 @@
     }
   },
   {
-    "id": "lw-06",
-    "employeeId": "",
-    "tier": "laundryWorker",
-    "sortOrder": 3,
-    "name": {
-      "en": "Khaled El Sayed",
-      "ar": "خالد السيد"
-    },
-    "jobTitle": {
-      "en": "Valet Room Attendant",
-      "ar": "عامل غرفة الفاليه"
-    },
-    "department": {
-      "en": "Valet Department",
-      "ar": "قسم الفاليه"
-    },
-    "phone": "",
-    "dateOfBirth": {
-      "en": "",
-      "ar": ""
-    },
-    "shift": {
-      "en": "",
-      "ar": ""
-    },
-    "salary": "",
-    "hireDate": {
-      "en": "",
-      "ar": ""
-    },
-    "notes": {
-      "en": "",
-      "ar": ""
-    }
-  },
-  {
-    "id": "ws-01",
-    "employeeId": "",
-    "tier": "washingSupervisor",
-    "sortOrder": 4,
-    "name": {
-      "en": "Ahmed Shabban",
-      "ar": "أحمد شعبان"
-    },
-    "jobTitle": {
-      "en": "Senior Laundry Supervisor",
-      "ar": "مشرف أول مغسلة"
-    },
-    "department": {
-      "en": "Laundry Department",
-      "ar": "قسم المغسلة"
-    },
-    "phone": "",
-    "dateOfBirth": {
-      "en": "",
-      "ar": ""
-    },
-    "shift": {
-      "en": "",
-      "ar": ""
-    },
-    "salary": "",
-    "hireDate": {
-      "en": "",
-      "ar": ""
-    },
-    "notes": {
-      "en": "",
-      "ar": ""
-    }
-  },
-  {
-    "id": "ws-02",
-    "employeeId": "ws-02",
-    "tier": "washingSupervisor",
+    "id": "EMP-0007",
+    "employeeId": "EMP-0007",
+    "tier": "tailor",
     "status": "active",
     "sortOrder": 6,
     "name": {
-      "en": "Tarik Ali",
-      "ar": "طارق علي"
+      "en": "Mohamed Saeed",
+      "ar": "محمد سعيد"
     },
     "jobTitle": {
-      "en": "Lead Supervisor",
-      "ar": "مشرف رئيسي"
+      "en": "Tailor",
+      "ar": "ترزي"
     },
     "department": {
-      "en": "Laundry",
-      "ar": "المغسلة"
+      "en": "Tailor",
+      "ar": "الترزي"
     },
     "phone": "",
     "dateOfBirth": {
@@ -253,10 +259,11 @@
     }
   },
   {
-    "id": "wts-02",
-    "employeeId": "",
+    "id": "EMP-0008",
+    "employeeId": "EMP-0008",
     "tier": "washingTeamSupervisor",
-    "sortOrder": 6,
+    "status": "active",
+    "sortOrder": 7,
     "name": {
       "en": "Mohamed Sayed",
       "ar": "محمد سيد"
@@ -289,21 +296,22 @@
     }
   },
   {
-    "id": "dm-03",
-    "employeeId": "",
-    "tier": "departmentManager",
-    "sortOrder": 7,
+    "id": "EMP-0009",
+    "employeeId": "EMP-0009",
+    "tier": "washingTeamSupervisor",
+    "status": "active",
+    "sortOrder": 8,
     "name": {
-      "en": "Mustafa Mohamed",
-      "ar": "مصطفى محمد"
+      "en": "Ashraf El Sayed",
+      "ar": "أشرف السيد"
     },
     "jobTitle": {
-      "en": "Senior Linen Supervisor",
-      "ar": "مشرف أول لينين"
+      "en": "Shift Leader Iron",
+      "ar": "مشرف وردية المكواة"
     },
     "department": {
-      "en": "Linen Room",
-      "ar": "غرفة اللينين"
+      "en": "Iron Room",
+      "ar": "غرفة المكواة"
     },
     "phone": "",
     "dateOfBirth": {
@@ -325,10 +333,85 @@
     }
   },
   {
-    "id": "lw-01",
-    "employeeId": "",
+    "id": "EMP-0010",
+    "employeeId": "EMP-0010",
+    "tier": "washingSupervisor",
+    "status": "active",
+    "sortOrder": 9,
+    "name": {
+      "en": "Tarek Ali",
+      "ar": "طارق علي"
+    },
+    "jobTitle": {
+      "en": "Lead Supervisor",
+      "ar": "مشرف رئيسي"
+    },
+    "department": {
+      "en": "Laundry",
+      "ar": "المغسلة"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "EMP-0011",
+    "employeeId": "EMP-0011",
     "tier": "laundryWorker",
-    "sortOrder": 8,
+    "status": "active",
+    "sortOrder": 10,
+    "name": {
+      "en": "Khaled El Sayed",
+      "ar": "خالد السيد"
+    },
+    "jobTitle": {
+      "en": "Valet Room Attendant",
+      "ar": "عامل غرفة الفاليه"
+    },
+    "department": {
+      "en": "Valet Department",
+      "ar": "قسم الفاليه"
+    },
+    "phone": "",
+    "dateOfBirth": {
+      "en": "",
+      "ar": ""
+    },
+    "shift": {
+      "en": "",
+      "ar": ""
+    },
+    "salary": "",
+    "hireDate": {
+      "en": "",
+      "ar": ""
+    },
+    "notes": {
+      "en": "",
+      "ar": ""
+    }
+  },
+  {
+    "id": "EMP-0012",
+    "employeeId": "EMP-0012",
+    "tier": "laundryWorker",
+    "status": "active",
+    "sortOrder": 11,
     "name": {
       "en": "Abdallah Ahmed",
       "ar": "عبدالله أحمد"
@@ -361,46 +444,11 @@
     }
   },
   {
-    "id": "wts-03",
-    "employeeId": "",
-    "tier": "washingTeamSupervisor",
-    "sortOrder": 9,
-    "name": {
-      "en": "Ashraf ElSayed",
-      "ar": "أشرف السيد"
-    },
-    "jobTitle": {
-      "en": "Shift Leader Iron",
-      "ar": "مشرف وردية المكواة"
-    },
-    "department": {
-      "en": "Iron Room",
-      "ar": "غرفة المكواة"
-    },
-    "phone": "",
-    "dateOfBirth": {
-      "en": "",
-      "ar": ""
-    },
-    "shift": {
-      "en": "",
-      "ar": ""
-    },
-    "salary": "",
-    "hireDate": {
-      "en": "",
-      "ar": ""
-    },
-    "notes": {
-      "en": "",
-      "ar": ""
-    }
-  },
-  {
-    "id": "lw-02",
-    "employeeId": "",
+    "id": "EMP-0013",
+    "employeeId": "EMP-0013",
     "tier": "laundryWorker",
-    "sortOrder": 10,
+    "status": "active",
+    "sortOrder": 12,
     "name": {
       "en": "Adel Salah",
       "ar": "عادل صلاح"
@@ -433,10 +481,11 @@
     }
   },
   {
-    "id": "lw-03",
-    "employeeId": "",
+    "id": "EMP-0014",
+    "employeeId": "EMP-0014",
     "tier": "laundryWorker",
-    "sortOrder": 11,
+    "status": "active",
+    "sortOrder": 13,
     "name": {
       "en": "Mohamed Abdul Nabi",
       "ar": "محمد عبد النبي"
@@ -469,10 +518,11 @@
     }
   },
   {
-    "id": "lw-04",
-    "employeeId": "",
+    "id": "EMP-0015",
+    "employeeId": "EMP-0015",
     "tier": "laundryWorker",
-    "sortOrder": 12,
+    "status": "active",
+    "sortOrder": 14,
     "name": {
       "en": "Mohamed Salama",
       "ar": "محمد سلامة"
@@ -505,10 +555,11 @@
     }
   },
   {
-    "id": "lw-05",
-    "employeeId": "",
+    "id": "EMP-0016",
+    "employeeId": "EMP-0016",
     "tier": "laundryWorker",
-    "sortOrder": 13,
+    "status": "active",
+    "sortOrder": 15,
     "name": {
       "en": "Eslam Abdulaziz",
       "ar": "إسلام عبدالعزيز"
@@ -541,10 +592,11 @@
     }
   },
   {
-    "id": "lw-07",
-    "employeeId": "",
+    "id": "EMP-0017",
+    "employeeId": "EMP-0017",
     "tier": "laundryWorker",
-    "sortOrder": 14,
+    "status": "active",
+    "sortOrder": 16,
     "name": {
       "en": "Mohamed Mosalam",
       "ar": "محمد مسلم"
@@ -577,10 +629,11 @@
     }
   },
   {
-    "id": "lw-08",
-    "employeeId": "",
+    "id": "EMP-0018",
+    "employeeId": "EMP-0018",
     "tier": "laundryWorker",
-    "sortOrder": 15,
+    "status": "active",
+    "sortOrder": 17,
     "name": {
       "en": "Ahmed Mohamed",
       "ar": "أحمد محمد"
@@ -613,10 +666,11 @@
     }
   },
   {
-    "id": "lw-09",
-    "employeeId": "",
+    "id": "EMP-0019",
+    "employeeId": "EMP-0019",
     "tier": "laundryWorker",
-    "sortOrder": 16,
+    "status": "active",
+    "sortOrder": 18,
     "name": {
       "en": "Ahmed Ali",
       "ar": "أحمد علي"
@@ -649,10 +703,11 @@
     }
   },
   {
-    "id": "lw-10",
-    "employeeId": "",
+    "id": "EMP-0020",
+    "employeeId": "EMP-0020",
     "tier": "laundryWorker",
-    "sortOrder": 17,
+    "status": "active",
+    "sortOrder": 19,
     "name": {
       "en": "Mohamed Mostafa",
       "ar": "محمد مصطفى"
@@ -664,42 +719,6 @@
     "department": {
       "en": "Chest Ironers",
       "ar": "الجندرة"
-    },
-    "phone": "",
-    "dateOfBirth": {
-      "en": "",
-      "ar": ""
-    },
-    "shift": {
-      "en": "",
-      "ar": ""
-    },
-    "salary": "",
-    "hireDate": {
-      "en": "",
-      "ar": ""
-    },
-    "notes": {
-      "en": "",
-      "ar": ""
-    }
-  },
-  {
-    "id": "tl-01",
-    "employeeId": "",
-    "tier": "tailor",
-    "sortOrder": 18,
-    "name": {
-      "en": "Mohamed Saeed",
-      "ar": "محمد سعيد"
-    },
-    "jobTitle": {
-      "en": "Tailor",
-      "ar": "ترزي"
-    },
-    "department": {
-      "en": "Tailor",
-      "ar": "الترزي"
     },
     "phone": "",
     "dateOfBirth": {

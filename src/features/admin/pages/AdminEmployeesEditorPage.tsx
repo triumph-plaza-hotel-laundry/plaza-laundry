@@ -17,16 +17,21 @@ import {
   getLocalizedDisplay,
   uniqueSorted,
 } from '@/lib/employee-admin';
+import { createEmployeeWithPermanentId } from '@/lib/migrate-employee-ids';
 import '@/features/admin/admin-editor.css';
 
-function emptyEmployee(sortOrder: number): LaundryEmployee {
-  return normalizeEmployee({
-    id: `emp-${Date.now()}`,
-    employeeId: '',
-    tier: 'laundryWorker',
-    status: 'active',
-    sortOrder,
-  });
+function emptyEmployee(
+  sortOrder: number,
+  existing: readonly LaundryEmployee[],
+): LaundryEmployee {
+  return createEmployeeWithPermanentId(
+    normalizeEmployee({
+      tier: 'laundryWorker',
+      status: 'active',
+      sortOrder,
+    }),
+    existing,
+  );
 }
 
 export function AdminEmployeesEditorPage() {
@@ -147,7 +152,7 @@ export function AdminEmployeesEditorPage() {
         (max, employee) => Math.max(max, employee.sortOrder),
         0,
       ) + 1;
-    openEmployee(emptyEmployee(nextSortOrder), true);
+    openEmployee(emptyEmployee(nextSortOrder, employees), true);
   };
 
   const handleSave = async () => {
@@ -160,7 +165,11 @@ export function AdminEmployeesEditorPage() {
     try {
       assertCan('employees', 'update');
       const exists = employees.some((employee) => employee.id === draft.id);
-      const normalized = normalizeEmployee(draft);
+      // Lock Employee ID on create (already allocated) and on edit (immutable).
+      const normalized = normalizeEmployee({
+        ...draft,
+        employeeId: draft.id,
+      });
 
       if (exists) {
         employeesRepository.update(normalized.id, normalized);

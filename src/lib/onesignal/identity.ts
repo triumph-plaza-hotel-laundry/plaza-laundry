@@ -5,7 +5,7 @@
  * Admin browser sessions use `admin:<adminUserId>`.
  *
  * These must never be interchangeable — primary admin "Kamel Ahmed" is not
- * laundry employee `wts-01`.
+ * laundry employee EMP-0006 (Kamel Ahmed).
  */
 
 export const ONESIGNAL_EMPLOYEE_EXTERNAL_PREFIX = 'employee:';

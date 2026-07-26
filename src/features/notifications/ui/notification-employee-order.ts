@@ -15,12 +15,12 @@ export const NOTIFICATION_EMPLOYEE_PRIORITY_AR_NAMES = [
 
 /** Stable ID fallback matching the Arabic priority list above. */
 export const NOTIFICATION_EMPLOYEE_PRIORITY_IDS = [
-  'gm-01',
-  'dm-01',
-  'ws-01',
-  'dm-02',
-  'dm-03',
-  'wts-01',
+  'EMP-0001',
+  'EMP-0002',
+  'EMP-0003',
+  'EMP-0004',
+  'EMP-0005',
+  'EMP-0006',
 ] as const;
 
 function priorityRank(employee: LaundryEmployee): number {

@@ -365,7 +365,10 @@ async function sendOnce(
   }
 
   // Create Message can return an id even when the subscription cannot receive
-  // web push (View Message then shows successful=0 and failed/errored > 0).
+  // web push. Early View Message counters are often incomplete — do NOT treat
+  // successful=0 at +1.2s as a permanent invalid subscription (that wrongly
+  // unlinks healthy devices). Permanent invalidation is only for Create
+  // recipients=0 / explicit invalid player ids from OneSignal.
   if (
     response.ok &&
     onesignalNotificationId &&
@@ -374,10 +377,9 @@ async function sendOnce(
     !invalidPlayerIds.includes(subscriptionId)
   ) {
     console.warn(
-      '[onesignal-delivery] notification id accepted but View Message shows zero successful deliveries',
+      '[onesignal-delivery] early View Message shows zero successful — not marking invalid yet',
       { subscriptionId, successful, failedCount, errored },
     );
-    invalidPlayerIds.push(subscriptionId);
   }
 
   const errorMessage = summarizeError(response.status, responseBody, rawText);

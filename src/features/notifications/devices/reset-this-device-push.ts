@@ -1,7 +1,6 @@
 import OneSignal from 'react-onesignal';
 import { getActiveDeviceByPlayerId } from '@/features/notifications/devices';
 import {
-  clearLocalDeviceLink,
   readLocalDeviceLink,
   writeLocalDeviceLink,
 } from '@/features/notifications/pairing/local-device-link';
@@ -134,11 +133,12 @@ async function wipeThisBrowserPushStack(): Promise<void> {
   }
 
   // Best-effort OneSignal / trace DB cleanup (origin-local only).
+  // Do NOT clearLocalDeviceLink here — rotate must succeed first so a failed
+  // reset can still recover using the prior Employee ID + old player proof.
   await deleteDatabase('tpl-push-trace');
   await deleteDatabase('ONE_SIGNAL_SDK_DB');
   await deleteDatabase('ONE_SIGNAL_PAGE_SDK_DB');
 
-  clearLocalDeviceLink();
   resetOneSignalClientStateForResubscribe();
 }
 

@@ -1,18 +1,15 @@
 /**
- * Detect a stale PWA app shell and force a one-time reclaim.
+ * Detect a stale PWA app shell and force reclaim.
  *
- * Why this exists:
- * Workbox precaches index.html. A phone with an old service worker keeps
- * serving the old HTML → old /assets/index-*.js → old pairing page without
- * diagnostics, even when Vercel production already has the new build.
- *
- * fetch('/') is intercepted by that same SW, so we cannot detect staleness
- * via HTML. Instead we compare a NetworkOnly /build.json to the compile-time id.
+ * Workbox can precache index.html. A phone with an old service worker keeps
+ * serving old HTML → old JS. Compare NetworkOnly /build.json to the
+ * compile-time id and reclaim the root SW until they match.
  */
 
 declare const __TPL_BUILD_ID__: string;
 
-const RECLAIM_FLAG = 'tpl-shell-reclaim';
+const RECLAIM_FLAG = 'tpl-shell-reclaim-target';
+const RECLAIM_ATTEMPTS = 'tpl-shell-reclaim-attempts';
 
 function localBuildId(): string {
   try {
@@ -62,7 +59,8 @@ async function reclaimRootServiceWorker(): Promise<void> {
 
 /**
  * If the installed shell is behind production, unregister the root SW,
- * clear app caches, and reload once this session.
+ * clear app caches, and reload. Retries across reloads until local matches
+ * remote (does not latch forever on the old build id).
  */
 export async function ensureFreshAppShell(): Promise<void> {
   if (typeof window === 'undefined') return;
@@ -71,22 +69,33 @@ export async function ensureFreshAppShell(): Promise<void> {
   const local = localBuildId();
   if (!local) return;
 
-  // Expose for phone-side confirmation without DevTools.
   (
     window as Window & { __TPL_BUILD_ID__?: string }
   ).__TPL_BUILD_ID__ = local;
 
-  if (sessionStorage.getItem(RECLAIM_FLAG) === local) {
-    return;
-  }
-
   const remote = await readRemoteBuildId();
   if (!remote || remote === local) {
+    sessionStorage.removeItem(RECLAIM_FLAG);
+    sessionStorage.removeItem(RECLAIM_ATTEMPTS);
     return;
   }
 
-  console.warn('[pwa] Stale app shell — reclaiming', { local, remote });
-  sessionStorage.setItem(RECLAIM_FLAG, local);
+  const attempts = Number(sessionStorage.getItem(RECLAIM_ATTEMPTS) || '0');
+  if (attempts >= 3) {
+    console.warn(
+      '[pwa] Stale shell persists after reclaim attempts — open /onesignal/clear-cache.html',
+      { local, remote, attempts },
+    );
+    return;
+  }
+
+  console.warn('[pwa] Stale app shell — reclaiming', {
+    local,
+    remote,
+    attempts,
+  });
+  sessionStorage.setItem(RECLAIM_FLAG, remote);
+  sessionStorage.setItem(RECLAIM_ATTEMPTS, String(attempts + 1));
   await reclaimRootServiceWorker();
   window.location.reload();
 }

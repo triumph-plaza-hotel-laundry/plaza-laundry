@@ -16,13 +16,14 @@ export type ReconcileLocalLinkResult = {
 };
 
 /**
- * Source of truth:
- * - Server active row in employee_notification_devices
- * - Local cache is a mirror for inbox sync / this-device UX
+ * Source of truth: active row in employee_notification_devices.
+ * Local cache mirrors that row for inbox / this-device UX.
  *
- * Never clear the local link merely because the current OneSignal player_id
- * does not match yet (rotation / login 409). Only clear when the server says
- * this employee no longer has an active device.
+ * Critical rule (phone replacement):
+ * Never call refresh when this browser's cached player_id differs from the
+ * server active player_id — that would steal the new phone's link.
+ * Refresh is only for true OneSignal rotation on the phone that still owns
+ * the active subscription (local player_id === server player_id).
  */
 export async function reconcileLocalDeviceLink(options?: {
   currentPlayerId?: string | null;
@@ -68,7 +69,7 @@ export async function reconcileLocalDeviceLink(options?: {
     }
   }
 
-  // 2) Local cache says this phone is linked to an employee → confirm by employee_id.
+  // 2) Local cache says this phone is linked → confirm by employee_id.
   if (local?.linked && local.laundryEmployeeId) {
     try {
       const byEmployee = await getActiveDeviceByEmployeeId(
@@ -83,7 +84,13 @@ export async function reconcileLocalDeviceLink(options?: {
         return { linked: false, reason: 'server_unlinked' };
       }
 
-      if (playerId && playerId !== byEmployee.playerId) {
+      // True rotation: we still own the active row; OneSignal gave a new id.
+      if (
+        playerId &&
+        local.onesignalPlayerId &&
+        local.onesignalPlayerId === byEmployee.playerId &&
+        playerId !== byEmployee.playerId
+      ) {
         const refreshed = await refreshLinkedPlayerId({
           newPlayerId: playerId,
           previousPlayerId: byEmployee.playerId,
@@ -97,22 +104,33 @@ export async function reconcileLocalDeviceLink(options?: {
           return { linked: true, reason: 'player_id_refreshed' };
         }
 
-        // Keep linked state with server player id until refresh succeeds.
         writeLocalDeviceLink({
           linked: true,
           onesignalPlayerId: byEmployee.playerId,
           laundryEmployeeId: byEmployee.employeeId,
           pairedAt: byEmployee.linkedAt,
         });
-        console.warn(
-          '[device-link] reconcile kept_local_refresh_failed',
-          {
-            employeeId: byEmployee.employeeId,
-            serverPlayerId: byEmployee.playerId,
-            currentPlayerId: playerId,
-          },
-        );
+        console.warn('[device-link] reconcile kept_local_refresh_failed', {
+          employeeId: byEmployee.employeeId,
+          serverPlayerId: byEmployee.playerId,
+          currentPlayerId: playerId,
+        });
         return { linked: true, reason: 'kept_local_refresh_failed' };
+      }
+
+      // Another device owns this employee (phone replacement) — do not steal.
+      if (
+        playerId &&
+        local.onesignalPlayerId &&
+        local.onesignalPlayerId !== byEmployee.playerId
+      ) {
+        clearLocalDeviceLink();
+        console.info('[device-link] reconcile replaced_by_other_device', {
+          employeeId: byEmployee.employeeId,
+          localPlayerId: local.onesignalPlayerId,
+          serverPlayerId: byEmployee.playerId,
+        });
+        return { linked: false, reason: 'replaced_by_other_device' };
       }
 
       writeLocalDeviceLink({

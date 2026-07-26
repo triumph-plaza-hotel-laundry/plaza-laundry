@@ -22,6 +22,7 @@ import {
   sendOneSignalNotificationLegacy,
   sendToSubscriptionId,
 } from '../_shared/notification-delivery.ts';
+import { resolvePermanentEmployeeId } from '../_shared/employee-id-map.ts';
 
 const SHIFTS_KEY = 'tpl-shifts';
 const EMPLOYEES_KEY = 'tpl-employees-v1';
@@ -146,7 +147,7 @@ async function sendOneSignalNotification(
 
       for (const invalidId of result.invalidPlayerIds) {
         console.warn('[shift-reminder] marking subscription invalid', invalidId);
-        await options.supabase.rpc('mark_onesignal_subscription_invalid', {
+        await options.supabase.rpc('mark_notification_device_invalid', {
           p_player_id: invalidId,
           p_reason: 'OneSignal reported invalid/zero recipients',
         });
@@ -236,7 +237,11 @@ async function loadFreshScheduleData(supabase: ReturnType<typeof createClient>) 
     throw new Error('Weekly shift schedule is missing or invalid');
   }
 
-  const employees = (employeesRow?.data ?? []) as LaundryEmployee[];
+  const employeesRaw = (employeesRow?.data ?? []) as LaundryEmployee[];
+  const employees = employeesRaw.map((employee) => {
+    const id = resolvePermanentEmployeeId(employee.id);
+    return id === employee.id ? employee : { ...employee, id };
+  });
 
   return {
     shifts,
@@ -250,12 +255,16 @@ async function resolveSubscriptions(
   supabase: ReturnType<typeof createClient>,
   laundryEmployeeId: string,
 ): Promise<SubscriptionRow[]> {
-  console.log('[shift-reminder] resolve active device', { laundryEmployeeId });
+  const permanentId = resolvePermanentEmployeeId(laundryEmployeeId);
+  console.log('[shift-reminder] resolve active device', {
+    laundryEmployeeId,
+    permanentId,
+  });
 
   const { data, error } = await supabase
     .from('employee_notification_devices')
     .select('id, employee_id, player_id')
-    .eq('employee_id', laundryEmployeeId)
+    .eq('employee_id', permanentId)
     .eq('status', 'active')
     .maybeSingle();
 
@@ -268,22 +277,22 @@ async function resolveSubscriptions(
     typeof data?.player_id === 'string' ? data.player_id.trim() : '';
   if (!playerId) {
     console.warn('[shift-reminder] employee is not linked', {
-      laundryEmployeeId,
+      laundryEmployeeId: permanentId,
     });
     return [];
   }
 
   console.log('[shift-reminder] resolved player_id', {
-    laundryEmployeeId,
+    laundryEmployeeId: permanentId,
     playerId,
   });
 
   return [
     {
       id: (data?.id as string) ?? playerId,
-      employee_id: laundryEmployeeId,
+      employee_id: permanentId,
       onesignal_player_id: playerId,
-      laundry_employee_id: laundryEmployeeId,
+      laundry_employee_id: permanentId,
     },
   ];
 }
@@ -789,8 +798,8 @@ Deno.serve(async (request) => {
       if (employee.status !== 'active') {
         reason = `status_${employee.status}`;
       } else if (
-        employee.id === 'gm-01' ||
-        employee.id === 'dm-01' ||
+        employee.id === 'EMP-0001' ||
+        employee.id === 'EMP-0002' ||
         employee.tier === 'generalManager' ||
         employee.tier === 'departmentManager'
       ) {
@@ -811,8 +820,8 @@ Deno.serve(async (request) => {
       weekDayId: builtWeekDayId,
       assignmentCount: assignments.length,
       assignmentEmployeeIds: assignments.map((row) => row.employeeId),
-      wts01: inclusion.find((row) => row.employeeId === 'wts-01') ?? {
-        employeeId: 'wts-01',
+      wts01: inclusion.find((row) => row.employeeId === 'EMP-0006') ?? {
+        employeeId: 'EMP-0006',
         included: false,
         reason: 'employee_missing_from_tpl_employees_v1',
       },
@@ -950,7 +959,7 @@ Deno.serve(async (request) => {
       targetDate: builtTargetDate,
       count: assignments.length,
       ids: assignments.map((row) => row.employeeId),
-      wts01Included: assignments.some((row) => row.employeeId === 'wts-01'),
+      wts01Included: assignments.some((row) => row.employeeId === 'EMP-0006'),
     });
 
     let sent = 0;

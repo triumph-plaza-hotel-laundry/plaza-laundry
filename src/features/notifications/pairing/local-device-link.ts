@@ -1,3 +1,5 @@
+import { resolvePermanentEmployeeId } from '@/lib/employee-permanent-id';
+
 const STORAGE_KEY = 'tpl-employee-device-link-v1';
 
 export type LocalDeviceLinkState = {
@@ -6,6 +8,19 @@ export type LocalDeviceLinkState = {
   laundryEmployeeId: string | null;
   pairedAt: string | null;
 };
+
+function withRemappedEmployeeId(
+  parsed: LocalDeviceLinkState,
+): LocalDeviceLinkState {
+  if (!parsed.laundryEmployeeId) {
+    return parsed;
+  }
+  const nextId = resolvePermanentEmployeeId(parsed.laundryEmployeeId);
+  if (nextId === parsed.laundryEmployeeId) {
+    return parsed;
+  }
+  return { ...parsed, laundryEmployeeId: nextId };
+}
 
 export function readLocalDeviceLink(): LocalDeviceLinkState | null {
   if (typeof window === 'undefined') {
@@ -21,7 +36,12 @@ export function readLocalDeviceLink(): LocalDeviceLinkState | null {
     if (!parsed || typeof parsed.linked !== 'boolean') {
       return null;
     }
-    return parsed;
+    const remapped = withRemappedEmployeeId(parsed);
+    if (remapped.laundryEmployeeId !== parsed.laundryEmployeeId) {
+      // Persist remap so pairing / inbox keep using Employee ID.
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(remapped));
+    }
+    return remapped;
   } catch {
     return null;
   }
@@ -31,7 +51,8 @@ export function writeLocalDeviceLink(state: LocalDeviceLinkState): void {
   if (typeof window === 'undefined') {
     return;
   }
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  const remapped = withRemappedEmployeeId(state);
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(remapped));
   window.dispatchEvent(new Event('tpl-device-link-changed'));
 }
 

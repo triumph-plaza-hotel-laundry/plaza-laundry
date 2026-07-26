@@ -171,14 +171,31 @@ async function bindSubscriptionChangeListener() {
         linkedEmployeeId: localLink?.laundryEmployeeId ?? null,
       });
 
-      // Linked device only: UPDATE existing row. Never claim / never create.
-      if (localLink?.linked && localLink.laundryEmployeeId) {
+      // Linked device only: UPDATE when THIS phone still owns the active
+      // subscription. Use local cached player_id as ownership proof — never
+      // pass the server's (possibly newer) id as "expected" (that enables steal).
+      if (
+        localLink?.linked &&
+        localLink.laundryEmployeeId &&
+        localLink.onesignalPlayerId &&
+        (!previousId || previousId === localLink.onesignalPlayerId)
+      ) {
         void import('@/features/notifications/devices/refresh-player-id').then(
           ({ refreshLinkedPlayerId }) =>
             refreshLinkedPlayerId({
               newPlayerId: nextId,
-              previousPlayerId: previousId ?? localLink.onesignalPlayerId,
+              previousPlayerId: localLink.onesignalPlayerId,
             }),
+        );
+      } else if (localLink?.linked) {
+        platformLog(
+          'subscription',
+          'player id change ignored — this browser is not the prior owner',
+          {
+            previousId,
+            localPlayerId: localLink.onesignalPlayerId,
+            nextId,
+          },
         );
       }
     });

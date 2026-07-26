@@ -1,8 +1,20 @@
 import type { EmployeeStatus, LaundryEmployee } from '@/data/laundry-employees';
+import {
+  isPermanentEmployeeId,
+  resolvePermanentEmployeeId,
+} from '@/lib/employee-permanent-id';
 
+/** Display / search code — always the permanent Employee ID when present. */
 export function getEmployeeCode(employee: LaundryEmployee): string {
+  const id = employee.id.trim();
+  if (isPermanentEmployeeId(id)) {
+    return id;
+  }
   const code = employee.employeeId.trim();
-  return code || employee.id;
+  if (isPermanentEmployeeId(code)) {
+    return code;
+  }
+  return resolvePermanentEmployeeId(code || id) || id || '—';
 }
 
 export function getEmployeeStatus(employee: LaundryEmployee): EmployeeStatus {

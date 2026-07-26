@@ -84,16 +84,16 @@ export const WORKING_SHIFT_ROLES = shiftRoles.filter(
 ) as readonly ShiftRole[];
 
 const WORKER_IDS = [
-  'lw-01',
-  'lw-02',
-  'lw-03',
-  'lw-04',
-  'lw-05',
-  'lw-06',
-  'lw-07',
-  'lw-08',
-  'lw-09',
-  'lw-10',
+  'EMP-0012',
+  'EMP-0013',
+  'EMP-0014',
+  'EMP-0015',
+  'EMP-0016',
+  'EMP-0011',
+  'EMP-0017',
+  'EMP-0018',
+  'EMP-0019',
+  'EMP-0020',
 ] as const;
 
 const WEEKDAY_BY_JS: Record<number, WeekDayId> = {

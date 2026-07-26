@@ -13,6 +13,7 @@ import {
 import { createLocalStore } from '@/lib/data-store';
 import { registerRepository } from '@/data/repositories/repository-utils';
 import { STORAGE_KEYS } from '@/lib/data-store/storage-keys';
+import { resolvePermanentEmployeeId } from '@/lib/employee-permanent-id';
 
 export type {
   DailyRoster,
@@ -21,6 +22,46 @@ export type {
   WeekDayId,
   WeeklyCellAssignment,
 } from '@/data/laundry-shifts';
+
+function remapPair(pair: [string, string] | undefined): [string, string] {
+  return [
+    resolvePermanentEmployeeId(pair?.[0] ?? ''),
+    resolvePermanentEmployeeId(pair?.[1] ?? ''),
+  ];
+}
+
+function remapShiftsEmployeeIds(state: ShiftsState): ShiftsState {
+  const weeklySchedule = { ...state.weeklySchedule };
+  for (const day of weekDays) {
+    const daySchedule = { ...weeklySchedule[day] };
+    for (const role of Object.keys(daySchedule) as ShiftRole[]) {
+      const cell = daySchedule[role];
+      if (!cell) continue;
+      daySchedule[role] = {
+        morning: remapPair(cell.morning),
+        evening: remapPair(cell.evening),
+      };
+    }
+    weeklySchedule[day] = daySchedule;
+  }
+
+  const dailyRosters = { ...state.dailyRosters };
+  for (const day of weekDays) {
+    const roster = dailyRosters[day];
+    if (!roster) continue;
+    dailyRosters[day] = {
+      ...roster,
+      morning: (roster.morning ?? []).map((id) =>
+        resolvePermanentEmployeeId(id),
+      ),
+      evening: (roster.evening ?? []).map((id) =>
+        resolvePermanentEmployeeId(id),
+      ),
+    };
+  }
+
+  return { ...state, weeklySchedule, dailyRosters };
+}
 
 function normalizeShiftsState(parsed: unknown, seed: ShiftsState): ShiftsState {
   if (!parsed || typeof parsed !== 'object') {
@@ -38,11 +79,11 @@ function normalizeShiftsState(parsed: unknown, seed: ShiftsState): ShiftsState {
     }
   });
 
-  return {
+  return remapShiftsEmployeeIds({
     dailyRosters: { ...seed.dailyRosters, ...partial.dailyRosters },
     weeklySchedule: migrateWeeklySchedule(partial.weeklySchedule, seed),
     workingHours,
-  };
+  });
 }
 
 const store = createLocalStore<ShiftsState>({

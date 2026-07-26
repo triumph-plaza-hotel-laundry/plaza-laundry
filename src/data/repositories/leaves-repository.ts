@@ -11,6 +11,7 @@ import {
 import { createLocalStore } from '@/lib/data-store';
 import { registerRepository } from '@/data/repositories/repository-utils';
 import { STORAGE_KEYS } from '@/lib/data-store/storage-keys';
+import { resolvePermanentEmployeeId } from '@/lib/employee-permanent-id';
 
 export type {
   LeaveEntry,
@@ -37,7 +38,19 @@ const store = createLocalStore<LeavesState>({
   key: STORAGE_KEYS.leaves,
   seed: createDefaultLeavesState,
   normalize(parsed) {
-    return normalizeLeavesState(parsed as Partial<LeavesState>);
+    const state = normalizeLeavesState(parsed as Partial<LeavesState>);
+    return {
+      ...state,
+      slots: state.slots.map((slot) => {
+        if (!slot.entry) return slot;
+        const employeeId = resolvePermanentEmployeeId(slot.entry.employeeId);
+        if (employeeId === slot.entry.employeeId) return slot;
+        return {
+          ...slot,
+          entry: { ...slot.entry, employeeId },
+        };
+      }),
+    };
   },
 });
 

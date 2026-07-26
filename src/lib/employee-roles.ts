@@ -1,6 +1,7 @@
 import type { LaundryEmployee } from '@/data/laundry-employees';
+import { MANAGER_PERMANENT_EMPLOYEE_IDS } from '@/lib/employee-permanent-id';
 
-export const MANAGER_EMPLOYEE_IDS = ['gm-01', 'dm-01'] as const;
+export const MANAGER_EMPLOYEE_IDS = MANAGER_PERMANENT_EMPLOYEE_IDS;
 
 export type ManagerEmployeeId = (typeof MANAGER_EMPLOYEE_IDS)[number];
 

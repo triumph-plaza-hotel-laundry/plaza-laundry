@@ -113,10 +113,9 @@ export function AdminEmployeeModal({
                 <div className="admin-editor-field">
                   <label>{t('admin.editor.employeeCode')}</label>
                   <input
-                    onChange={(event) =>
-                      onChange({ ...employee, employeeId: event.target.value })
-                    }
-                    value={employee.employeeId}
+                    readOnly
+                    title="Permanent Employee ID — cannot be changed"
+                    value={employee.id}
                   />
                 </div>
                 <div className="admin-editor-field">
