@@ -91,6 +91,15 @@ export async function createTrainingLesson(
   const title = input.title.trim();
   if (!title) throw new Error('Lesson title is required.');
 
+  const { data: maxRow } = await client
+    .from('training_lessons')
+    .select('display_order')
+    .eq('month_key', input.monthKey ?? getCurrentTrainingMonthKey())
+    .order('display_order', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const nextOrder = Number(maxRow?.display_order ?? 0) + 1;
+
   const now = new Date().toISOString();
   const row: TrainingLessonRecord = {
     id: createTrainingEntityId('tles'),
@@ -99,7 +108,7 @@ export async function createTrainingLesson(
     month_key: input.monthKey ?? getCurrentTrainingMonthKey(),
     status: 'active',
     visibility: input.visibility ?? 'visible',
-    display_order: Date.now(),
+    display_order: nextOrder,
     created_at: now,
     updated_at: now,
   };

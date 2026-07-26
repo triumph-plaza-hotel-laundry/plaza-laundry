@@ -122,6 +122,15 @@ export async function createTrainingVideo(
       source_type === 'youtube' ? getYoutubeThumbnail(url) || '' : '';
   }
 
+  const { data: maxRow } = await client
+    .from('training_videos')
+    .select('display_order')
+    .eq('status', 'active')
+    .order('display_order', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const nextOrder = Number(maxRow?.display_order ?? 0) + 1;
+
   const row: TrainingVideoRecord = {
     id: createTrainingEntityId('tvid'),
     title: input.title.trim(),
@@ -132,7 +141,7 @@ export async function createTrainingVideo(
     thumbnail_url,
     month_key: getCurrentTrainingMonthKey(),
     status: 'active',
-    display_order: Date.now(),
+    display_order: nextOrder,
     created_at: now,
     updated_at: now,
   };

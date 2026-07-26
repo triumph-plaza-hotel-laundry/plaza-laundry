@@ -90,6 +90,15 @@ export async function createTrainingImage(
     onProgress: input.onProgress,
   });
 
+  const { data: maxRow } = await client
+    .from('training_images')
+    .select('display_order')
+    .eq('status', 'active')
+    .order('display_order', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const nextOrder = Number(maxRow?.display_order ?? 0) + 1;
+
   const now = new Date().toISOString();
   const row: TrainingImageRecord = {
     id: createTrainingEntityId('timg'),
@@ -99,7 +108,7 @@ export async function createTrainingImage(
     public_url: uploaded.publicUrl,
     month_key: getCurrentTrainingMonthKey(),
     status: 'active',
-    display_order: Date.now(),
+    display_order: nextOrder,
     created_at: now,
     updated_at: now,
   };
