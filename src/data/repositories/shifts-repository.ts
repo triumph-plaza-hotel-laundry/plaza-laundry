@@ -4,6 +4,7 @@ import {
   SHIFT_HOURS,
   weekDays,
   type DailyRoster,
+  type ShiftPair,
   type ShiftPeriod,
   type ShiftRole,
   type ShiftsState,
@@ -23,7 +24,7 @@ export type {
   WeeklyCellAssignment,
 } from '@/data/laundry-shifts';
 
-function remapPair(pair: [string, string] | undefined): [string, string] {
+function remapPair(pair: ShiftPair | undefined): ShiftPair {
   return [
     resolvePermanentEmployeeId(pair?.[0] ?? ''),
     resolvePermanentEmployeeId(pair?.[1] ?? ''),
