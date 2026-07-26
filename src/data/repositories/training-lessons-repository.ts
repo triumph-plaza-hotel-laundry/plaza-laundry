@@ -11,6 +11,7 @@ import {
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { countTrainingImages } from '@/data/repositories/training-images-repository';
 import { countTrainingVideos } from '@/data/repositories/training-videos-repository';
+import { nextTrainingDisplayOrder } from '@/data/repositories/training-order';
 
 function requireSupabase() {
   const client = getSupabaseClient();
@@ -91,21 +92,17 @@ export async function createTrainingLesson(
   const title = input.title.trim();
   if (!title) throw new Error('Lesson title is required.');
 
-  const { data: maxRow } = await client
-    .from('training_lessons')
-    .select('display_order')
-    .eq('month_key', input.monthKey ?? getCurrentTrainingMonthKey())
-    .order('display_order', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  const nextOrder = Number(maxRow?.display_order ?? 0) + 1;
+  const monthKey = input.monthKey ?? getCurrentTrainingMonthKey();
+  const nextOrder = await nextTrainingDisplayOrder(client, 'training_lessons', {
+    month_key: monthKey,
+  });
 
   const now = new Date().toISOString();
   const row: TrainingLessonRecord = {
     id: createTrainingEntityId('tles'),
     title,
     content_html: input.contentHtml ?? '',
-    month_key: input.monthKey ?? getCurrentTrainingMonthKey(),
+    month_key: monthKey,
     status: 'active',
     visibility: input.visibility ?? 'visible',
     display_order: nextOrder,

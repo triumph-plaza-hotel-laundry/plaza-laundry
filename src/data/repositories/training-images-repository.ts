@@ -14,6 +14,7 @@ import {
   type UploadProgressCallback,
 } from '@/features/training/storage/upload-training-media';
 import { optimizeTrainingImageToBlob } from '@/features/training/image-optimize';
+import { nextTrainingDisplayOrder } from '@/data/repositories/training-order';
 
 function requireSupabase() {
   const client = getSupabaseClient();
@@ -90,14 +91,9 @@ export async function createTrainingImage(
     onProgress: input.onProgress,
   });
 
-  const { data: maxRow } = await client
-    .from('training_images')
-    .select('display_order')
-    .eq('status', 'active')
-    .order('display_order', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  const nextOrder = Number(maxRow?.display_order ?? 0) + 1;
+  const nextOrder = await nextTrainingDisplayOrder(client, 'training_images', {
+    status: 'active',
+  });
 
   const now = new Date().toISOString();
   const row: TrainingImageRecord = {

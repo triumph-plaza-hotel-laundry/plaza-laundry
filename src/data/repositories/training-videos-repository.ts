@@ -16,6 +16,7 @@ import {
 } from '@/features/training/storage/upload-training-media';
 import { detectVideoSource } from '@/data/training-content';
 import { getYoutubeThumbnail } from '@/features/training/youtube';
+import { nextTrainingDisplayOrder } from '@/data/repositories/training-order';
 
 function requireSupabase() {
   const client = getSupabaseClient();
@@ -122,14 +123,9 @@ export async function createTrainingVideo(
       source_type === 'youtube' ? getYoutubeThumbnail(url) || '' : '';
   }
 
-  const { data: maxRow } = await client
-    .from('training_videos')
-    .select('display_order')
-    .eq('status', 'active')
-    .order('display_order', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  const nextOrder = Number(maxRow?.display_order ?? 0) + 1;
+  const nextOrder = await nextTrainingDisplayOrder(client, 'training_videos', {
+    status: 'active',
+  });
 
   const row: TrainingVideoRecord = {
     id: createTrainingEntityId('tvid'),
