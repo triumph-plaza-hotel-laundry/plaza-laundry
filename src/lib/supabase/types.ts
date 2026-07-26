@@ -1347,6 +1347,150 @@ export type Database = {
           },
         ];
       };
+      training_images: {
+        Row: {
+          id: string;
+          title: string;
+          description: string;
+          storage_path: string;
+          public_url: string;
+          month_key: string;
+          status: string;
+          display_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          title?: string;
+          description?: string;
+          storage_path?: string;
+          public_url?: string;
+          month_key: string;
+          status?: string;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          description?: string;
+          storage_path?: string;
+          public_url?: string;
+          month_key?: string;
+          status?: string;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      training_videos: {
+        Row: {
+          id: string;
+          title: string;
+          description: string;
+          source_type: string;
+          media_url: string;
+          storage_path: string;
+          thumbnail_url: string;
+          month_key: string;
+          status: string;
+          display_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          title?: string;
+          description?: string;
+          source_type?: string;
+          media_url?: string;
+          storage_path?: string;
+          thumbnail_url?: string;
+          month_key: string;
+          status?: string;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          description?: string;
+          source_type?: string;
+          media_url?: string;
+          storage_path?: string;
+          thumbnail_url?: string;
+          month_key?: string;
+          status?: string;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      training_lessons: {
+        Row: {
+          id: string;
+          title: string;
+          content_html: string;
+          month_key: string;
+          status: string;
+          visibility: string;
+          display_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          title?: string;
+          content_html?: string;
+          month_key: string;
+          status?: string;
+          visibility?: string;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          content_html?: string;
+          month_key?: string;
+          status?: string;
+          visibility?: string;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      training_monthly_archives: {
+        Row: {
+          archive_month: string;
+          images_snapshot: Json;
+          videos_snapshot: Json;
+          lessons_snapshot: Json;
+          archived_at: string;
+        };
+        Insert: {
+          archive_month: string;
+          images_snapshot?: Json;
+          videos_snapshot?: Json;
+          lessons_snapshot?: Json;
+          archived_at?: string;
+        };
+        Update: {
+          archive_month?: string;
+          images_snapshot?: Json;
+          videos_snapshot?: Json;
+          lessons_snapshot?: Json;
+          archived_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -1439,6 +1583,18 @@ export type Database = {
           p_employee_id: string;
         };
         Returns: boolean;
+      };
+      archive_training_previous_month: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      training_current_month_key: {
+        Args: Record<string, never>;
+        Returns: string;
+      };
+      training_previous_month_key: {
+        Args: Record<string, never>;
+        Returns: string;
       };
     };
     Enums: {

@@ -85,6 +85,39 @@ export {
 } from '@/data/repositories/training-repository';
 
 export {
+  trainingImagesRepository,
+  createTrainingImage,
+  updateTrainingImage,
+  deleteTrainingImage,
+  listTrainingImages,
+} from '@/data/repositories/training-images-repository';
+
+export {
+  trainingVideosRepository,
+  createTrainingVideo,
+  updateTrainingVideo,
+  deleteTrainingVideo,
+  listTrainingVideos,
+} from '@/data/repositories/training-videos-repository';
+
+export {
+  trainingLessonsRepository,
+  createTrainingLesson,
+  updateTrainingLesson,
+  deleteTrainingLesson,
+  listTrainingLessons,
+  getTrainingCmsStats,
+  reorderTrainingLessons,
+} from '@/data/repositories/training-lessons-repository';
+
+export {
+  trainingArchivesRepository,
+  ensureTrainingMonthArchived,
+  searchTrainingCms,
+  listTrainingArchives,
+} from '@/data/repositories/training-archives-repository';
+
+export {
   aiSettingsRepository,
   type AiSettings,
 } from '@/data/repositories/ai-settings-repository';

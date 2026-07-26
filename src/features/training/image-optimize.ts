@@ -63,7 +63,17 @@ function blobToDataUrl(blob: Blob): Promise<string> {
  * Convert uploaded/pasted images to lightweight WebP (PNG fallback if WebP
  * encoding fails or transparency requires it). Caps width at ~1920px.
  */
-export async function optimizeTrainingImage(file: File): Promise<OptimizedImage> {
+export type OptimizedImageBlob = {
+  blob: Blob;
+  width: number;
+  height: number;
+  bytesApprox: number;
+  mimeType: 'image/webp' | 'image/png';
+};
+
+async function optimizeTrainingImageCanvas(
+  file: File,
+): Promise<OptimizedImageBlob> {
   if (!file.type.startsWith('image/')) {
     throw new Error('Only image files are allowed.');
   }
@@ -90,9 +100,8 @@ export async function optimizeTrainingImage(file: File): Promise<OptimizedImage>
 
   const webpBlob = await canvasToBlob(canvas, 'image/webp', WEBP_QUALITY);
   if (webpBlob && webpBlob.size > 0) {
-    const dataUrl = await blobToDataUrl(webpBlob);
     return {
-      dataUrl,
+      blob: webpBlob,
       width,
       height,
       bytesApprox: webpBlob.size,
@@ -100,18 +109,35 @@ export async function optimizeTrainingImage(file: File): Promise<OptimizedImage>
     };
   }
 
-  // Preserve transparency when WebP is unavailable in the browser.
   const pngBlob = await canvasToBlob(canvas, 'image/png');
   if (!pngBlob) {
     throw new Error('Could not optimize image.');
   }
-  const dataUrl = await blobToDataUrl(pngBlob);
   return {
-    dataUrl,
+    blob: pngBlob,
     width,
     height,
     bytesApprox: pngBlob.size,
     mimeType: 'image/png',
+  };
+}
+
+/** Optimize to Blob for Storage uploads (preferred for CMS). */
+export async function optimizeTrainingImageToBlob(
+  file: File,
+): Promise<OptimizedImageBlob> {
+  return optimizeTrainingImageCanvas(file);
+}
+
+export async function optimizeTrainingImage(file: File): Promise<OptimizedImage> {
+  const optimized = await optimizeTrainingImageCanvas(file);
+  const dataUrl = await blobToDataUrl(optimized.blob);
+  return {
+    dataUrl,
+    width: optimized.width,
+    height: optimized.height,
+    bytesApprox: optimized.bytesApprox,
+    mimeType: optimized.mimeType,
   };
 }
 
