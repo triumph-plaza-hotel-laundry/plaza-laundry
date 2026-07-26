@@ -50,6 +50,14 @@
   color: rgb(244 239 228 / 55%);
 }
 
+.employee-device-pairing__build {
+  margin: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: rgb(244 239 228 / 40%);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
 .employee-device-pairing__diagnostic {
   width: 100%;
   margin: 0;

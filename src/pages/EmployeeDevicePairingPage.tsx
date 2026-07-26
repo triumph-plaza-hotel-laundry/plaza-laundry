@@ -16,6 +16,7 @@ import { useLanguage } from '@/hooks';
 import { useThisDeviceLinkStatus } from '@/hooks/useThisDeviceLinkStatus';
 import { PushClientTracePanel } from '@/features/employee-devices/PushClientTracePanel';
 import { installPushTraceClient } from '@/lib/onesignal';
+import { getTplBuildId } from '@/lib/pwa/ensure-fresh-shell';
 import '@/features/employee-devices/employee-device-pairing.css';
 
 type UiState =
@@ -211,6 +212,13 @@ export function EmployeeDevicePairingPage() {
           This phone is linked. If notifications never appear on this phone
           only, reset the push subscription here — other devices are untouched.
         </p>
+        <p className="employee-device-pairing__step">
+          If you do not see “Push client logs” below, open{' '}
+          <a href="/onesignal/clear-cache.html">
+            /onesignal/clear-cache.html
+          </a>{' '}
+          once to drop the stale PWA shell, then return here.
+        </p>
         {resetSummary ? (
           <pre className="employee-device-pairing__diag">{resetSummary}</pre>
         ) : null}
@@ -219,6 +227,9 @@ export function EmployeeDevicePairingPage() {
           <p className="employee-device-pairing__step">{statusStep}</p>
         ) : null}
         <PushClientTracePanel />
+        <p className="employee-device-pairing__build">
+          Build {getTplBuildId() || 'unknown'}
+        </p>
         <button
           type="button"
           disabled={uiState === 'resetting'}

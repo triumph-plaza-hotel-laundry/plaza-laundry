@@ -4,6 +4,7 @@ import { registerSW } from 'virtual:pwa-register';
 import { App } from '@/app/App';
 import { bootstrapOneSignalWebPush } from '@/lib/onesignal';
 import { startNotificationPlatform } from '@/lib/notification-platform';
+import { ensureFreshAppShell } from '@/lib/pwa/ensure-fresh-shell';
 import '@/styles/index.css';
 
 let oneSignalBootstrapStarted = false;
@@ -48,8 +49,10 @@ const updateSW = registerSW({
 // Dev often skips PWA registration — still bootstrap OneSignal.
 window.setTimeout(() => bootstrapPushOnce(), 3000);
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+void ensureFreshAppShell().finally(() => {
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+});

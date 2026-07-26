@@ -1,16 +1,44 @@
 import path from 'node:path';
+import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+/** Unique per build — used by ensureFreshAppShell to reclaim stale PWAs. */
+const TPL_BUILD_ID = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
+function emitBuildJson(): Plugin {
+  return {
+    name: 'tpl-emit-build-json',
+    writeBundle(outputOptions) {
+      const outDir = outputOptions.dir || path.resolve(__dirname, 'dist');
+      writeFileSync(
+        path.join(outDir, 'build.json'),
+        JSON.stringify(
+          {
+            id: TPL_BUILD_ID,
+            builtAt: new Date().toISOString(),
+          },
+          null,
+          2,
+        ),
+      );
+    },
+  };
+}
+
 export default defineConfig({
+  define: {
+    __TPL_BUILD_ID__: JSON.stringify(TPL_BUILD_ID),
+  },
   plugins: [
     react(),
     tailwindcss(),
+    emitBuildJson(),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false,
@@ -66,10 +94,30 @@ export default defineConfig({
         navigateFallback: '/index.html',
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2,webmanifest}'],
         // OneSignal owns /onesignal/* — keep it out of the PWA precache and SPA fallback.
-        globIgnores: ['**/onesignal/**'],
-        navigateFallbackDenylist: [/^\/onesignal\//],
+        // build.json must stay NetworkOnly so stale shells can detect a newer deploy.
+        globIgnores: ['**/onesignal/**', '**/build.json'],
+        navigateFallbackDenylist: [/^\/onesignal\//, /\/build\.json$/i],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         runtimeCaching: [
+          {
+            urlPattern: /\/build\.json$/i,
+            handler: 'NetworkOnly',
+            options: {
+              cacheName: 'tpl-build-id',
+            },
+          },
+          {
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'tpl-html-navigations',
+              networkTimeoutSeconds: 4,
+              expiration: {
+                maxEntries: 20,
+                maxAgeSeconds: 60 * 60 * 24,
+              },
+            },
+          },
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
             handler: 'NetworkFirst',
