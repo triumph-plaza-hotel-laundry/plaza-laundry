@@ -1,12 +1,36 @@
-import { ImagePlus, Pencil, Trash2, Upload } from 'lucide-react';
+import {
+  DndContext,
+  PointerSensor,
+  closestCenter,
+  type DragEndEvent,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  arrayMove,
+  rectSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import {
+  Download,
+  GripVertical,
+  ImagePlus,
+  Pencil,
+  Trash2,
+  Upload,
+} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { TrainingImageRecord } from '@/data/training-cms';
 import {
   createTrainingImage,
   deleteTrainingImage,
   listTrainingImages,
+  reorderTrainingImages,
   updateTrainingImage,
 } from '@/data/repositories/training-images-repository';
+import { downloadUrl } from '@/features/training/export/print-lesson';
 
 type Props = {
   onChanged: () => void;
@@ -29,6 +53,88 @@ const emptyForm = (): FormState => ({
   previewUrl: '',
 });
 
+function SortableImageCard({
+  item,
+  busy,
+  onEdit,
+  onDelete,
+  onDownload,
+  onLightbox,
+}: {
+  item: TrainingImageRecord;
+  busy: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
+  onDownload: () => void;
+  onLightbox: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: item.id, disabled: busy });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.85 : 1,
+  };
+
+  return (
+    <article
+      className="training-cms-gallery__card"
+      ref={setNodeRef}
+      style={style}
+    >
+      <button
+        className="training-cms-gallery__thumb"
+        onClick={onLightbox}
+        type="button"
+      >
+        <img alt={item.title} loading="lazy" src={item.public_url} />
+      </button>
+      <div className="training-cms-gallery__meta">
+        <div className="training-cms-gallery__title-row">
+          <button
+            aria-label="سحب لإعادة الترتيب"
+            className="training-cms-lesson-card__grip"
+            disabled={busy}
+            type="button"
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical size={16} />
+          </button>
+          <h3>{item.title || 'بدون عنوان'}</h3>
+        </div>
+        {item.description ? <p>{item.description}</p> : null}
+        <div className="training-cms-gallery__actions">
+          <button
+            className="training-admin-btn"
+            disabled={busy}
+            onClick={onEdit}
+            type="button"
+          >
+            <Pencil size={16} /> تعديل
+          </button>
+          <button
+            className="training-admin-btn"
+            disabled={busy}
+            onClick={onDownload}
+            type="button"
+          >
+            <Download size={16} /> تحميل
+          </button>
+          <button
+            className="training-admin-btn training-admin-btn--danger"
+            disabled={busy}
+            onClick={onDelete}
+            type="button"
+          >
+            <Trash2 size={16} /> حذف
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 export function TrainingImagesPanel({
   onChanged,
   onToast,
@@ -37,11 +143,17 @@ export function TrainingImagesPanel({
   const [items, setItems] = useState<TrainingImageRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
   const [progress, setProgress] = useState<number | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [lightbox, setLightbox] = useState<TrainingImageRecord | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const lock = useRef(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+  );
 
   const reload = async () => {
     setLoading(true);
@@ -59,7 +171,7 @@ export function TrainingImagesPanel({
 
   useEffect(() => {
     void reload();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const openCreate = () => {
@@ -85,6 +197,8 @@ export function TrainingImagesPanel({
   };
 
   const handleSave = async () => {
+    if (saving || lock.current) return;
+    lock.current = true;
     try {
       assertCanWrite();
       if (!form.title.trim()) {
@@ -98,45 +212,94 @@ export function TrainingImagesPanel({
       setSaving(true);
       setProgress(0);
       if (form.id) {
-        await updateTrainingImage({
+        const updated = await updateTrainingImage({
           id: form.id,
           title: form.title,
           description: form.description,
           file: form.file ?? undefined,
           onProgress: setProgress,
         });
+        setItems((prev) =>
+          prev.map((item) => (item.id === updated.id ? updated : item)),
+        );
         onToast('Updated Successfully', 'success');
       } else {
-        await createTrainingImage({
+        const created = await createTrainingImage({
           title: form.title,
           description: form.description,
           file: form.file!,
           onProgress: setProgress,
         });
+        setItems((prev) => [created, ...prev]);
         onToast('Saved Successfully', 'success');
       }
       setFormOpen(false);
       setForm(emptyForm());
-      await reload();
       onChanged();
     } catch (error) {
       onToast(error instanceof Error ? error.message : 'تعذر الحفظ', 'error');
     } finally {
       setSaving(false);
       setProgress(null);
+      lock.current = false;
     }
   };
 
   const handleDelete = async (item: TrainingImageRecord) => {
     if (!window.confirm(`حذف الصورة «${item.title || 'بدون عنوان'}»؟`)) return;
+    if (lock.current) return;
+    lock.current = true;
+    setBusyId(item.id);
     try {
       assertCanWrite();
       await deleteTrainingImage(item.id);
+      setItems((prev) => prev.filter((row) => row.id !== item.id));
+      if (lightbox?.id === item.id) setLightbox(null);
       onToast('تم الحذف بنجاح', 'success');
-      await reload();
       onChanged();
     } catch (error) {
       onToast(error instanceof Error ? error.message : 'تعذر الحذف', 'error');
+      await reload();
+    } finally {
+      setBusyId(null);
+      lock.current = false;
+    }
+  };
+
+  const handleDownload = async (item: TrainingImageRecord) => {
+    try {
+      await downloadUrl(`${item.title || 'image'}.jpg`, item.public_url);
+      onToast('Saved Successfully', 'success');
+    } catch (error) {
+      onToast(
+        error instanceof Error ? error.message : 'تعذر التحميل',
+        'error',
+      );
+    }
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id || lock.current) return;
+    const oldIndex = items.findIndex((i) => i.id === active.id);
+    const newIndex = items.findIndex((i) => i.id === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+    const reordered = arrayMove(items, oldIndex, newIndex);
+    setItems(reordered);
+    lock.current = true;
+    try {
+      assertCanWrite();
+      await reorderTrainingImages(reordered.map((i) => i.id));
+      onToast('Updated Successfully', 'success');
+      onChanged();
+    } catch (error) {
+      onToast(
+        error instanceof Error ? error.message : 'تعذر إعادة الترتيب',
+        'error',
+      );
+      await reload();
+    } finally {
+      lock.current = false;
     }
   };
 
@@ -149,6 +312,7 @@ export function TrainingImagesPanel({
         </div>
         <button
           className="training-admin-btn training-admin-btn--primary"
+          disabled={saving || loading}
           onClick={openCreate}
           type="button"
         >
@@ -161,39 +325,30 @@ export function TrainingImagesPanel({
       ) : items.length === 0 ? (
         <p className="training-cms-empty">لا توجد صور بعد</p>
       ) : (
-        <div className="training-cms-gallery">
-          {items.map((item) => (
-            <article className="training-cms-gallery__card" key={item.id}>
-              <button
-                className="training-cms-gallery__thumb"
-                onClick={() => setLightbox(item)}
-                type="button"
-              >
-                <img alt={item.title} loading="lazy" src={item.public_url} />
-              </button>
-              <div className="training-cms-gallery__meta">
-                <h3>{item.title || 'بدون عنوان'}</h3>
-                {item.description ? <p>{item.description}</p> : null}
-                <div className="training-cms-gallery__actions">
-                  <button
-                    className="training-admin-btn"
-                    onClick={() => openEdit(item)}
-                    type="button"
-                  >
-                    <Pencil size={16} /> تعديل
-                  </button>
-                  <button
-                    className="training-admin-btn training-admin-btn--danger"
-                    onClick={() => void handleDelete(item)}
-                    type="button"
-                  >
-                    <Trash2 size={16} /> حذف
-                  </button>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
+        <DndContext
+          collisionDetection={closestCenter}
+          onDragEnd={(e) => void handleDragEnd(e)}
+          sensors={sensors}
+        >
+          <SortableContext
+            items={items.map((i) => i.id)}
+            strategy={rectSortingStrategy}
+          >
+            <div className="training-cms-gallery">
+              {items.map((item) => (
+                <SortableImageCard
+                  busy={busyId === item.id}
+                  item={item}
+                  key={item.id}
+                  onDelete={() => void handleDelete(item)}
+                  onDownload={() => void handleDownload(item)}
+                  onEdit={() => openEdit(item)}
+                  onLightbox={() => setLightbox(item)}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       {formOpen ? (
@@ -222,6 +377,7 @@ export function TrainingImagesPanel({
               <label className="training-admin-field">
                 <span>العنوان *</span>
                 <input
+                  disabled={saving}
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, title: e.target.value }))
                   }
@@ -231,6 +387,7 @@ export function TrainingImagesPanel({
               <label className="training-admin-field">
                 <span>الوصف</span>
                 <textarea
+                  disabled={saving}
                   onChange={(e) =>
                     setForm((prev) => ({
                       ...prev,
@@ -243,7 +400,11 @@ export function TrainingImagesPanel({
               </label>
               <div className="training-cms-upload">
                 {form.previewUrl ? (
-                  <img alt="" className="training-cms-upload__preview" src={form.previewUrl} />
+                  <img
+                    alt=""
+                    className="training-cms-upload__preview"
+                    src={form.previewUrl}
+                  />
                 ) : null}
                 <input
                   accept="image/*"
@@ -296,13 +457,22 @@ export function TrainingImagesPanel({
               <strong>{lightbox.title}</strong>
               {lightbox.description ? <p>{lightbox.description}</p> : null}
             </figcaption>
-            <button
-              className="training-admin-btn"
-              onClick={() => setLightbox(null)}
-              type="button"
-            >
-              إغلاق
-            </button>
+            <div className="training-cms-gallery__actions">
+              <button
+                className="training-admin-btn"
+                onClick={() => void handleDownload(lightbox)}
+                type="button"
+              >
+                <Download size={16} /> تحميل
+              </button>
+              <button
+                className="training-admin-btn"
+                onClick={() => setLightbox(null)}
+                type="button"
+              >
+                إغلاق
+              </button>
+            </div>
           </figure>
         </div>
       ) : null}

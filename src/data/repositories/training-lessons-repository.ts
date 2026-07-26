@@ -185,6 +185,40 @@ export async function deleteTrainingLesson(id: string): Promise<void> {
   if (error) throw error;
 }
 
+/** Soft-archive a lesson (status=archived). Does not hard-delete. */
+export async function archiveTrainingLesson(
+  id: string,
+): Promise<TrainingLessonRecord> {
+  const client = requireSupabase();
+  const existing = await getTrainingLesson(id);
+  if (!existing) throw new Error('Lesson not found.');
+  const { data, error } = await client
+    .from('training_lessons')
+    .update({
+      status: 'archived',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .select('*')
+    .single();
+  if (error) throw error;
+  return mapLesson(data as TrainingLessonRecord);
+}
+
+/** Duplicate an existing lesson into the same month as a new active row. */
+export async function duplicateTrainingLesson(
+  id: string,
+): Promise<TrainingLessonRecord> {
+  const existing = await getTrainingLesson(id);
+  if (!existing) throw new Error('Lesson not found.');
+  return createTrainingLesson({
+    title: `${existing.title || 'درس'} (نسخة)`,
+    contentHtml: existing.content_html,
+    visibility: existing.visibility,
+    monthKey: existing.month_key,
+  });
+}
+
 export async function restoreTrainingLesson(
   id: string,
   target: TrainingRestoreTarget,
@@ -254,6 +288,8 @@ export const trainingLessonsRepository = {
   update: updateTrainingLesson,
   reorder: reorderTrainingLessons,
   delete: deleteTrainingLesson,
+  archive: archiveTrainingLesson,
+  duplicate: duplicateTrainingLesson,
   restore: restoreTrainingLesson,
   count: countTrainingLessons,
   stats: getTrainingCmsStats,

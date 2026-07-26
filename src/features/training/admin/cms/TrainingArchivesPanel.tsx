@@ -1,5 +1,5 @@
-import { Archive, Download, RotateCcw } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Archive, Download, Printer, RotateCcw, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import type {
   TrainingMonthlyArchiveRecord,
   TrainingRestoreTarget,
@@ -18,17 +18,11 @@ type Props = {
   onPrintMonth?: (archive: TrainingMonthlyArchiveRecord) => void;
 };
 
-function askRestoreTarget(): TrainingRestoreTarget | null {
-  const choice = window.prompt(
-    'Restore to:\n1 = Original Month\n2 = Current Month\n\nEnter 1 or 2:',
-    '2',
-  );
-  if (choice === null) return null;
-  if (choice.trim() === '1') return 'original';
-  if (choice.trim() === '2') return 'current';
-  window.alert('Invalid choice. Use 1 or 2.');
-  return null;
-}
+type RestoreRequest = {
+  kind: 'lesson' | 'image' | 'video';
+  id: string;
+  title: string;
+};
 
 export function TrainingArchivesPanel({
   onChanged,
@@ -40,6 +34,10 @@ export function TrainingArchivesPanel({
   const [archives, setArchives] = useState<TrainingMonthlyArchiveRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [openMonth, setOpenMonth] = useState<string | null>(null);
+  const [restoreReq, setRestoreReq] = useState<RestoreRequest | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [exportBusy, setExportBusy] = useState(false);
+  const lock = useRef(false);
 
   const reload = async () => {
     setLoading(true);
@@ -60,13 +58,21 @@ export function TrainingArchivesPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleRestoreLesson = async (id: string) => {
-    const target = askRestoreTarget();
-    if (!target) return;
+  const runRestore = async (target: TrainingRestoreTarget) => {
+    if (!restoreReq || lock.current) return;
+    lock.current = true;
+    setBusy(true);
     try {
       assertCanWrite();
-      await restoreTrainingLesson(id, target);
+      if (restoreReq.kind === 'lesson') {
+        await restoreTrainingLesson(restoreReq.id, target);
+      } else if (restoreReq.kind === 'image') {
+        await restoreTrainingImage(restoreReq.id, target);
+      } else {
+        await restoreTrainingVideo(restoreReq.id, target);
+      }
       onToast('Updated Successfully', 'success');
+      setRestoreReq(null);
       await reload();
       onChanged();
     } catch (error) {
@@ -74,40 +80,9 @@ export function TrainingArchivesPanel({
         error instanceof Error ? error.message : 'تعذر الاستعادة',
         'error',
       );
-    }
-  };
-
-  const handleRestoreImage = async (id: string) => {
-    const target = askRestoreTarget();
-    if (!target) return;
-    try {
-      assertCanWrite();
-      await restoreTrainingImage(id, target);
-      onToast('Updated Successfully', 'success');
-      await reload();
-      onChanged();
-    } catch (error) {
-      onToast(
-        error instanceof Error ? error.message : 'تعذر الاستعادة',
-        'error',
-      );
-    }
-  };
-
-  const handleRestoreVideo = async (id: string) => {
-    const target = askRestoreTarget();
-    if (!target) return;
-    try {
-      assertCanWrite();
-      await restoreTrainingVideo(id, target);
-      onToast('Updated Successfully', 'success');
-      await reload();
-      onChanged();
-    } catch (error) {
-      onToast(
-        error instanceof Error ? error.message : 'تعذر الاستعادة',
-        'error',
-      );
+    } finally {
+      setBusy(false);
+      lock.current = false;
     }
   };
 
@@ -154,61 +129,105 @@ export function TrainingArchivesPanel({
                     <div className="training-cms-gallery__actions">
                       <button
                         className="training-admin-btn"
-                        onClick={() => onDownloadMonth?.(archive)}
+                        disabled={exportBusy || !archive.lessons_snapshot.length}
+                        onClick={() => {
+                          setExportBusy(true);
+                          try {
+                            onDownloadMonth?.(archive);
+                          } finally {
+                            window.setTimeout(() => setExportBusy(false), 800);
+                          }
+                        }}
                         type="button"
                       >
                         <Download size={16} /> Download Month
                       </button>
                       <button
                         className="training-admin-btn"
+                        disabled={
+                          exportBusy || !archive.lessons_snapshot.length
+                        }
                         onClick={() => onPrintMonth?.(archive)}
                         type="button"
                       >
-                        Print Month
+                        <Printer size={16} /> Print Month
                       </button>
                     </div>
 
                     <h4>Lessons</h4>
-                    {archive.lessons_snapshot.map((lesson) => (
-                      <div className="training-cms-archive-row" key={lesson.id}>
-                        <span>{lesson.title || 'Untitled'}</span>
-                        <button
-                          className="training-admin-btn"
-                          onClick={() => void handleRestoreLesson(lesson.id)}
-                          type="button"
-                        >
-                          <RotateCcw size={14} /> Restore
-                        </button>
-                      </div>
-                    ))}
+                    {archive.lessons_snapshot.length === 0 ? (
+                      <p className="training-cms-empty">لا دروس</p>
+                    ) : (
+                      archive.lessons_snapshot.map((lesson) => (
+                        <div className="training-cms-archive-row" key={lesson.id}>
+                          <span>{lesson.title || 'Untitled'}</span>
+                          <button
+                            className="training-admin-btn"
+                            disabled={busy}
+                            onClick={() =>
+                              setRestoreReq({
+                                kind: 'lesson',
+                                id: lesson.id,
+                                title: lesson.title || 'Untitled',
+                              })
+                            }
+                            type="button"
+                          >
+                            <RotateCcw size={14} /> Restore
+                          </button>
+                        </div>
+                      ))
+                    )}
 
                     <h4>Images</h4>
-                    {archive.images_snapshot.map((image) => (
-                      <div className="training-cms-archive-row" key={image.id}>
-                        <span>{image.title || 'Untitled'}</span>
-                        <button
-                          className="training-admin-btn"
-                          onClick={() => void handleRestoreImage(image.id)}
-                          type="button"
-                        >
-                          <RotateCcw size={14} /> Restore
-                        </button>
-                      </div>
-                    ))}
+                    {archive.images_snapshot.length === 0 ? (
+                      <p className="training-cms-empty">لا صور</p>
+                    ) : (
+                      archive.images_snapshot.map((image) => (
+                        <div className="training-cms-archive-row" key={image.id}>
+                          <span>{image.title || 'Untitled'}</span>
+                          <button
+                            className="training-admin-btn"
+                            disabled={busy}
+                            onClick={() =>
+                              setRestoreReq({
+                                kind: 'image',
+                                id: image.id,
+                                title: image.title || 'Untitled',
+                              })
+                            }
+                            type="button"
+                          >
+                            <RotateCcw size={14} /> Restore
+                          </button>
+                        </div>
+                      ))
+                    )}
 
                     <h4>Videos</h4>
-                    {archive.videos_snapshot.map((video) => (
-                      <div className="training-cms-archive-row" key={video.id}>
-                        <span>{video.title || 'Untitled'}</span>
-                        <button
-                          className="training-admin-btn"
-                          onClick={() => void handleRestoreVideo(video.id)}
-                          type="button"
-                        >
-                          <RotateCcw size={14} /> Restore
-                        </button>
-                      </div>
-                    ))}
+                    {archive.videos_snapshot.length === 0 ? (
+                      <p className="training-cms-empty">لا فيديوهات</p>
+                    ) : (
+                      archive.videos_snapshot.map((video) => (
+                        <div className="training-cms-archive-row" key={video.id}>
+                          <span>{video.title || 'Untitled'}</span>
+                          <button
+                            className="training-admin-btn"
+                            disabled={busy}
+                            onClick={() =>
+                              setRestoreReq({
+                                kind: 'video',
+                                id: video.id,
+                                title: video.title || 'Untitled',
+                              })
+                            }
+                            type="button"
+                          >
+                            <RotateCcw size={14} /> Restore
+                          </button>
+                        </div>
+                      ))
+                    )}
                   </div>
                 ) : null}
               </section>
@@ -216,6 +235,53 @@ export function TrainingArchivesPanel({
           })}
         </div>
       )}
+
+      {restoreReq ? (
+        <div
+          aria-modal="true"
+          className="training-dialog-backdrop"
+          onClick={() => !busy && setRestoreReq(null)}
+          role="dialog"
+        >
+          <div
+            className="training-cms-dialog"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <header className="training-cms-dialog__header">
+              <h3>استعادة: {restoreReq.title}</h3>
+              <button
+                className="training-admin-btn"
+                disabled={busy}
+                onClick={() => setRestoreReq(null)}
+                type="button"
+              >
+                <X size={16} />
+              </button>
+            </header>
+            <div className="training-cms-dialog__body">
+              <p className="training-cms-empty" style={{ padding: 0 }}>
+                Restore to:
+              </p>
+              <button
+                className="training-admin-btn training-admin-btn--primary"
+                disabled={busy}
+                onClick={() => void runRestore('original')}
+                type="button"
+              >
+                Original Month
+              </button>
+              <button
+                className="training-admin-btn training-admin-btn--primary"
+                disabled={busy}
+                onClick={() => void runRestore('current')}
+                type="button"
+              >
+                Current Month
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

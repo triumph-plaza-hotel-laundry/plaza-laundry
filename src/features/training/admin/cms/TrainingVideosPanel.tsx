@@ -1,4 +1,4 @@
-import { Film, Pencil, Trash2, Upload } from 'lucide-react';
+import { Download, Film, Pencil, Trash2, Upload } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { TrainingVideoRecord } from '@/data/training-cms';
 import {
@@ -7,6 +7,7 @@ import {
   listTrainingVideos,
   updateTrainingVideo,
 } from '@/data/repositories/training-videos-repository';
+import { downloadUrl } from '@/features/training/export/print-lesson';
 import { getYoutubeEmbedUrl } from '@/features/training/youtube';
 
 type Props = {
@@ -40,10 +41,12 @@ export function TrainingVideosPanel({
   const [items, setItems] = useState<TrainingVideoRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
   const [progress, setProgress] = useState<number | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const fileRef = useRef<HTMLInputElement>(null);
+  const lock = useRef(false);
 
   const reload = async () => {
     setLoading(true);
@@ -82,73 +85,110 @@ export function TrainingVideosPanel({
   };
 
   const handleSave = async () => {
+    if (saving || lock.current) return;
+    lock.current = true;
     try {
       assertCanWrite();
       if (!form.title.trim()) {
         onToast('عنوان الفيديو مطلوب', 'error');
         return;
       }
+      if (form.mode === 'mp4' && !form.id && !form.file) {
+        onToast('يرجى اختيار ملف MP4', 'error');
+        return;
+      }
+      if (form.mode === 'youtube' && !form.id && !form.youtubeUrl.trim()) {
+        onToast('رابط يوتيوب مطلوب', 'error');
+        return;
+      }
+      if (
+        form.id &&
+        form.mode === 'youtube' &&
+        !form.youtubeUrl.trim() &&
+        !form.file
+      ) {
+        // keep existing media; title/description only
+      }
       setSaving(true);
       setProgress(0);
 
       if (form.id) {
-        await updateTrainingVideo({
+        const updated = await updateTrainingVideo({
           id: form.id,
           title: form.title,
           description: form.description,
           youtubeUrl:
-            form.mode === 'youtube' ? form.youtubeUrl : undefined,
+            form.mode === 'youtube' ? form.youtubeUrl || undefined : undefined,
           file: form.mode === 'mp4' && form.file ? form.file : undefined,
           onProgress: setProgress,
         });
+        setItems((prev) =>
+          prev.map((item) => (item.id === updated.id ? updated : item)),
+        );
         onToast('Updated Successfully', 'success');
+      } else if (form.mode === 'mp4') {
+        const created = await createTrainingVideo({
+          title: form.title,
+          description: form.description,
+          file: form.file!,
+          onProgress: setProgress,
+        });
+        setItems((prev) => [created, ...prev]);
+        onToast('Saved Successfully', 'success');
       } else {
-        if (form.mode === 'mp4') {
-          if (!form.file) {
-            onToast('يرجى اختيار ملف MP4', 'error');
-            return;
-          }
-          await createTrainingVideo({
-            title: form.title,
-            description: form.description,
-            file: form.file,
-            onProgress: setProgress,
-          });
-        } else {
-          if (!form.youtubeUrl.trim()) {
-            onToast('رابط يوتيوب مطلوب', 'error');
-            return;
-          }
-          await createTrainingVideo({
-            title: form.title,
-            description: form.description,
-            youtubeUrl: form.youtubeUrl,
-          });
-        }
+        const created = await createTrainingVideo({
+          title: form.title,
+          description: form.description,
+          youtubeUrl: form.youtubeUrl,
+        });
+        setItems((prev) => [created, ...prev]);
         onToast('Saved Successfully', 'success');
       }
       setFormOpen(false);
       setForm(emptyForm());
-      await reload();
       onChanged();
     } catch (error) {
       onToast(error instanceof Error ? error.message : 'تعذر الحفظ', 'error');
     } finally {
       setSaving(false);
       setProgress(null);
+      lock.current = false;
     }
   };
 
   const handleDelete = async (item: TrainingVideoRecord) => {
     if (!window.confirm(`حذف الفيديو «${item.title || 'بدون عنوان'}»؟`)) return;
+    if (lock.current) return;
+    lock.current = true;
+    setBusyId(item.id);
     try {
       assertCanWrite();
       await deleteTrainingVideo(item.id);
+      setItems((prev) => prev.filter((row) => row.id !== item.id));
       onToast('تم الحذف بنجاح', 'success');
-      await reload();
       onChanged();
     } catch (error) {
       onToast(error instanceof Error ? error.message : 'تعذر الحذف', 'error');
+      await reload();
+    } finally {
+      setBusyId(null);
+      lock.current = false;
+    }
+  };
+
+  const handleDownload = async (item: TrainingVideoRecord) => {
+    if (item.source_type !== 'mp4' || !item.media_url) {
+      onToast('التحميل متاح لملفات MP4 فقط', 'error');
+      return;
+    }
+    try {
+      await downloadUrl(`${item.title || 'video'}.mp4`, item.media_url);
+      onToast('Saved Successfully', 'success');
+    } catch (error) {
+      onToast(
+        error instanceof Error ? error.message : 'تعذر التحميل',
+        'error',
+      );
     }
   };
 
@@ -161,6 +201,7 @@ export function TrainingVideosPanel({
         </div>
         <button
           className="training-admin-btn training-admin-btn--primary"
+          disabled={saving || loading}
           onClick={openCreate}
           type="button"
         >
@@ -213,13 +254,25 @@ export function TrainingVideosPanel({
                   <div className="training-cms-gallery__actions">
                     <button
                       className="training-admin-btn"
+                      disabled={busyId === item.id}
                       onClick={() => openEdit(item)}
                       type="button"
                     >
                       <Pencil size={16} /> تعديل
                     </button>
+                    {item.source_type === 'mp4' ? (
+                      <button
+                        className="training-admin-btn"
+                        disabled={busyId === item.id}
+                        onClick={() => void handleDownload(item)}
+                        type="button"
+                      >
+                        <Download size={16} /> تحميل
+                      </button>
+                    ) : null}
                     <button
                       className="training-admin-btn training-admin-btn--danger"
+                      disabled={busyId === item.id}
                       onClick={() => void handleDelete(item)}
                       type="button"
                     >

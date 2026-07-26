@@ -210,6 +210,36 @@ export async function restoreTrainingImage(
   return mapImage(data as TrainingImageRecord);
 }
 
+export async function archiveTrainingImage(
+  id: string,
+): Promise<TrainingImageRecord> {
+  const client = requireSupabase();
+  const { data, error } = await client
+    .from('training_images')
+    .update({ status: 'archived', updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select('*')
+    .single();
+  if (error) throw error;
+  return mapImage(data as TrainingImageRecord);
+}
+
+export async function reorderTrainingImages(
+  orderedIds: string[],
+): Promise<void> {
+  const client = requireSupabase();
+  const now = new Date().toISOString();
+  await Promise.all(
+    orderedIds.map(async (id, index) => {
+      const { error } = await client
+        .from('training_images')
+        .update({ display_order: index + 1, updated_at: now })
+        .eq('id', id);
+      if (error) throw error;
+    }),
+  );
+}
+
 export async function countTrainingImages(
   status: 'active' | 'archived' = 'active',
 ): Promise<number> {
@@ -229,6 +259,8 @@ export const trainingImagesRepository = {
   update: updateTrainingImage,
   delete: deleteTrainingImage,
   restore: restoreTrainingImage,
+  archive: archiveTrainingImage,
+  reorder: reorderTrainingImages,
   count: countTrainingImages,
 };
 
